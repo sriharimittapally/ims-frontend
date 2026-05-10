@@ -1,0 +1,116 @@
+<div class="animate-fade-in-up">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+      <h1 class="page-title">Admin Dashboard</h1>
+      <p class="page-subtitle">System-wide overview and key metrics</p>
+    </div>
+    <a routerLink="/admin/reports" class="btn-ims-primary btn">
+      <i class="bi bi-bar-chart-line me-1"></i> Full Reports
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div class="page-loader" *ngIf="loading">
+    <div class="spinner-border" role="status"></div>
+  </div>
+
+  <ng-container *ngIf="!loading && dashboard">
+
+    <!-- Stats Row 1 -->
+    <div class="row g-3 mb-4">
+      <div class="col-xl-2 col-md-4 col-6">
+        <app-stats-card label="Total Users" [value]="dashboard.totalUsers" icon="bi-people-fill" color="primary" />
+      </div>
+      <div class="col-xl-2 col-md-4 col-6">
+        <app-stats-card label="Warehouses" [value]="dashboard.totalWarehouses" icon="bi-building-fill" color="info" />
+      </div>
+      <div class="col-xl-2 col-md-4 col-6">
+        <app-stats-card label="Products" [value]="dashboard.totalProducts" icon="bi-box-seam-fill" color="secondary" />
+      </div>
+      <div class="col-xl-2 col-md-4 col-6">
+        <app-stats-card label="Categories" [value]="dashboard.totalCategories" icon="bi-tags-fill" color="primary" />
+      </div>
+      <div class="col-xl-2 col-md-4 col-6">
+        <app-stats-card label="Suppliers" [value]="dashboard.totalSuppliers" icon="bi-truck" color="warning" />
+      </div>
+      <div class="col-xl-2 col-md-4 col-6">
+        <app-stats-card label="Inventory Items" [value]="dashboard.totalInventoryItems" icon="bi-archive-fill" color="success" />
+      </div>
+    </div>
+
+    <!-- Alerts Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="alert-stat-card danger">
+          <div class="as-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <div class="as-body">
+            <div class="as-value">{{ dashboard.lowStockAlerts }}</div>
+            <div class="as-label">Low Stock Alerts</div>
+          </div>
+          <a routerLink="/admin/inventory" class="as-action">View <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="alert-stat-card warning">
+          <div class="as-icon"><i class="bi bi-clock-history"></i></div>
+          <div class="as-body">
+            <div class="as-value">{{ dashboard.pendingSupplierApprovals }}</div>
+            <div class="as-label">Pending Supplier Approvals</div>
+          </div>
+          <a routerLink="/admin/suppliers" class="as-action">Review <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="alert-stat-card info">
+          <div class="as-icon"><i class="bi bi-cart-check-fill"></i></div>
+          <div class="as-body">
+            <div class="as-value">{{ dashboard.pendingPurchaseOrders }}</div>
+            <div class="as-label">Pending Purchase Orders</div>
+          </div>
+          <a routerLink="/admin/purchase-orders" class="as-action">View <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3 mb-4">
+      <!-- Stock Trend -->
+      <div class="col-lg-8">
+        <div class="ims-card">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0 fw-700">Stock In / Out Trend (14 Days)</h6>
+            <span class="badge-ims badge-pending">Last 14 Days</span>
+          </div>
+          <div class="chart-container" style="height: 280px;">
+            <canvas baseChart [data]="stockTrendData" [options]="stockTrendOptions" type="line"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- PO Status -->
+      <div class="col-lg-4">
+        <div class="ims-card h-100">
+          <h6 class="mb-3 fw-700">Purchase Order Status</h6>
+          <div class="chart-container" style="height: 250px;">
+            <canvas baseChart [data]="poStatusData" [options]="donutOptions" type="doughnut"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="ims-card">
+      <h6 class="mb-3 fw-700">Quick Actions</h6>
+      <div class="row g-2">
+        <div class="col-auto"><a routerLink="/admin/users" class="quick-action-btn"><i class="bi bi-person-plus me-2"></i>Add User</a></div>
+        <div class="col-auto"><a routerLink="/admin/warehouses" class="quick-action-btn"><i class="bi bi-building me-2"></i>New Warehouse</a></div>
+        <div class="col-auto"><a routerLink="/admin/products" class="quick-action-btn"><i class="bi bi-plus-circle me-2"></i>Add Product</a></div>
+        <div class="col-auto"><a routerLink="/admin/suppliers" class="quick-action-btn"><i class="bi bi-check2-circle me-2"></i>Approve Suppliers</a></div>
+        <div class="col-auto"><a routerLink="/admin/reports" class="quick-action-btn"><i class="bi bi-download me-2"></i>View Reports</a></div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

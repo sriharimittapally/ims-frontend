@@ -1,0 +1,91 @@
+<div class="animate-fade-in-up">
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+      <h1 class="page-title">Warehouses</h1>
+      <p class="page-subtitle">Manage warehouse locations and assignments</p>
+    </div>
+    <button class="btn-ims-primary btn" (click)="openCreate()">
+      <i class="bi bi-plus-circle me-1"></i> New Warehouse
+    </button>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="row g-3" *ngIf="!loading">
+    <div class="col-xl-4 col-md-6" *ngFor="let w of warehouses">
+      <div class="wh-card ims-card">
+        <div class="wh-card-header">
+          <div class="wh-icon gradient-primary"><i class="bi bi-building"></i></div>
+          <div>
+            <div class="wh-name">{{ w.name }}</div>
+            <div class="wh-location"><i class="bi bi-geo-alt me-1"></i>{{ w.location }}</div>
+          </div>
+          <span class="badge-ims ms-auto" [ngClass]="w.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ w.status }}</span>
+        </div>
+
+        <div class="wh-stats">
+          <div class="wh-stat"><div class="wh-stat-value">{{ w.totalProducts ?? 0 }}</div><div class="wh-stat-label">Products</div></div>
+          <div class="wh-divider"></div>
+          <div class="wh-stat"><div class="wh-stat-value">{{ w.totalQuantity ?? 0 }}</div><div class="wh-stat-label">Total Qty</div></div>
+        </div>
+
+        <div class="wh-manager">
+          <i class="bi bi-person-badge me-2 text-muted"></i>
+          <span *ngIf="w.managerName" class="fw-600">{{ w.managerName }}</span>
+          <span *ngIf="!w.managerName" class="text-muted">No manager assigned</span>
+        </div>
+
+        <!-- Assign Manager -->
+        <div class="mt-2" *ngIf="managers.length">
+          <label class="ims-form-label">Assign Manager</label>
+          <div class="d-flex gap-2">
+            <select class="ims-form-control" #managerSel>
+              <option value="">Select manager...</option>
+              <option *ngFor="let m of managers" [value]="m.id">{{ m.name }}</option>
+            </select>
+            <button class="btn-ims-outline btn btn-sm" (click)="assignManager(w.id, +managerSel.value)" [disabled]="!managerSel.value">Assign</button>
+          </div>
+        </div>
+
+        <div class="wh-actions mt-3">
+          <button class="btn-ims-outline btn btn-sm" (click)="openEdit(w)"><i class="bi bi-pencil me-1"></i>Edit</button>
+          <button class="btn btn-sm" [ngClass]="w.status === 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'" (click)="toggle(w)" style="border-radius:8px">
+            {{ w.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12" *ngIf="warehouses.length === 0">
+      <div class="empty-state"><div class="empty-icon"><i class="bi bi-building"></i></div><h5>No warehouses yet</h5></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="bi bi-building me-2"></i>{{ editMode ? 'Edit' : 'New' }} Warehouse</h5>
+      <button class="btn-close" (click)="showModal=false"></button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="form">
+        <div class="mb-3">
+          <label class="ims-form-label">Warehouse Name</label>
+          <input class="ims-form-control" formControlName="name" placeholder="e.g. North Hub">
+        </div>
+        <div class="mb-3">
+          <label class="ims-form-label">Location</label>
+          <input class="ims-form-control" formControlName="location" placeholder="e.g. Bengaluru, Karnataka">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">
+        {{ editMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="animate-fade-in-up">
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div><h1 class="page-title">Inventory</h1><p class="page-subtitle">System-wide stock levels across all warehouses</p></div>
+    <button class="btn" [ngClass]="showLowStock ? 'btn-danger' : 'btn-outline-danger'" style="border-radius:8px; font-size:.875rem" (click)="toggleLowStock()">
+      <i class="bi bi-exclamation-triangle me-1"></i>{{ showLowStock ? 'All Stock' : 'Low Stock (' + lowStockCount + ')' }}
+    </button>
+  </div>
+
+  <div class="ims-card mb-3">
+    <div class="search-input-wrap">
+      <i class="bi bi-search search-icon"></i>
+      <input class="ims-form-control" (input)="onSearch($event)" placeholder="Search product or warehouse..." style="padding-left:2.25rem">
+    </div>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead><tr><th>Product</th><th>Warehouse</th><th>Total Qty</th><th>Reserved</th><th>Available</th><th>Reorder Lvl</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let inv of filtered" [class.low-stock-row]="inv.isLowStock">
+            <td>
+              <div class="fw-600">{{ inv.productName }}</div>
+              <div style="font-size:.75rem;font-family:monospace;color:var(--ims-text-muted)">{{ inv.productSku }}</div>
+            </td>
+            <td class="text-muted">{{ inv.warehouseName }}</td>
+            <td class="fw-600">{{ inv.quantity | number }}</td>
+            <td class="text-muted">{{ inv.reservedQuantity | number }}</td>
+            <td><span class="fw-600" [style.color]="inv.isLowStock ? 'var(--ims-danger)' : 'var(--ims-success)'">{{ inv.availableQuantity | number }}</span></td>
+            <td class="text-muted">{{ inv.reorderLevel | number }}</td>
+            <td>
+              <span *ngIf="inv.isLowStock" class="badge-ims badge-inactive"><i class="bi bi-exclamation-triangle me-1"></i>Low Stock</span>
+              <span *ngIf="!inv.isLowStock" class="badge-ims badge-active">OK</span>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0"><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="bi bi-archive"></i></div><h5>No inventory items found</h5></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

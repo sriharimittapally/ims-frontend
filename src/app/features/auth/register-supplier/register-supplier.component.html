@@ -1,0 +1,54 @@
+<div class="login-card ims-card">
+  <div class="login-header">
+    <div class="login-logo gradient-warning">
+      <i class="bi bi-truck"></i>
+    </div>
+    <h2>Supplier Registration</h2>
+    <p class="text-muted">Create your supplier account to get started</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label class="ims-form-label">Full Name</label>
+      <div class="input-wrap">
+        <i class="bi bi-person input-icon"></i>
+        <input type="text" class="ims-form-control with-icon" formControlName="name"
+          placeholder="Your name" [class.is-invalid]="name.invalid && name.touched">
+      </div>
+      <div class="invalid-feedback d-block" *ngIf="name.invalid && name.touched">Name is required.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="ims-form-label">Email Address</label>
+      <div class="input-wrap">
+        <i class="bi bi-envelope input-icon"></i>
+        <input type="email" class="ims-form-control with-icon" formControlName="email"
+          placeholder="you@company.com" [class.is-invalid]="email.invalid && email.touched">
+      </div>
+      <div class="invalid-feedback d-block" *ngIf="email.invalid && email.touched">Valid email required.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="ims-form-label">Password</label>
+      <div class="input-wrap">
+        <i class="bi bi-lock input-icon"></i>
+        <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control with-icon with-icon-right"
+          formControlName="password" placeholder="Min. 6 characters" [class.is-invalid]="password.invalid && password.touched">
+        <button type="button" class="password-toggle" (click)="showPassword = !showPassword">
+          <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+        </button>
+      </div>
+      <div class="invalid-feedback d-block" *ngIf="password.invalid && password.touched">Min 6 characters required.</div>
+    </div>
+
+    <button type="submit" class="btn w-100 mt-2" style="background: var(--ims-warning); color:#fff; border-radius:8px; padding:.6rem; font-weight:600;" [disabled]="loading">
+      <span *ngIf="!loading"><i class="bi bi-person-check me-2"></i>Create Account</span>
+      <span *ngIf="loading"><span class="spinner-border spinner-border-sm me-2"></span>Registering...</span>
+    </button>
+  </form>
+
+  <div class="login-footer">
+    <span class="text-muted">Already have an account?</span>
+    <a routerLink="/auth/login" class="register-link">Sign in</a>
+  </div>
+</div>

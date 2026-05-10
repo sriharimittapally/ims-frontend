@@ -1,0 +1,127 @@
+<div class="animate-fade-in-up">
+  <!-- Header -->
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+      <h1 class="page-title">User Management</h1>
+      <p class="page-subtitle">Manage system users — managers and staff</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn-ims-primary btn" (click)="openCreate('MANAGER')">
+        <i class="bi bi-person-plus me-1"></i> Add Manager
+      </button>
+      <button class="btn btn-success btn-sm rounded-2 px-3" (click)="openCreate('STAFF')">
+        <i class="bi bi-person-plus me-1"></i> Add Staff
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs + Search -->
+  <div class="ims-card mb-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="tab-group">
+        <button class="tab-btn" [class.active]="activeTab==='ALL'"      (click)="setTab('ALL')">All ({{ users.length }})</button>
+        <button class="tab-btn" [class.active]="activeTab==='MANAGER'"  (click)="setTab('MANAGER')">Managers ({{ countByRole('MANAGER') }})</button>
+        <button class="tab-btn" [class.active]="activeTab==='STAFF'"    (click)="setTab('STAFF')">Staff ({{ countByRole('STAFF') }})</button>
+        <button class="tab-btn" [class.active]="activeTab==='SUPPLIER'" (click)="setTab('SUPPLIER')">Suppliers ({{ countByRole('SUPPLIER') }})</button>
+      </div>
+      <div class="search-input-wrap" style="width:250px">
+        <i class="bi bi-search search-icon"></i>
+        <input class="ims-form-control" (input)="onSearch($event)" placeholder="Search users..." style="padding-left:2.25rem">
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="ims-card p-0 overflow-hidden">
+    <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+    <div class="table-responsive" *ngIf="!loading">
+      <table class="ims-table w-100">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Warehouse</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filtered; let i = index">
+            <td class="text-muted">{{ i + 1 }}</td>
+            <td>
+              <div class="user-cell">
+                <div class="user-mini-avatar" [style.background]="user.role === 'MANAGER' ? '#6366f1' : user.role === 'STAFF' ? '#10b981' : '#f59e0b'">
+                  {{ user.name[0].toUpperCase() }}
+                </div>
+                <span class="fw-600">{{ user.name }}</span>
+              </div>
+            </td>
+            <td class="text-muted">{{ user.email }}</td>
+            <td>
+              <span class="badge-ims" [ngClass]="{'badge-sent': user.role === 'MANAGER', 'badge-active': user.role === 'STAFF', 'badge-pending': user.role === 'SUPPLIER'}">
+                {{ user.role }}
+              </span>
+            </td>
+            <td class="text-muted">{{ user.warehouseName ?? '—' }}</td>
+            <td>
+              <span class="status-dot" [ngClass]="user.status === 'ACTIVE' ? 'dot-success' : 'dot-danger'"></span>
+              {{ user.status }}
+            </td>
+            <td>
+              <button class="action-btn" (click)="toggleStatus(user)"
+                [title]="user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'"
+                [style.color]="user.status === 'ACTIVE' ? 'var(--ims-danger)' : 'var(--ims-success)'">
+                <i class="bi" [class.bi-slash-circle]="user.status === 'ACTIVE'" [class.bi-check-circle]="user.status !== 'ACTIVE'"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-people"></i></div>
+                <h5>No users found</h5>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-overlay" *ngIf="showCreateModal" (click)="showCreateModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Add {{ createRole }}</h5>
+      <button class="btn-close" (click)="showCreateModal=false"></button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="createForm">
+        <div class="mb-3">
+          <label class="ims-form-label">Full Name</label>
+          <input class="ims-form-control" formControlName="name" placeholder="Enter name">
+          <div class="invalid-feedback d-block text-danger" style="font-size:.75rem" *ngIf="createForm.get('name')?.invalid && createForm.get('name')?.touched">Required.</div>
+        </div>
+        <div class="mb-3">
+          <label class="ims-form-label">Email</label>
+          <input class="ims-form-control" type="email" formControlName="email" placeholder="email@example.com">
+        </div>
+        <div class="mb-3">
+          <label class="ims-form-label">Password</label>
+          <input class="ims-form-control" type="password" formControlName="password" placeholder="Min. 6 chars">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showCreateModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submitCreate()" [disabled]="createLoading">
+        <span *ngIf="!createLoading">Create {{ createRole }}</span>
+        <span *ngIf="createLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
+      </button>
+    </div>
+  </div>
+</div>

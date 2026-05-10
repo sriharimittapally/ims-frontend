@@ -1,0 +1,115 @@
+<div class="animate-fade-in-up">
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div><h1 class="page-title">Products</h1><p class="page-subtitle">Manage product catalog and supplier links</p></div>
+    <button class="btn-ims-primary btn" (click)="openCreate()"><i class="bi bi-plus-circle me-1"></i> Add Product</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="ims-card mb-3">
+    <div class="d-flex gap-3 flex-wrap">
+      <div class="search-input-wrap" style="flex:1; min-width:200px">
+        <i class="bi bi-search search-icon"></i>
+        <input class="ims-form-control" (input)="onSearch($event)" placeholder="Search by name or SKU..." style="padding-left:2.25rem">
+      </div>
+      <select class="ims-form-control" style="width:180px" (change)="onCatFilter($event)">
+        <option value="">All Categories</option>
+        <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead><tr><th>#</th><th>Product</th><th>SKU</th><th>Category</th><th>Unit Price</th><th>Reorder Lvl</th><th>Suppliers</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of filtered; let i = index">
+            <td class="text-muted">{{ i+1 }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="prod-icon"><i class="bi bi-box-seam"></i></div>
+                <div><div class="fw-600">{{ p.name }}</div><div style="font-size:.75rem;color:var(--ims-text-muted)">{{ p.description | slice:0:40 }}...</div></div>
+              </div>
+            </td>
+            <td><code class="sku-code">{{ p.sku }}</code></td>
+            <td class="text-muted">{{ p.categoryName }}</td>
+            <td class="fw-600">₹{{ p.unitPrice | number:'1.2-2' }}</td>
+            <td class="text-muted">{{ p.reorderLevel }}</td>
+            <td>
+              <span class="badge-ims badge-sent">{{ p.suppliers?.length ?? 0 }} linked</span>
+            </td>
+            <td><span class="badge-ims" [ngClass]="p.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ p.status }}</span></td>
+            <td>
+              <div class="d-flex gap-1">
+                <button class="action-btn" (click)="openEdit(p)" title="Edit"><i class="bi bi-pencil" style="color:var(--ims-primary)"></i></button>
+                <button class="action-btn" (click)="openLink(p)" title="Link Supplier"><i class="bi bi-link-45deg" style="color:var(--ims-info)"></i></button>
+                <button class="action-btn" (click)="toggle(p)" title="Toggle Status">
+                  <i class="bi" [class.bi-slash-circle]="p.status==='ACTIVE'" [class.bi-check-circle]="p.status!=='ACTIVE'" [style.color]="p.status==='ACTIVE'?'var(--ims-danger)':'var(--ims-success)'"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0"><td colspan="9"><div class="empty-state"><div class="empty-icon"><i class="bi bi-box-seam"></i></div><h5>No products found</h5></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal-box modal-lg-box" (click)="$event.stopPropagation()">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>{{ editMode ? 'Edit' : 'New' }} Product</h5><button class="btn-close" (click)="showModal=false"></button></div>
+    <div class="modal-body">
+      <form [formGroup]="form">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="ims-form-label">Product Name</label><input class="ims-form-control" formControlName="name" placeholder="Product name"></div>
+          <div class="col-md-6"><label class="ims-form-label">SKU</label><input class="ims-form-control" formControlName="sku" placeholder="e.g. PROD-001"></div>
+          <div class="col-12"><label class="ims-form-label">Description</label><textarea class="ims-form-control" formControlName="description" rows="2" placeholder="Description..."></textarea></div>
+          <div class="col-md-4"><label class="ims-form-label">Unit Price (₹)</label><input class="ims-form-control" type="number" formControlName="unitPrice" placeholder="0.00"></div>
+          <div class="col-md-4"><label class="ims-form-label">Reorder Level</label><input class="ims-form-control" type="number" formControlName="reorderLevel" placeholder="0"></div>
+          <div class="col-md-4">
+            <label class="ims-form-label">Category</label>
+            <select class="ims-form-control" formControlName="categoryId">
+              <option value="">Select category</option>
+              <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">{{ editMode ? 'Update' : 'Create' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Link Supplier Modal -->
+<div class="modal-overlay" *ngIf="showLinkModal" (click)="showLinkModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-link-45deg me-2"></i>Link Supplier</h5><button class="btn-close" (click)="showLinkModal=false"></button></div>
+    <div class="modal-body">
+      <form [formGroup]="linkForm">
+        <div class="mb-3">
+          <label class="ims-form-label">Supplier</label>
+          <select class="ims-form-control" formControlName="supplierId">
+            <option value="">Select supplier</option>
+            <option *ngFor="let s of suppliers" [value]="s.id">{{ s.companyName }}</option>
+          </select>
+        </div>
+        <div class="mb-3"><label class="ims-form-label">Unit Cost (₹)</label><input class="ims-form-control" type="number" formControlName="unitCost"></div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" formControlName="isPreferred" id="preferred">
+          <label class="form-check-label" for="preferred">Set as Preferred Supplier</label>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showLinkModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submitLink()">Link Supplier</button>
+    </div>
+  </div>
+</div>

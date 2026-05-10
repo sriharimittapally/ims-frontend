@@ -1,0 +1,48 @@
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ims-bg);
+  position: relative;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.auth-bg-shapes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  .shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.15;
+  }
+
+  .shape-1 {
+    width: 400px; height: 400px;
+    background: var(--ims-primary);
+    top: -100px; left: -100px;
+  }
+
+  .shape-2 {
+    width: 300px; height: 300px;
+    background: var(--ims-secondary);
+    bottom: -80px; right: -80px;
+  }
+
+  .shape-3 {
+    width: 200px; height: 200px;
+    background: var(--ims-accent);
+    top: 40%; left: 60%;
+  }
+}
+
+.auth-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+}

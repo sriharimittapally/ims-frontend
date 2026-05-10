@@ -1,0 +1,44 @@
+<aside class="ims-sidebar" [class.collapsed]="collapsed">
+  <!-- Logo -->
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <i class="bi bi-boxes"></i>
+    </div>
+    <div class="brand-text" *ngIf="!collapsed">
+      <span class="brand-name">IMS</span>
+      <span class="brand-sub">Inventory System</span>
+    </div>
+  </div>
+
+  <!-- User Info -->
+  <div class="sidebar-user" *ngIf="!collapsed">
+    <div class="user-avatar" [style.background]="getRoleColor()">
+      {{ (auth.currentUser()?.name ?? 'U')[0].toUpperCase() }}
+    </div>
+    <div class="user-info">
+      <div class="user-name">{{ auth.currentUser()?.name }}</div>
+      <div class="user-role">{{ getRoleLabel() }}</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <div class="nav-label" *ngIf="!collapsed">NAVIGATION</div>
+    <a *ngFor="let item of navItems()"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       class="nav-item"
+       [title]="collapsed ? item.label : ''">
+      <i class="bi {{ item.icon }} nav-icon"></i>
+      <span class="nav-label-text" *ngIf="!collapsed">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <!-- Logout -->
+  <div class="sidebar-footer">
+    <button class="nav-item logout-btn w-100" (click)="logout()" [title]="collapsed ? 'Logout' : ''">
+      <i class="bi bi-box-arrow-left nav-icon"></i>
+      <span class="nav-label-text" *ngIf="!collapsed">Logout</span>
+    </button>
+  </div>
+</aside>
