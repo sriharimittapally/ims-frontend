@@ -1,49 +1,41 @@
 export interface AdminDashboardResponse {
   totalUsers: number;
-  totalManagers: number;
-  totalStaff: number;
-  totalSuppliers: number;
   totalWarehouses: number;
+  activeWarehouses: number;
   totalProducts: number;
-  totalCategories: number;
-  totalInventoryItems: number;
+  totalSuppliers: number;
   pendingSupplierApprovals: number;
+  lowStockProducts: number;
   pendingPurchaseOrders: number;
-  lowStockAlerts: number;
-  totalStockIn: number;
-  totalStockOut: number;
+  totalInventoryValue: number;
 }
 
 export interface ManagerDashboardResponse {
   warehouseId: number;
   warehouseName: string;
+  totalStaff:number;
   totalProducts: number;
-  totalInventoryItems: number;
-  lowStockAlerts: number;
-  pendingIssues: number;
-  totalStaff: number;
+  lowStockProducts: number;
   pendingPurchaseOrders: number;
-  totalStockIn: number;
-  totalStockOut: number;
+  pendingStockIssues: number; 
+  warehouseInventoryValue:number
 }
 
 export interface StaffDashboardResponse {
   warehouseId: number;
   warehouseName: string;
-  myOpenIssues: number;
   myTotalIssues: number;
+  myPendingIssues: number;
+  myIssuedIssues:number;
   pendingPOsToReceive: number;
-  totalInventoryItems: number;
 }
 
 export interface SupplierDashboardResponse {
   companyName: string;
   approvalStatus: string;
+  linkedProducts:number;
   totalPOs: number;
   pendingPOs: number;
   acceptedPOs: number;
   shippedPOs: number;
-  receivedPOs: number;
-  rejectedPOs: number;
-  totalRevenue: number;
 }

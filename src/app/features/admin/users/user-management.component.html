@@ -9,7 +9,10 @@
       <button class="btn-ims-primary btn" (click)="openCreate('MANAGER')">
         <i class="bi bi-person-plus me-1"></i> Add Manager
       </button>
-      <button class="btn btn-success btn-sm rounded-2 px-3" (click)="openCreate('STAFF')">
+      <button
+        class="btn btn-success btn-sm rounded-2 px-3"
+        (click)="openCreate('STAFF')"
+      >
         <i class="bi bi-person-plus me-1"></i> Add Staff
       </button>
     </div>
@@ -17,23 +20,56 @@
 
   <!-- Tabs + Search -->
   <div class="ims-card mb-3">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div
+      class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+    >
       <div class="tab-group">
-        <button class="tab-btn" [class.active]="activeTab==='ALL'"      (click)="setTab('ALL')">All ({{ users.length }})</button>
-        <button class="tab-btn" [class.active]="activeTab==='MANAGER'"  (click)="setTab('MANAGER')">Managers ({{ countByRole('MANAGER') }})</button>
-        <button class="tab-btn" [class.active]="activeTab==='STAFF'"    (click)="setTab('STAFF')">Staff ({{ countByRole('STAFF') }})</button>
-        <button class="tab-btn" [class.active]="activeTab==='SUPPLIER'" (click)="setTab('SUPPLIER')">Suppliers ({{ countByRole('SUPPLIER') }})</button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'ALL'"
+          (click)="setTab('ALL')"
+        >
+          All ({{ users.length }})
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'MANAGER'"
+          (click)="setTab('MANAGER')"
+        >
+          Managers ({{ countByRole("MANAGER") }})
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'STAFF'"
+          (click)="setTab('STAFF')"
+        >
+          Staff ({{ countByRole("STAFF") }})
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'SUPPLIER'"
+          (click)="setTab('SUPPLIER')"
+        >
+          Suppliers ({{ countByRole("SUPPLIER") }})
+        </button>
       </div>
-      <div class="search-input-wrap" style="width:250px">
+      <div class="search-input-wrap" style="width: 250px">
         <i class="bi bi-search search-icon"></i>
-        <input class="ims-form-control" (input)="onSearch($event)" placeholder="Search users..." style="padding-left:2.25rem">
+        <input
+          class="ims-form-control"
+          (input)="onSearch($event)"
+          placeholder="Search users..."
+          style="padding-left: 2.25rem"
+        />
       </div>
     </div>
   </div>
 
   <!-- Table -->
   <div class="ims-card p-0 overflow-hidden">
-    <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+    <div class="page-loader" *ngIf="loading">
+      <div class="spinner-border"></div>
+    </div>
 
     <div class="table-responsive" *ngIf="!loading">
       <table class="ims-table w-100">
@@ -53,7 +89,18 @@
             <td class="text-muted">{{ i + 1 }}</td>
             <td>
               <div class="user-cell">
-                <div class="user-mini-avatar" [style.background]="user.role === 'MANAGER' ? '#6366f1' : user.role === 'STAFF' ? '#10b981' : '#f59e0b'">
+                <div
+                  class="user-mini-avatar"
+                  [style.background]="
+                    user.role === 'ADMIN'
+                      ? '#ef4444'
+                      : user.role === 'MANAGER'
+                        ? '#6366f1'
+                        : user.role === 'STAFF'
+                          ? '#10b981'
+                          : '#f59e0b'
+                  "
+                >
                   {{ user.name[0].toUpperCase() }}
                 </div>
                 <span class="fw-600">{{ user.name }}</span>
@@ -61,20 +108,43 @@
             </td>
             <td class="text-muted">{{ user.email }}</td>
             <td>
-              <span class="badge-ims" [ngClass]="{'badge-sent': user.role === 'MANAGER', 'badge-active': user.role === 'STAFF', 'badge-pending': user.role === 'SUPPLIER'}">
+              <span
+                class="badge-ims"
+                [ngClass]="{
+                  'badge-sent': user.role === 'MANAGER',
+                  'badge-active': user.role === 'STAFF',
+                  'badge-pending': user.role === 'SUPPLIER',
+                }"
+              >
                 {{ user.role }}
               </span>
             </td>
-            <td class="text-muted">{{ user.warehouseName ?? '—' }}</td>
+            <td class="text-muted">{{ user.warehouseName ?? "—" }}</td>
             <td>
-              <span class="status-dot" [ngClass]="user.status === 'ACTIVE' ? 'dot-success' : 'dot-danger'"></span>
+              <span
+                class="status-dot"
+                [ngClass]="
+                  user.status === 'ACTIVE' ? 'dot-success' : 'dot-danger'
+                "
+              ></span>
               {{ user.status }}
             </td>
             <td>
-              <button class="action-btn" (click)="toggleStatus(user)"
+              <button
+                class="action-btn"
+                (click)="toggleStatus(user)"
                 [title]="user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'"
-                [style.color]="user.status === 'ACTIVE' ? 'var(--ims-danger)' : 'var(--ims-success)'">
-                <i class="bi" [class.bi-slash-circle]="user.status === 'ACTIVE'" [class.bi-check-circle]="user.status !== 'ACTIVE'"></i>
+                [style.color]="
+                  user.status === 'ACTIVE'
+                    ? 'var(--ims-danger)'
+                    : 'var(--ims-success)'
+                "
+              >
+                <i
+                  class="bi"
+                  [class.bi-slash-circle]="user.status === 'ACTIVE'"
+                  [class.bi-check-circle]="user.status !== 'ACTIVE'"
+                ></i>
               </button>
             </td>
           </tr>
@@ -93,34 +163,91 @@
 </div>
 
 <!-- Create Modal -->
-<div class="modal-overlay" *ngIf="showCreateModal" (click)="showCreateModal=false">
+<div
+  class="modal-overlay"
+  *ngIf="showCreateModal"
+  (click)="showCreateModal = false"
+>
   <div class="modal-box" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Add {{ createRole }}</h5>
-      <button class="btn-close" (click)="showCreateModal=false"></button>
+      <h5 class="modal-title">
+        <i class="bi bi-person-plus me-2"></i>Add {{ createRole }}
+      </h5>
+      <button class="btn-close" (click)="showCreateModal = false"></button>
     </div>
     <div class="modal-body">
       <form [formGroup]="createForm">
         <div class="mb-3">
           <label class="ims-form-label">Full Name</label>
-          <input class="ims-form-control" formControlName="name" placeholder="Enter name">
-          <div class="invalid-feedback d-block text-danger" style="font-size:.75rem" *ngIf="createForm.get('name')?.invalid && createForm.get('name')?.touched">Required.</div>
+          <input
+            class="ims-form-control"
+            formControlName="name"
+            placeholder="Enter name"
+          />
+          <div
+            class="invalid-feedback d-block text-danger"
+            style="font-size: 0.75rem"
+            *ngIf="
+              createForm.get('name')?.invalid && createForm.get('name')?.touched
+            "
+          >
+            Required.
+          </div>
         </div>
         <div class="mb-3">
           <label class="ims-form-label">Email</label>
-          <input class="ims-form-control" type="email" formControlName="email" placeholder="email@example.com">
+          <input
+            class="ims-form-control"
+            type="email"
+            formControlName="email"
+            placeholder="email@example.com"
+          />
+        </div>
+        <div class="mb-3">
+          <label class="ims-form-label">Mobile</label>
+          <input
+            class="ims-form-control"
+            type="text"
+            formControlName="phone"
+            placeholder="+91 0000000000"
+          />
         </div>
         <div class="mb-3">
           <label class="ims-form-label">Password</label>
-          <input class="ims-form-control" type="password" formControlName="password" placeholder="Min. 6 chars">
+          <input
+            class="ims-form-control"
+            type="password"
+            formControlName="password"
+            placeholder="Min. 6 chars"
+          />
+        </div>
+        <div class="mb-3" *ngIf="createRole === 'MANAGER'">
+          <label class="ims-form-label"> Warehouse </label>
+
+          <select class="ims-form-control" formControlName="warehouseId">
+            <option [ngValue]="null">Select Warehouse</option>
+
+            <option *ngFor="let wh of warehouses" [value]="wh.id">
+              {{ wh.name }}
+            </option>
+          </select>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn-ims-outline btn" (click)="showCreateModal=false">Cancel</button>
-      <button class="btn-ims-primary btn" (click)="submitCreate()" [disabled]="createLoading">
+      <button class="btn-ims-outline btn" (click)="showCreateModal = false">
+        Cancel
+      </button>
+      <button
+        class="btn-ims-primary btn"
+        (click)="submitCreate()"
+        [disabled]="createLoading"
+      >
         <span *ngIf="!createLoading">Create {{ createRole }}</span>
-        <span *ngIf="createLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
+        <span *ngIf="createLoading"
+          ><span class="spinner-border spinner-border-sm me-1"></span
+          >Creating...</span
+        >
       </button>
     </div>
   </div>

@@ -12,5 +12,6 @@ export interface WarehouseResponse {
 
 export interface WarehouseRequest {
   name: string;
-  location: string;
+  address: string;
+  city:string;
 }

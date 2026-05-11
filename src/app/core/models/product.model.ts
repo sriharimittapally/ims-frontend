@@ -1,35 +1,47 @@
+import { CategoryResponse } from "./category.model";
+
 export interface ProductResponse {
   id: number;
-  name: string;
-  description: string;
   sku: string;
-  unitPrice: number;
+  productName: string;
+  description: string;
+  category: CategoryResponse;
+  unit: string;
   reorderLevel: number;
-  categoryId: number;
-  categoryName: string;
+  sellingPrice: number;
   status: string;
-  suppliers?: ProductSupplierResponse[];
-  createdAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  suppliers: ProductSupplierResponse[];
 }
 
 export interface ProductSupplierResponse {
-  supplierId: number;
+  id: number;
+  productId:number;
+  productName:string;
+  sku:string;
+  categoryName:string
+  supplierId:number;
   supplierName: string;
-  unitCost: number;
+  companyName:string;
+  purhchasePrice: number;
+  leadTimeDays:number;
   isPreferred: boolean;
+  isActive:boolean;
+  createdAt?:string;
 }
 
 export interface ProductRequest {
-  name: string;
+  productName: string;
   description: string;
   sku: string;
-  unitPrice: number;
+  sellingPrice: number;
+  unit:string;
   reorderLevel: number;
   categoryId: number;
 }
 
 export interface SupplierLinkRequest {
-  supplierId: number;
-  unitCost: number;
-  isPreferred: boolean;
+  purchasePrice: number;
+  leadTimeDays: boolean;
 }

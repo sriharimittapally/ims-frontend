@@ -8,10 +8,13 @@ export interface AuthResponse {
   role: string;
   email: string;
   name: string;
+  userCode:string;
 }
 
 export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  phone:string;
+  warehouseId:number;
 }

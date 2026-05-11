@@ -3,7 +3,6 @@ export interface CategoryResponse {
   name: string;
   description: string;
   status: string;
-  productCount?: number;
   createdAt?: string;
 }
 

@@ -23,7 +23,7 @@
           <tr *ngFor="let inv of filtered" [class.low-stock-row]="inv.isLowStock">
             <td>
               <div class="fw-600">{{ inv.productName }}</div>
-              <div style="font-size:.75rem;font-family:monospace;color:var(--ims-text-muted)">{{ inv.productSku }}</div>
+              <div style="font-size:.75rem;font-family:monospace;color:var(--ims-text-muted)">{{ inv.sku }}</div>
             </td>
             <td class="text-muted">{{ inv.warehouseName }}</td>
             <td class="fw-600">{{ inv.quantity | number }}</td>

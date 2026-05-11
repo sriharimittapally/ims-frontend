@@ -8,7 +8,6 @@ import { DashboardService } from '../../../core/services/dashboard.service';
 import { ReportService } from '../../../core/services/report.service';
 import { StatsCardComponent } from '../../../shared/components/stats-card/stats-card.component';
 import { AdminDashboardResponse } from '../../../core/models/dashboard.model';
-import { StockTrendReport } from '../../../core/models/report.model';
 
 Chart.register(...registerables);
 
@@ -46,7 +45,10 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.dashSvc.getAdminDashboard().subscribe({
-      next: res => { this.dashboard = res.data; this.loading = false; },
+      next: res => {
+        console.log(res.data);
+        
+         this.dashboard = res.data; this.loading = false; },
       error: () => { this.loading = false; }
     });
 

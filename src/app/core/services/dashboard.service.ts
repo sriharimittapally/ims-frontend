@@ -22,6 +22,10 @@ export class DashboardService {
     return this.http.get<ApiResponse<ManagerDashboardResponse>>(`${this.base}/manager/dashboard`);
   }
 
+  getStaffDashboard():Observable<ApiResponse<StaffDashboardResponse>>{
+    return this.http.get<ApiResponse<StaffDashboardResponse>>(`${this.base}/stock-issues/dashboard`);
+  }
+
   getSupplierDashboard(): Observable<ApiResponse<SupplierDashboardResponse>> {
     return this.http.get<ApiResponse<SupplierDashboardResponse>>(`${this.base}/suppliers/dashboard`);
   }

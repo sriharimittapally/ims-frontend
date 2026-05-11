@@ -36,7 +36,8 @@ export class WarehouseManagementComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       name:     ['', Validators.required],
-      location: ['', Validators.required]
+      address: ['', Validators.required],
+      city:['', Validators.required]
     });
   }
 

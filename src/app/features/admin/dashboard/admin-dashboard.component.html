@@ -19,61 +19,133 @@
   <ng-container *ngIf="!loading && dashboard">
 
     <!-- Stats Row 1 -->
-    <div class="row g-3 mb-4">
-      <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Total Users" [value]="dashboard.totalUsers" icon="bi-people-fill" color="primary" />
-      </div>
-      <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Warehouses" [value]="dashboard.totalWarehouses" icon="bi-building-fill" color="info" />
-      </div>
-      <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Products" [value]="dashboard.totalProducts" icon="bi-box-seam-fill" color="secondary" />
-      </div>
-      <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Categories" [value]="dashboard.totalCategories" icon="bi-tags-fill" color="primary" />
-      </div>
-      <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Suppliers" [value]="dashboard.totalSuppliers" icon="bi-truck" color="warning" />
-      </div>
-      <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Inventory Items" [value]="dashboard.totalInventoryItems" icon="bi-archive-fill" color="success" />
-      </div>
-    </div>
+<div class="row g-3 mb-4">
+
+  <div class="col-xl-2 col-md-4 col-6">
+    <app-stats-card
+      label="Total Users"
+      [value]="dashboard.totalUsers"
+      icon="bi-people-fill"
+      color="primary" />
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-6">
+    <app-stats-card
+      label="Warehouses"
+      [value]="dashboard.totalWarehouses"
+      icon="bi-building-fill"
+      color="info" />
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-6">
+    <app-stats-card
+      label="Active WH"
+      [value]="dashboard.activeWarehouses"
+      icon="bi-building-check"
+      color="success" />
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-6">
+    <app-stats-card
+      label="Products"
+      [value]="dashboard.totalProducts"
+      icon="bi-box-seam-fill"
+      color="secondary" />
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-6">
+    <app-stats-card
+      label="Suppliers"
+      [value]="dashboard.totalSuppliers"
+      icon="bi-truck"
+      color="warning" />
+  </div>
+
+  <div class="col-xl-2 col-md-4 col-6">
+    <app-stats-card
+      label="Inventory Value"
+      [value]="dashboard.totalInventoryValue"
+      icon="bi-cash-stack"
+      color="success" />
+  </div>
+
+</div>
 
     <!-- Alerts Row -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-4">
-        <div class="alert-stat-card danger">
-          <div class="as-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-          <div class="as-body">
-            <div class="as-value">{{ dashboard.lowStockAlerts }}</div>
-            <div class="as-label">Low Stock Alerts</div>
-          </div>
-          <a routerLink="/admin/inventory" class="as-action">View <i class="bi bi-arrow-right"></i></a>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="alert-stat-card warning">
-          <div class="as-icon"><i class="bi bi-clock-history"></i></div>
-          <div class="as-body">
-            <div class="as-value">{{ dashboard.pendingSupplierApprovals }}</div>
-            <div class="as-label">Pending Supplier Approvals</div>
-          </div>
-          <a routerLink="/admin/suppliers" class="as-action">Review <i class="bi bi-arrow-right"></i></a>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="alert-stat-card info">
-          <div class="as-icon"><i class="bi bi-cart-check-fill"></i></div>
-          <div class="as-body">
-            <div class="as-value">{{ dashboard.pendingPurchaseOrders }}</div>
-            <div class="as-label">Pending Purchase Orders</div>
-          </div>
-          <a routerLink="/admin/purchase-orders" class="as-action">View <i class="bi bi-arrow-right"></i></a>
-        </div>
-      </div>
-    </div>
+<div class="row g-3 mb-4">
 
+  <div class="col-md-4">
+    <div class="alert-stat-card danger">
+      <div class="as-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+
+      <div class="as-body">
+        <div class="as-value">
+          {{ dashboard.lowStockProducts }}
+        </div>
+
+        <div class="as-label">
+          Low Stock Products
+        </div>
+      </div>
+
+      <a routerLink="/admin/inventory" class="as-action">
+        View
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="alert-stat-card warning">
+
+      <div class="as-icon">
+        <i class="bi bi-clock-history"></i>
+      </div>
+
+      <div class="as-body">
+        <div class="as-value">
+          {{ dashboard.pendingSupplierApprovals }}
+        </div>
+
+        <div class="as-label">
+          Pending Supplier Approvals
+        </div>
+      </div>
+
+      <a routerLink="/admin/suppliers" class="as-action">
+        Review
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="alert-stat-card info">
+
+      <div class="as-icon">
+        <i class="bi bi-cart-check-fill"></i>
+      </div>
+
+      <div class="as-body">
+        <div class="as-value">
+          {{ dashboard.pendingPurchaseOrders }}
+        </div>
+
+        <div class="as-label">
+          Pending Purchase Orders
+        </div>
+      </div>
+
+      <a routerLink="/admin/purchase-orders" class="as-action">
+        View
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+</div>
     <!-- Charts Row -->
     <div class="row g-3 mb-4">
       <!-- Stock Trend -->

@@ -30,12 +30,12 @@
             <td>
               <div class="d-flex align-items-center gap-2">
                 <div class="prod-icon"><i class="bi bi-box-seam"></i></div>
-                <div><div class="fw-600">{{ p.name }}</div><div style="font-size:.75rem;color:var(--ims-text-muted)">{{ p.description | slice:0:40 }}...</div></div>
+                <div><div class="fw-600">{{ p.productName }}</div><div style="font-size:.75rem;color:var(--ims-text-muted)">{{ p.description | slice:0:40 }}...</div></div>
               </div>
             </td>
             <td><code class="sku-code">{{ p.sku }}</code></td>
-            <td class="text-muted">{{ p.categoryName }}</td>
-            <td class="fw-600">₹{{ p.unitPrice | number:'1.2-2' }}</td>
+            <td class="text-muted">{{ p.category.name }}</td>
+            <td class="fw-600">₹{{ p.sellingPrice | number:'1.2-2' }}</td>
             <td class="text-muted">{{ p.reorderLevel }}</td>
             <td>
               <span class="badge-ims badge-sent">{{ p.suppliers?.length ?? 0 }} linked</span>
@@ -65,10 +65,11 @@
     <div class="modal-body">
       <form [formGroup]="form">
         <div class="row g-3">
-          <div class="col-md-6"><label class="ims-form-label">Product Name</label><input class="ims-form-control" formControlName="name" placeholder="Product name"></div>
+          <div class="col-md-6"><label class="ims-form-label">Product Name</label><input class="ims-form-control" formControlName="productName" placeholder="Product name"></div>
           <div class="col-md-6"><label class="ims-form-label">SKU</label><input class="ims-form-control" formControlName="sku" placeholder="e.g. PROD-001"></div>
           <div class="col-12"><label class="ims-form-label">Description</label><textarea class="ims-form-control" formControlName="description" rows="2" placeholder="Description..."></textarea></div>
-          <div class="col-md-4"><label class="ims-form-label">Unit Price (₹)</label><input class="ims-form-control" type="number" formControlName="unitPrice" placeholder="0.00"></div>
+          <div class="col-md-4"><label class="ims-form-label">Selling Price (₹)</label><input class="ims-form-control" type="number" formControlName="sellingPrice" placeholder="0.00"></div>
+          <div class="col-md-4"><label class="ims-form-label">Unit </label><input class="ims-form-control" type="string" formControlName="unit" placeholder="0.00"></div>
           <div class="col-md-4"><label class="ims-form-label">Reorder Level</label><input class="ims-form-control" type="number" formControlName="reorderLevel" placeholder="0"></div>
           <div class="col-md-4">
             <label class="ims-form-label">Category</label>

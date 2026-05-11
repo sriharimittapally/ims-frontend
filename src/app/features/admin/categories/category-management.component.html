@@ -19,7 +19,6 @@
             </div>
           </td>
           <td class="text-muted" style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ c.description }}</td>
-          <td><span class="badge-ims badge-sent">{{ c.productCount ?? 0 }}</span></td>
           <td><span class="badge-ims" [ngClass]="c.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ c.status }}</span></td>
           <td>
             <div class="d-flex gap-1">
