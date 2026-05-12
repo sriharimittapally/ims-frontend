@@ -25,7 +25,7 @@
           <div class="sup-avatar">{{ s.companyName[0].toUpperCase() }}</div>
           <div class="sup-info">
             <div class="sup-company">{{ s.companyName }}</div>
-            <div class="sup-contact"><i class="bi bi-person me-1"></i>{{ s.contactPerson }}</div>
+            <div class="sup-contact"><i class="bi bi-person me-1"></i>{{ s.gstNumber }}</div>
           </div>
           <span class="badge-ims ms-auto"
             [ngClass]="{'badge-active': s.approvalStatus==='APPROVED', 'badge-pending': s.approvalStatus==='PENDING', 'badge-inactive': s.approvalStatus==='REJECTED'}">
@@ -47,9 +47,7 @@
           <i class="bi bi-info-circle me-1" style="color:var(--ims-danger)"></i>
           <span>{{ s.rejectionReason }}</span>
         </div>
-        <div class="text-muted" style="font-size:.75rem; margin-top:.5rem" *ngIf="s.approvalStatus === 'APPROVED'">
-          <i class="bi bi-check2-circle me-1 text-success"></i>Approved by {{ s.approvedBy }}
-        </div>
+    
       </div>
     </div>
 

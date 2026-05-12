@@ -1,0 +1,113 @@
+<div class="animate-fade-in-up">
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div><h1 class="page-title">Purchase Orders</h1><p class="page-subtitle">Create and manage purchase orders for your warehouse</p></div>
+    <button class="btn-ims-primary btn" (click)="openCreate()"><i class="bi bi-plus-circle me-1"></i> Create PO</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="ims-card mb-3">
+    <div class="tab-scroll">
+      <button class="tab-btn" *ngFor="let s of statuses" [class.active]="activeTab===s" (click)="activeTab=s">
+        {{ s === 'ALL' ? 'All (' + orders.length + ')' : s + ' (' + countBy(s) + ')' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead><tr><th>PO Number</th><th>Supplier</th><th>Amount</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let o of filtered">
+            <td><span class="po-number">{{ o.poNumber }}</span></td>
+            <td class="text-muted">{{ o.supplierName }}</td>
+            <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
+            <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
+            <td class="text-muted">{{ o.createdAt | date:'dd MMM, yy' }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <button class="action-btn" (click)="viewDetail(o)"><i class="bi bi-eye" style="color:var(--ims-info)"></i></button>
+                <button class="action-btn" *ngIf="o.status === 'DRAFT'" (click)="send(o)"><i class="bi bi-send" style="color:var(--ims-primary)"></i></button>
+                <button class="action-btn" *ngIf="o.status === 'DRAFT' || o.status === 'SENT'" (click)="cancel(o)"><i class="bi bi-x-circle" style="color:var(--ims-danger)"></i></button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0"><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="bi bi-cart-check"></i></div><h5>No purchase orders</h5></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Create PO Modal -->
+<div class="modal-overlay" *ngIf="showCreateModal" (click)="showCreateModal=false">
+  <div class="modal-box modal-xl-box" (click)="$event.stopPropagation()">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-cart-plus me-2"></i>Create Purchase Order</h5><button class="btn-close" (click)="showCreateModal=false"></button></div>
+    <div class="modal-body">
+      <form [formGroup]="form">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="ims-form-label">Supplier *</label>
+            <select class="ims-form-control" formControlName="supplierId">
+              <option value="">Select supplier</option>
+              <option *ngFor="let s of suppliers" [value]="s.id">{{ s.companyName }}</option>
+            </select>
+          </div>
+          <div class="col-md-6"><label class="ims-form-label">Note (Optional)</label><input class="ims-form-control" formControlName="note" placeholder="Internal note..."></div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="mb-0 fw-700">Order Items</h6>
+          <button type="button" class="btn-ims-outline btn btn-sm" (click)="addItem()"><i class="bi bi-plus me-1"></i>Add Item</button>
+        </div>
+
+        <div formArrayName="items">
+          <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="item-row">
+            <select class="ims-form-control" formControlName="productId" style="flex:2">
+              <option value="">Select product</option>
+              <option *ngFor="let p of products" [value]="p.id">{{ p.productName }} ({{ p.sku }})</option>
+            </select>
+            <input class="ims-form-control" type="number" formControlName="quantity" placeholder="Qty" style="width:80px">
+            <input class="ims-form-control" type="number" formControlName="unitCost" placeholder="Cost ₹" style="width:110px">
+            <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius:8px;flex-shrink:0" (click)="removeItem(i)" [disabled]="items.length === 1">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showCreateModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">
+        <span *ngIf="!submitLoading"><i class="bi bi-cart-check me-1"></i>Create PO</span>
+        <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel (reuse same pattern as admin PO) -->
+<div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
+  <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedOrder">
+    <div class="detail-header">
+      <div><h5 class="mb-0">{{ selectedOrder.poNumber }}</h5><span class="badge-ims" [ngClass]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span></div>
+      <button class="btn-close" (click)="showDetail=false"></button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-row"><span class="detail-label">Supplier</span><span>{{ selectedOrder.supplierName }}</span></div>
+      <div class="detail-row"><span class="detail-label">Created At</span><span>{{ selectedOrder.createdAt | date:'dd MMM yyyy, HH:mm' }}</span></div>
+      <div class="detail-row" *ngIf="selectedOrder.note"><span class="detail-label">Note</span><span>{{ selectedOrder.note }}</span></div>
+      <div class="detail-row" *ngIf="selectedOrder.rejectionReason"><span class="detail-label">Rejection</span><span style="color:var(--ims-danger)">{{ selectedOrder.rejectionReason }}</span></div>
+      <h6 class="mt-3 mb-2">Items</h6>
+      <table class="ims-table w-100">
+        <thead><tr><th>Product</th><th>Qty</th><th>Cost</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let it of selectedOrder.items"><td>{{ it.productName }}</td><td>{{ it.quantity }}</td><td>₹{{ it.unitCost | number:'1.2-2' }}</td><td class="fw-600">₹{{ it.totalCost | number:'1.2-2' }}</td></tr>
+        </tbody>
+      </table>
+      <div class="detail-total"><span>Total</span><span class="fw-700">₹{{ selectedOrder.totalAmount | number:'1.2-2' }}</span></div>
+    </div>
+  </div>
+</div>

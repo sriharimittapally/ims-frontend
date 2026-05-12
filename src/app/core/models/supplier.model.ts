@@ -1,16 +1,16 @@
 export interface SupplierProfileResponse {
   id: number;
-  userId: number;
-  name: string;
+  name:string;
+  userCode: string;
   email: string;
   companyName: string;
-  contactPerson: string;
   phone: string;
   address: string;
+  gstNumber:string;
   approvalStatus: string;
-  approvedBy?: string;
   rejectionReason?: string;
   createdAt?: string;
+  reviewdAt:string;
 }
 
 export interface SupplierProfileRequest {

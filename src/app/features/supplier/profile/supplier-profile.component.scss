@@ -1,0 +1,4 @@
+.profile-avatar { width:80px; height:80px; background:linear-gradient(135deg,var(--ims-warning),#d97706); border-radius:20px; color:#fff; font-size:2rem; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto; }
+.profile-field { display:flex; justify-content:space-between; align-items:center; padding:.625rem 0; border-bottom:1px solid var(--ims-border-light); font-size:.875rem; .field-label { color:var(--ims-text-muted); font-weight:500; font-size:.78rem; text-transform:uppercase; letter-spacing:.4px; } }
+.rejected-info { background:rgba(239,68,68,.08); border-radius:8px; padding:.75rem; margin-top:1rem; font-size:.8rem; color:var(--ims-danger); }
+.fw-700 { font-weight:700; }

@@ -1,0 +1,42 @@
+<div class="animate-fade-in-up">
+  <div class="page-header"><h1 class="page-title">My Reports</h1><p class="page-subtitle">Your personal activity and warehouse insights</p></div>
+
+  <div class="ims-card mb-4">
+    <div class="d-flex gap-2">
+      <button class="report-tab" [class.active]="activeTab==='history'" (click)="setTab('history')"><i class="bi bi-list-check me-1"></i>My Issue History</button>
+      <button class="report-tab" [class.active]="activeTab==='trend'"   (click)="setTab('trend')"><i class="bi bi-graph-up me-1"></i>Warehouse Trend</button>
+    </div>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <!-- Issue History -->
+  <ng-container *ngIf="activeTab === 'history' && !loading && issueHistory">
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="stat-card stat-primary"><div class="stat-value">{{ issueHistory.totalIssues }}</div><div class="stat-label">Total Issues</div></div></div>
+      <div class="col-md-3 col-6"><div class="stat-card stat-success"><div class="stat-value">{{ issueHistory.issuedCount }}</div><div class="stat-label">Issued</div></div></div>
+      <div class="col-md-3 col-6"><div class="stat-card stat-danger"><div class="stat-value">{{ issueHistory.rejectedCount }}</div><div class="stat-label">Rejected</div></div></div>
+      <div class="col-md-3 col-6"><div class="stat-card stat-warning"><div class="stat-value">{{ issueHistory.cancelledCount }}</div><div class="stat-label">Cancelled</div></div></div>
+    </div>
+    <div class="ims-card p-0 overflow-hidden">
+      <table class="ims-table w-100">
+        <thead><tr><th>Issue Number</th><th>Status</th><th>Items</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let i of issueHistory.issues">
+            <td><span style="font-family:monospace;color:var(--ims-secondary);font-weight:700">{{ i.issueNumber }}</span></td>
+            <td><span class="badge-ims" [ngClass]="getStatusClass(i.status)">{{ i.status }}</span></td>
+            <td class="text-muted">{{ i.itemCount }}</td>
+            <td class="text-muted">{{ i.createdAt | date:'dd MMM yy' }}</td>
+          </tr>
+          <tr *ngIf="issueHistory.issues?.length === 0"><td colspan="4"><div class="empty-state"><div class="empty-icon"><i class="bi bi-list-check"></i></div><h5>No history yet</h5></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- Trend -->
+  <ng-container *ngIf="activeTab === 'trend' && !loading">
+    <div class="ims-card mb-3"><div class="d-flex gap-3 flex-wrap"><div><label class="ims-form-label">From</label><input type="date" class="ims-form-control" [(ngModel)]="fromDate" style="width:160px"></div><div><label class="ims-form-label">To</label><input type="date" class="ims-form-control" [(ngModel)]="toDate" style="width:160px"></div><div class="align-self-end"><button class="btn-ims-primary btn" (click)="loadTrend()">Apply</button></div></div></div>
+    <div class="ims-card"><h6 class="mb-3 fw-700">Warehouse Stock Movement</h6><div class="chart-container" style="height:300px"><canvas baseChart [data]="trendData" [options]="barOptions" type="bar"></canvas></div></div>
+  </ng-container>
+</div>

@@ -1,0 +1,63 @@
+<div class="animate-fade-in-up">
+  <div class="page-header"><h1 class="page-title">My Profile</h1><p class="page-subtitle">Manage your supplier details</p></div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <ng-container *ngIf="!loading">
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="ims-card text-center">
+          <div class="profile-avatar">{{ profile?.companyName?.[0]?.toUpperCase() ?? '?' }}</div>
+          <h5 class="mt-3 mb-1">{{ profile?.companyName }}</h5>
+          <div class="text-muted" style="font-size:.85rem">{{ profile?.phone }}</div>
+          <div class="mt-2">
+            <span class="badge-ims"
+              [ngClass]="{'badge-active': profile?.approvalStatus==='APPROVED', 'badge-pending': profile?.approvalStatus==='PENDING', 'badge-inactive': profile?.approvalStatus==='REJECTED'}">
+              {{ profile?.approvalStatus }}
+            </span>
+          </div>
+          <div class="rejected-info" *ngIf="profile?.approvalStatus === 'REJECTED' && profile?.rejectionReason">
+            <i class="bi bi-info-circle me-1"></i>{{ profile?.rejectionReason }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="ims-card">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0 fw-700">Profile Details</h6>
+            <button class="btn-ims-outline btn btn-sm" (click)="editing = !editing">
+              <i class="bi" [class.bi-pencil]="!editing" [class.bi-x]="editing" class="me-1"></i>{{ editing ? 'Cancel' : 'Edit' }}
+            </button>
+          </div>
+
+          <!-- View Mode -->
+          <ng-container *ngIf="!editing && profile">
+            <div class="profile-field"><span class="field-label">Company Name</span><span>{{ profile.companyName }}</span></div>
+            <div class="profile-field"><span class="field-label">GST Number</span><span>{{ profile.gstNumber }}</span></div>
+            <div class="profile-field"><span class="field-label">Phone</span><span>{{ profile.phone }}</span></div>
+            <div class="profile-field"><span class="field-label">Address</span><span>{{ profile.address }}</span></div>
+            <div class="profile-field"><span class="field-label">Email</span><span>{{ profile.email }}</span></div>
+            <div class="profile-field" *ngIf="profile?.approvalStatus === 'REJECTED'"><span class="field-label">Why Rejected?</span><span>{{ profile.rejectionReason }}</span></div>
+          </ng-container>
+
+          <!-- Edit Mode -->
+          <form [formGroup]="form" *ngIf="editing">
+            <div class="row g-3">
+              <div class="col-md-6"><label class="ims-form-label">Company Name</label><input class="ims-form-control" formControlName="companyName"></div>
+              <div class="col-md-6"><label class="ims-form-label">GST Number</label><input class="ims-form-control" formControlName="gstNumber"></div>
+              <div class="col-md-6"><label class="ims-form-label">Phone</label><input class="ims-form-control" formControlName="phone"></div>
+              <div class="col-12"><label class="ims-form-label">Address</label><textarea class="ims-form-control" formControlName="address" rows="2"></textarea></div>
+            </div>
+            <div class="mt-3">
+              <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">
+                <span *ngIf="!submitLoading">Save Changes</span>
+                <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

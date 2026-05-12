@@ -1,0 +1,59 @@
+<div class="animate-fade-in-up">
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div><h1 class="page-title">Stock Issues</h1><p class="page-subtitle">Review and approve stock issue requests from staff</p></div>
+    <div class="tab-group">
+      <button class="tab-btn" [class.active]="activeTab==='PENDING'" (click)="setTab('PENDING')">Pending Review</button>
+      <button class="tab-btn" [class.active]="activeTab==='ALL'"     (click)="setTab('ALL')">All Issues</button>
+    </div>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead><tr><th>Issue Number</th><th>Created By</th><th>Items</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let issue of issues">
+            <td><span class="issue-num">{{ issue.issueNumber }}</span></td>
+            <td class="text-muted">{{ issue.createdBy }}</td>
+            <td><span class="badge-ims badge-sent">{{ issue.items.length }} items</span></td>
+            <td><span class="badge-ims" [ngClass]="getStatusClass(issue.status)">{{ issue.status }}</span></td>
+            <td class="text-muted">{{ issue.createdAt | date:'dd MMM, yy' }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <button class="action-btn" (click)="viewDetail(issue)"><i class="bi bi-eye" style="color:var(--ims-info)"></i></button>
+                <button class="action-btn" *ngIf="issue.status === 'PENDING_APPROVAL'" (click)="approve(issue)"><i class="bi bi-check-circle" style="color:var(--ims-success)"></i></button>
+                <button class="action-btn" *ngIf="issue.status === 'PENDING_APPROVAL'" (click)="reject(issue)"><i class="bi bi-x-circle" style="color:var(--ims-danger)"></i></button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="issues.length === 0"><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="bi bi-arrow-left-right"></i></div><h5>No stock issues</h5></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
+  <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedIssue">
+    <div class="detail-header">
+      <div><h5 class="mb-0">{{ selectedIssue.issueNumber }}</h5><span class="badge-ims" [ngClass]="getStatusClass(selectedIssue.status)">{{ selectedIssue.status }}</span></div>
+      <button class="btn-close" (click)="showDetail=false"></button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-row"><span class="detail-label">Created By</span><span>{{ selectedIssue.createdBy }}</span></div>
+      <div class="detail-row" *ngIf="selectedIssue.approvedBy"><span class="detail-label">Approved By</span><span>{{ selectedIssue.approvedBy }}</span></div>
+      <div class="detail-row" *ngIf="selectedIssue.note"><span class="detail-label">Note</span><span>{{ selectedIssue.note }}</span></div>
+      <div class="detail-row" *ngIf="selectedIssue.rejectionReason"><span class="detail-label">Rejection</span><span style="color:var(--ims-danger)">{{ selectedIssue.rejectionReason }}</span></div>
+      <h6 class="mt-3 mb-2">Items</h6>
+      <table class="ims-table w-100">
+        <thead><tr><th>Product</th><th>Requested</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let it of selectedIssue.items"><td>{{ it.productName }}<br><small class="text-muted">{{ it.productSku }}</small></td><td>{{ it.requestedQuantity }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

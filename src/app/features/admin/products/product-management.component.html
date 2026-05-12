@@ -44,7 +44,7 @@
             <td>
               <div class="d-flex gap-1">
                 <button class="action-btn" (click)="openEdit(p)" title="Edit"><i class="bi bi-pencil" style="color:var(--ims-primary)"></i></button>
-                <button class="action-btn" (click)="openLink(p)" title="Link Supplier"><i class="bi bi-link-45deg" style="color:var(--ims-info)"></i></button>
+                <!-- <button class="action-btn" (click)="openLink(p)" title="Link Supplier"><i class="bi bi-link-45deg" style="color:var(--ims-info)"></i></button> -->
                 <button class="action-btn" (click)="toggle(p)" title="Toggle Status">
                   <i class="bi" [class.bi-slash-circle]="p.status==='ACTIVE'" [class.bi-check-circle]="p.status!=='ACTIVE'" [style.color]="p.status==='ACTIVE'?'var(--ims-danger)':'var(--ims-success)'"></i>
                 </button>

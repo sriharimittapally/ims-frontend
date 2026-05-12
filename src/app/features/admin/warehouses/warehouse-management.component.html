@@ -18,16 +18,11 @@
           <div class="wh-icon gradient-primary"><i class="bi bi-building"></i></div>
           <div>
             <div class="wh-name">{{ w.name }}</div>
-            <div class="wh-location"><i class="bi bi-geo-alt me-1"></i>{{ w.location }}</div>
+            <div class="wh-location"><i class="bi bi-geo-alt me-1"></i>{{ w.city }}</div>
           </div>
           <span class="badge-ims ms-auto" [ngClass]="w.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ w.status }}</span>
         </div>
 
-        <div class="wh-stats">
-          <div class="wh-stat"><div class="wh-stat-value">{{ w.totalProducts ?? 0 }}</div><div class="wh-stat-label">Products</div></div>
-          <div class="wh-divider"></div>
-          <div class="wh-stat"><div class="wh-stat-value">{{ w.totalQuantity ?? 0 }}</div><div class="wh-stat-label">Total Qty</div></div>
-        </div>
 
         <div class="wh-manager">
           <i class="bi bi-person-badge me-2 text-muted"></i>
@@ -43,7 +38,7 @@
               <option value="">Select manager...</option>
               <option *ngFor="let m of managers" [value]="m.id">{{ m.name }}</option>
             </select>
-            <button class="btn-ims-outline btn btn-sm" (click)="assignManager(w.id, +managerSel.value)" [disabled]="!managerSel.value">Assign</button>
+            <button class="btn-ims-outline btn btn-sm" (click)="assignManager(w.id, +managerSel.value)">Assign</button>
           </div>
         </div>
 

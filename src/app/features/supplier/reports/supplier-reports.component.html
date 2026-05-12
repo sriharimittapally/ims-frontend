@@ -1,0 +1,42 @@
+<div class="animate-fade-in-up">
+  <div class="page-header"><h1 class="page-title">My PO Reports</h1><p class="page-subtitle">Purchase order history and performance overview</p></div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <ng-container *ngIf="!loading && report">
+    <!-- KPI Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4 col-6">
+        <div class="stat-card stat-primary"><div class="stat-icon"><i class="bi bi-cart-check-fill"></i></div><div class="stat-value mt-2">{{ report.totalPOs }}</div><div class="stat-label">Total POs</div></div>
+      </div>
+      <div class="col-md-4 col-6">
+        <div class="stat-card stat-success"><div class="stat-icon"><i class="bi bi-currency-rupee"></i></div><div class="stat-value mt-2">₹{{ report.totalRevenue | number:'1.0-0' }}</div><div class="stat-label">Total Revenue</div></div>
+      </div>
+      <div class="col-md-4 col-12">
+        <div class="ims-card h-100">
+          <h6 class="mb-2 fw-700">Status Breakdown</h6>
+          <div class="chart-container" style="height:160px"><canvas baseChart [data]="donutData" [options]="donutOptions" type="doughnut"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PO History Table -->
+    <div class="ims-card p-0 overflow-hidden">
+      <div class="p-3 border-bottom" style="border-color:var(--ims-border)!important"><h6 class="mb-0 fw-700">Order History</h6></div>
+      <div class="table-responsive">
+        <table class="ims-table w-100">
+          <thead><tr><th>PO Number</th><th>Status</th><th>Amount</th><th>Date</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let o of report.orders">
+              <td><span style="font-family:monospace;color:var(--ims-warning);font-weight:700">{{ o.poNumber }}</span></td>
+              <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
+              <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
+              <td class="text-muted">{{ o.createdAt | date:'dd MMM yy' }}</td>
+            </tr>
+            <tr *ngIf="report.orders?.length === 0"><td colspan="4"><div class="empty-state"><div class="empty-icon"><i class="bi bi-bar-chart-line"></i></div><h5>No PO history yet</h5></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

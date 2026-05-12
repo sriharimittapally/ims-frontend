@@ -34,50 +34,50 @@ export const routes: Routes = [
     ]
   },
 
-//   {
-//     path: 'manager',
-//     loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
-//     canActivate: [authGuard, roleGuard],
-//     data: { roles: ['MANAGER'] },
-//     children: [
-//       { path: 'dashboard',       loadComponent: () => import('./features/manager/dashboard/manager-dashboard.component').then(m => m.ManagerDashboardComponent) },
-//       { path: 'staff',           loadComponent: () => import('./features/manager/staff/manager-staff.component').then(m => m.ManagerStaffComponent) },
-//       { path: 'purchase-orders', loadComponent: () => import('./features/manager/purchase-orders/manager-po.component').then(m => m.ManagerPoComponent) },
-//       { path: 'stock-issues',    loadComponent: () => import('./features/manager/stock-issues/manager-stock-issues.component').then(m => m.ManagerStockIssuesComponent) },
-//       { path: 'inventory',       loadComponent: () => import('./features/manager/inventory/manager-inventory.component').then(m => m.ManagerInventoryComponent) },
-//       { path: 'reports',         loadComponent: () => import('./features/manager/reports/manager-reports.component').then(m => m.ManagerReportsComponent) },
-//       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-//     ]
-//   },
+  {
+    path: 'manager',
+    loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['MANAGER'] },
+    children: [
+      { path: 'dashboard',       loadComponent: () => import('./features/manager/dashboard/manager-dashboard.component').then(m => m.ManagerDashboardComponent) },
+      { path: 'staff',           loadComponent: () => import('./features/manager/staff/manager-staff.component').then(m => m.ManagerStaffComponent) },
+      { path: 'purchase-orders', loadComponent: () => import('./features/manager/purchase-orders/manager-po.component').then(m => m.ManagerPoComponent) },
+      { path: 'stock-issues',    loadComponent: () => import('./features/manager/stock-issues/manager-stock-issues.component').then(m => m.ManagerStockIssuesComponent) },
+      { path: 'inventory',       loadComponent: () => import('./features/manager/inventory/manager-inventory.component').then(m => m.ManagerInventoryComponent) },
+      { path: 'reports',         loadComponent: () => import('./features/manager/reports/manager-reports.component').then(m => m.ManagerReportsComponent) },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
 
-//   {
-//     path: 'staff',
-//     loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
-//     canActivate: [authGuard, roleGuard],
-//     data: { roles: ['STAFF'] },
-//     children: [
-//       { path: 'dashboard',       loadComponent: () => import('./features/staff/dashboard/staff-dashboard.component').then(m => m.StaffDashboardComponent) },
-//       { path: 'purchase-orders', loadComponent: () => import('./features/staff/purchase-orders/staff-po.component').then(m => m.StaffPoComponent) },
-//       { path: 'stock-issues',    loadComponent: () => import('./features/staff/stock-issues/staff-stock-issues.component').then(m => m.StaffStockIssuesComponent) },
-//       { path: 'inventory',       loadComponent: () => import('./features/staff/inventory/staff-inventory.component').then(m => m.StaffInventoryComponent) },
-//       { path: 'reports',         loadComponent: () => import('./features/staff/reports/staff-reports.component').then(m => m.StaffReportsComponent) },
-//       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-//     ]
-//   },
+  {
+    path: 'staff',
+    loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['STAFF'] },
+    children: [
+      { path: 'dashboard',       loadComponent: () => import('./features/staff/dashboard/staff-dashboard.component').then(m => m.StaffDashboardComponent) },
+      { path: 'purchase-orders', loadComponent: () => import('./features/staff/purchase-orders/staff-po.component').then(m => m.StaffPoComponent) },
+      { path: 'stock-issues',    loadComponent: () => import('./features/staff/stock-issues/staff-stock-issues.component').then(m => m.StaffStockIssuesComponent) },
+      { path: 'inventory',       loadComponent: () => import('./features/staff/inventory/staff-inventory.component').then(m => m.StaffInventoryComponent) },
+      { path: 'reports',         loadComponent: () => import('./features/staff/reports/staff-reports.component').then(m => m.StaffReportsComponent) },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
 
-//   {
-//     path: 'supplier',
-//     loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
-//     canActivate: [authGuard, roleGuard],
-//     data: { roles: ['SUPPLIER'] },
-//     children: [
-//       { path: 'dashboard',       loadComponent: () => import('./features/supplier/dashboard/supplier-dashboard.component').then(m => m.SupplierDashboardComponent) },
-//       { path: 'profile',         loadComponent: () => import('./features/supplier/profile/supplier-profile.component').then(m => m.SupplierProfileComponent) },
-//       { path: 'purchase-orders', loadComponent: () => import('./features/supplier/purchase-orders/supplier-po.component').then(m => m.SupplierPoComponent) },
-//       { path: 'reports',         loadComponent: () => import('./features/supplier/reports/supplier-reports.component').then(m => m.SupplierReportsComponent) },
-//       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-//     ]
-//   },
+  {
+    path: 'supplier',
+    loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['SUPPLIER'] },
+    children: [
+      { path: 'dashboard',       loadComponent: () => import('./features/supplier/dashboard/supplier-dashboard.component').then(m => m.SupplierDashboardComponent) },
+      { path: 'profile',         loadComponent: () => import('./features/supplier/profile/supplier-profile.component').then(m => m.SupplierProfileComponent) },
+      { path: 'purchase-orders', loadComponent: () => import('./features/supplier/purchase-orders/supplier-po.component').then(m => m.SupplierPoComponent) },
+      { path: 'reports',         loadComponent: () => import('./features/supplier/reports/supplier-reports.component').then(m => m.SupplierReportsComponent) },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
 
-//   { path: '**', redirectTo: '/auth/login' }
+  { path: '**', redirectTo: '/auth/login' }
 ];

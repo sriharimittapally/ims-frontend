@@ -15,9 +15,10 @@ export interface ManagerDashboardResponse {
   warehouseName: string;
   totalStaff:number;
   totalProducts: number;
-  lowStockProducts: number;
+  totalInventoryItems: number;
+  lowStockAlerts: number;
   pendingPurchaseOrders: number;
-  pendingStockIssues: number; 
+  pendingIssues: number; 
   warehouseInventoryValue:number
 }
 
@@ -33,9 +34,17 @@ export interface StaffDashboardResponse {
 export interface SupplierDashboardResponse {
   companyName: string;
   approvalStatus: string;
-  linkedProducts:number;
+
+  linkedProducts: number;
+
+
   totalPOs: number;
   pendingPOs: number;
   acceptedPOs: number;
   shippedPOs: number;
+  receivedPOs: number;
+  rejectedPOs: number;
+
+    totalRevenue: number;
+
 }

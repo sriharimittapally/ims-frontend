@@ -1,0 +1,59 @@
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <h1 class="page-title">Purchase Orders</h1>
+    <p class="page-subtitle">Orders in SHIPPED status ready to be received into inventory</p>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead><tr><th>PO Number</th><th>Supplier</th><th>Amount</th><th>Items</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let o of orders">
+            <td><span class="po-number">{{ o.poNumber }}</span></td>
+            <td class="text-muted">{{ o.supplierName }}</td>
+            <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
+            <td><span class="badge-ims badge-sent">{{ o.items.length }} items</span></td>
+            <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
+            <td>
+              <div class="d-flex gap-1">
+                <button class="action-btn" (click)="viewDetail(o)"><i class="bi bi-eye" style="color:var(--ims-info)"></i></button>
+                <button class="btn btn-sm btn-success" style="border-radius:8px; font-size:.78rem" *ngIf="o.status === 'SHIPPED'" (click)="receive(o)">
+                  <i class="bi bi-inbox-fill me-1"></i>Receive
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="orders.length === 0"><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="bi bi-cart-check"></i></div><h5>No orders to receive</h5><p>Orders that are shipped will appear here.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
+  <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedOrder">
+    <div class="detail-header">
+      <div><h5 class="mb-0">{{ selectedOrder.poNumber }}</h5><span class="badge-ims" [ngClass]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span></div>
+      <button class="btn-close" (click)="showDetail=false"></button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-row"><span class="detail-label">Supplier</span><span>{{ selectedOrder.supplierName }}</span></div>
+      <div class="detail-row"><span class="detail-label">Warehouse</span><span>{{ selectedOrder.warehouseName }}</span></div>
+      <h6 class="mt-3 mb-2">Items to Receive</h6>
+      <table class="ims-table w-100">
+        <thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let it of selectedOrder.items">
+            <td>{{ it.productName }}<br><small class="text-muted">{{ it.productSku }}</small></td>
+            <td class="fw-600">{{ it.quantity }}</td>
+            <td>₹{{ it.unitCost | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="animate-fade-in-up">
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+      <h1 class="page-title">Manager Dashboard</h1>
+      <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.warehouseName }} — your warehouse at a glance</p>
+    </div>
+    <a routerLink="/manager/reports" class="btn-ims-primary btn"><i class="bi bi-bar-chart-line me-1"></i> Reports</a>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <ng-container *ngIf="!loading && dashboard">
+    <div class="row g-3 mb-4">
+      <div class="col-md-4 col-6"><app-stats-card label="Total Products" [value]="dashboard.totalProducts"       icon="bi-box-seam-fill"   color="primary" /></div>
+      <div class="col-md-4 col-6"><app-stats-card label="Inventory Items" [value]="dashboard.totalInventoryItems" icon="bi-archive-fill"    color="info" /></div>
+      <div class="col-md-4 col-6"><app-stats-card label="Staff Count" [value]="dashboard.totalStaff"             icon="bi-people-fill"     color="secondary" /></div>
+      <div class="col-md-4 col-6"><app-stats-card label="Low Stock Alerts" [value]="dashboard.lowStockAlerts"    icon="bi-exclamation-triangle-fill" color="warning" /></div>
+      <div class="col-md-4 col-6"><app-stats-card label="Pending Issues" [value]="dashboard.pendingIssues"       icon="bi-arrow-left-right" color="danger" /></div>
+      <div class="col-md-4 col-6"><app-stats-card label="Pending POs" [value]="dashboard.pendingPurchaseOrders" icon="bi-cart-check-fill"  color="success" /></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div class="ims-card">
+          <h6 class="mb-3 fw-700">My Warehouse — Stock Trend (14 Days)</h6>
+          <div class="chart-container" style="height:260px">
+            <canvas baseChart [data]="trendData" [options]="trendOptions" type="line"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ims-card">
+      <h6 class="mb-3 fw-700">Quick Actions</h6>
+      <div class="row g-2">
+        <div class="col-auto"><a routerLink="/manager/purchase-orders" class="quick-action-btn"><i class="bi bi-plus-circle me-1"></i>Create PO</a></div>
+        <div class="col-auto"><a routerLink="/manager/stock-issues" class="quick-action-btn"><i class="bi bi-check2-all me-1"></i>Review Issues</a></div>
+        <div class="col-auto"><a routerLink="/manager/staff" class="quick-action-btn"><i class="bi bi-person-plus me-1"></i>Add Staff</a></div>
+        <div class="col-auto"><a routerLink="/manager/inventory" class="quick-action-btn"><i class="bi bi-archive me-1"></i>View Inventory</a></div>
+      </div>
+    </div>
+  </ng-container>
+</div>

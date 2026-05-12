@@ -49,12 +49,13 @@ export class UserManagementComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      warehouseId: [null]
     });
   }
 
   ngOnInit(): void {
     this.load();
-    this.loadWarehouses();
+    this.loadActiveWarehouses();
   }
 
   load(): void {
@@ -95,11 +96,34 @@ export class UserManagementComponent implements OnInit {
     this.applyFilter();
   }
 
-  openCreate(role: 'MANAGER' | 'STAFF'): void {
-    this.createRole = role;
-    this.createForm.reset();
-    this.showCreateModal = true;
+openCreate(role: 'MANAGER' | 'STAFF'): void {
+
+  this.createRole = role;
+
+  this.createForm.reset({
+    warehouseId: null
+  });
+
+  if (role === 'STAFF') {
+
+    this.createForm
+      .get('warehouseId')
+      ?.setValidators([Validators.required]);
+
+  } else {
+
+    this.createForm
+      .get('warehouseId')
+      ?.clearValidators();
+
   }
+
+  this.createForm
+    .get('warehouseId')
+    ?.updateValueAndValidity();
+
+  this.showCreateModal = true;
+}
 
   submitCreate(): void {
     if (this.createForm.invalid) {
@@ -159,9 +183,9 @@ export class UserManagementComponent implements OnInit {
   }
 
   // load warehouses
-  loadWarehouses(): void {
+  loadActiveWarehouses(): void {
     this.loading = true;
-    this.wSvc.getAll().subscribe({
+    this.wSvc.getActiveAll().subscribe({
       next: (res) => {
         this.warehouses = res.data;
         this.loading = false;

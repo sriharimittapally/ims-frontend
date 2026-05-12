@@ -1,0 +1,66 @@
+<div class="animate-fade-in-up">
+  <div class="page-header"><h1 class="page-title">Purchase Orders</h1><p class="page-subtitle">Manage purchase orders assigned to you</p></div>
+
+  <div class="ims-card mb-3">
+    <div class="tab-scroll">
+      <button class="tab-btn" *ngFor="let s of statuses" [class.active]="activeTab===s" (click)="activeTab=s">
+        {{ s === 'ALL' ? 'All (' + orders.length + ')' : s + ' (' + countBy(s) + ')' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead><tr><th>PO Number</th><th>Warehouse</th><th>Amount</th><th>Items</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let o of filtered">
+            <td><span class="po-number">{{ o.poNumber }}</span></td>
+            <td class="text-muted">{{ o.warehouseName }}</td>
+            <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
+            <td><span class="badge-ims badge-sent">{{ o.items.length }}</span></td>
+            <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
+            <td class="text-muted">{{ o.createdAt | date:'dd MMM, yy' }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <button class="action-btn" (click)="viewDetail(o)"><i class="bi bi-eye" style="color:var(--ims-info)"></i></button>
+                <button class="btn btn-sm btn-outline-success" style="border-radius:8px;font-size:.75rem" *ngIf="o.status === 'SENT'" (click)="accept(o)">Accept</button>
+                <button class="btn btn-sm btn-outline-danger"  style="border-radius:8px;font-size:.75rem" *ngIf="o.status === 'SENT'" (click)="reject(o)">Reject</button>
+                <button class="btn btn-sm btn-outline-primary" style="border-radius:8px;font-size:.75rem" *ngIf="o.status === 'ACCEPTED'" (click)="ship(o)">
+                  <i class="bi bi-truck me-1"></i>Ship
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0"><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="bi bi-cart-check"></i></div><h5>No purchase orders</h5></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
+  <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedOrder">
+    <div class="detail-header">
+      <div><h5 class="mb-1">{{ selectedOrder.poNumber }}</h5><span class="badge-ims" [ngClass]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span></div>
+      <button class="btn-close" (click)="showDetail=false"></button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-row"><span class="detail-label">Warehouse</span><span>{{ selectedOrder.warehouseName }}</span></div>
+      <div class="detail-row"><span class="detail-label">Date</span><span>{{ selectedOrder.createdAt | date:'dd MMM yyyy' }}</span></div>
+      <div class="detail-row" *ngIf="selectedOrder.note"><span class="detail-label">Note</span><span>{{ selectedOrder.note }}</span></div>
+      <div class="detail-row" *ngIf="selectedOrder.rejectionReason"><span class="detail-label">Your Rejection</span><span style="color:var(--ims-danger)">{{ selectedOrder.rejectionReason }}</span></div>
+      <h6 class="mt-3 mb-2">Order Items</h6>
+      <table class="ims-table w-100">
+        <thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let it of selectedOrder.items"><td>{{ it.productName }}<br><small class="text-muted">{{ it.productSku }}</small></td><td>{{ it.quantity }}</td><td>₹{{ it.unitCost | number:'1.2-2' }}</td><td class="fw-600">₹{{ it.totalCost | number:'1.2-2' }}</td></tr>
+        </tbody>
+      </table>
+      <div class="detail-total"><span>Total Amount</span><span class="fw-700">₹{{ selectedOrder.totalAmount | number:'1.2-2' }}</span></div>
+    </div>
+  </div>
+</div>

@@ -1,13 +1,13 @@
 export interface WarehouseResponse {
   id: number;
   name: string;
-  location: string;
+  address: string;
+  city:string;
   status: string;
   managerId?: number;
   managerName?: string;
-  totalProducts?: number;
-  totalQuantity?: number;
   createdAt?: string;
+  updatedAt?:string;
 }
 
 export interface WarehouseRequest {

@@ -1,0 +1,22 @@
+.report-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--ims-border);
+  background: transparent;
+  color: var(--ims-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    background: var(--ims-bg-secondary);
+  }
+  &.active {
+    background: var(--ims-primary);
+    color: #fff;
+    border-color: var(--ims-primary);
+  }
+}
+.fw-700 {
+  font-weight: 700;
+}

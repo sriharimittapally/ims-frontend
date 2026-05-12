@@ -15,6 +15,11 @@ export class WarehouseService {
     return this.http.get<ApiResponse<WarehouseResponse[]>>(this.base);
   }
 
+  getActiveAll(): Observable<ApiResponse<WarehouseResponse[]>> {
+    return this.http.get<ApiResponse<WarehouseResponse[]>>(`${this.base}/active`);
+  }
+
+
   getById(id: number): Observable<ApiResponse<WarehouseResponse>> {
     return this.http.get<ApiResponse<WarehouseResponse>>(`${this.base}/${id}`);
   }

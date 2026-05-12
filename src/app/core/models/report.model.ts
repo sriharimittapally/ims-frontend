@@ -13,6 +13,7 @@ export interface WarehouseBreakdown {
   totalProducts: number;
   totalQuantity: number;
   lowStockCount: number;
+  inventoryValue:number;
 }
 
 export interface LowStockAlertReport {

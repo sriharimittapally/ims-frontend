@@ -1,0 +1,43 @@
+<div class="animate-fade-in-up">
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div><h1 class="page-title">My Staff</h1><p class="page-subtitle">Manage staff members in your warehouse</p></div>
+    <button class="btn-ims-primary btn" (click)="showModal=true; form.reset()"><i class="bi bi-person-plus me-1"></i> Add Staff</button>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <div class="row g-3" *ngIf="!loading">
+    <div class="col-xl-3 col-md-4 col-sm-6" *ngFor="let s of staff">
+      <div class="staff-card ims-card">
+        <div class="staff-avatar">{{ s.name[0].toUpperCase() }}</div>
+        <div class="staff-name">{{ s.name }}</div>
+        <div class="staff-email">{{ s.email }}</div>
+        <span class="badge-ims mt-2" [ngClass]="s.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ s.status }}</span>
+        <div class="staff-actions mt-3">
+          <button class="btn btn-sm" [ngClass]="s.status === 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'" style="border-radius:8px;width:100%" (click)="toggle(s)">
+            {{ s.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-12" *ngIf="staff.length === 0"><div class="empty-state"><div class="empty-icon"><i class="bi bi-people"></i></div><h5>No staff yet</h5><p>Create your first staff member.</p></div></div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Add Staff</h5><button class="btn-close" (click)="showModal=false"></button></div>
+    <div class="modal-body">
+      <form [formGroup]="form">
+        <div class="mb-3"><label class="ims-form-label">Full Name</label><input class="ims-form-control" formControlName="name" placeholder="Staff name"></div>
+        <div class="mb-3"><label class="ims-form-label">Email</label><input class="ims-form-control" type="email" formControlName="email" placeholder="staff@company.com"></div>
+        <div class="mb-3"><label class="ims-form-label">Mobile</label><input class="ims-form-control" type="text" formControlName="phone" placeholder="9090909090"></div>
+        <div class="mb-3"><label class="ims-form-label">Password</label><input class="ims-form-control" type="password" formControlName="password" placeholder="Min. 6 chars"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">Create Staff</button>
+    </div>
+  </div>
+</div>

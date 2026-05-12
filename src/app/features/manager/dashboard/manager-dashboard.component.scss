@@ -1,0 +1,2 @@
+.fw-700 { font-weight:700; }
+.quick-action-btn { display:inline-flex; align-items:center; padding:.5rem 1rem; background:var(--ims-bg-secondary); border:1px solid var(--ims-border); border-radius:var(--ims-radius-sm); color:var(--ims-text-primary); font-size:.85rem; font-weight:500; text-decoration:none; transition:all .2s; &:hover { background:var(--ims-primary); color:#fff; border-color:var(--ims-primary); transform:translateY(-1px); } }

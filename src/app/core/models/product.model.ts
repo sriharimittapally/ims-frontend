@@ -12,7 +12,7 @@ export interface ProductResponse {
   status: string;
   createdAt: string;
   updatedAt: string;
-  suppliers: ProductSupplierResponse[];
+  suppliers?: ProductSupplierResponse[];
 }
 
 export interface ProductSupplierResponse {

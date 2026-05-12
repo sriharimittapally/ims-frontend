@@ -59,8 +59,8 @@ export class WarehouseManagementComponent implements OnInit {
 
   openEdit(w: WarehouseResponse): void {
     this.editMode = true; this.editId = w.id;
-    this.form.patchValue({ name: w.name, location: w.location });
-    this.showModal = true;
+    this.form.patchValue({ name: w.name, address:w.address, city: w.city });
+    this.showModal = true
   }
 
   submit(): void {

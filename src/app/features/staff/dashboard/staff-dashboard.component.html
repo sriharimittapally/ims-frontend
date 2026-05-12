@@ -1,0 +1,43 @@
+<div class="animate-fade-in-up">
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="page-title">Staff Dashboard</h1>
+            <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.warehouseName }}</p>
+        </div>
+        <a routerLink="/staff/stock-issues" class="btn-ims-primary btn"><i class="bi bi-plus-circle me-1"></i> New Stock
+            Issue</a>
+    </div>
+
+    <div class="page-loader" *ngIf="loading">
+        <div class="spinner-border"></div>
+    </div>
+
+    <ng-container *ngIf="!loading && dashboard">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6"><app-stats-card label="My Open Issues" [value]="dashboard.myPendingIssues"
+                    icon="bi-arrow-left-right" color="warning" /></div>
+            <div class="col-md-3 col-6"><app-stats-card label="Total My Issues" [value]="dashboard.myTotalIssues"
+                    icon="bi-list-check" color="primary" /></div>
+            <div class="col-md-3 col-6"><app-stats-card label="POs to Receive" [value]="dashboard.pendingPOsToReceive"
+                    icon="bi-cart-check-fill" color="info" /></div>
+            <div class="col-md-3 col-6">
+                <app-stats-card label="Issued Issues" [value]="dashboard.myIssuedIssues" icon="bi-check-circle-fill"
+                    color="success" />
+            </div>
+        </div>
+
+        <div class="ims-card">
+            <h6 class="mb-3 fw-700">Quick Actions</h6>
+            <div class="row g-2">
+                <div class="col-auto"><a routerLink="/staff/stock-issues" class="quick-btn"><i
+                            class="bi bi-plus-circle me-1"></i>Create Stock Issue</a></div>
+                <div class="col-auto"><a routerLink="/staff/purchase-orders" class="quick-btn"><i
+                            class="bi bi-cart-check me-1"></i>Receive PO</a></div>
+                <div class="col-auto"><a routerLink="/staff/inventory" class="quick-btn"><i
+                            class="bi bi-archive me-1"></i>View Inventory</a></div>
+                <div class="col-auto"><a routerLink="/staff/reports" class="quick-btn"><i
+                            class="bi bi-bar-chart-line me-1"></i>My Reports</a></div>
+            </div>
+        </div>
+    </ng-container>
+</div>
