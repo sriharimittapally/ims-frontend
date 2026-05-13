@@ -1,53 +1,81 @@
 <div class="login-card ims-card">
   <div class="login-header">
-    <div class="login-logo gradient-warning">
+    <div class="login-logo" style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 8px 24px rgba(245,158,11,.35);">
       <i class="bi bi-truck"></i>
     </div>
     <h2>Supplier Registration</h2>
-    <p class="text-muted">Create your supplier account to get started</p>
+    <p class="text-muted">Create your account to join as a supplier</p>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()">
+
     <div class="form-group">
-      <label class="ims-form-label">Full Name</label>
+      <label class="ims-form-label">Full Name *</label>
       <div class="input-wrap">
         <i class="bi bi-person input-icon"></i>
         <input type="text" class="ims-form-control with-icon" formControlName="name"
-          placeholder="Your name" [class.is-invalid]="name.invalid && name.touched">
+          placeholder="Your full name"
+          [class.border-danger]="name.invalid && name.touched">
       </div>
-      <div class="invalid-feedback d-block" *ngIf="name.invalid && name.touched">Name is required.</div>
+      <div class="field-error" *ngIf="name.invalid && name.touched">Name is required.</div>
     </div>
 
     <div class="form-group">
-      <label class="ims-form-label">Email Address</label>
+      <label class="ims-form-label">Email Address *</label>
       <div class="input-wrap">
         <i class="bi bi-envelope input-icon"></i>
         <input type="email" class="ims-form-control with-icon" formControlName="email"
-          placeholder="you@company.com" [class.is-invalid]="email.invalid && email.touched">
+          placeholder="you@company.com"
+          [class.border-danger]="email.invalid && email.touched">
       </div>
-      <div class="invalid-feedback d-block" *ngIf="email.invalid && email.touched">Valid email required.</div>
+      <div class="field-error" *ngIf="email.invalid && email.touched">
+        <span *ngIf="email.errors?.['required']">Email is required.</span>
+        <span *ngIf="email.errors?.['email']">Enter a valid email address.</span>
+      </div>
     </div>
 
     <div class="form-group">
-      <label class="ims-form-label">Password</label>
+      <label class="ims-form-label">Phone Number</label>
+      <div class="input-wrap">
+        <i class="bi bi-telephone input-icon"></i>
+        <input type="tel" class="ims-form-control with-icon" formControlName="phone"
+          placeholder="+91XXXXXXXXXX (optional)"
+          [class.border-danger]="phone.invalid && phone.touched">
+      </div>
+      <div class="field-error" *ngIf="phone.invalid && phone.touched">Invalid phone number format.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="ims-form-label">Password *</label>
       <div class="input-wrap">
         <i class="bi bi-lock input-icon"></i>
-        <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control with-icon with-icon-right"
-          formControlName="password" placeholder="Min. 6 characters" [class.is-invalid]="password.invalid && password.touched">
+        <input [type]="showPassword ? 'text' : 'password'"
+          class="ims-form-control with-icon with-icon-right"
+          formControlName="password" placeholder="Min. 8 characters"
+          [class.border-danger]="password.invalid && password.touched">
         <button type="button" class="password-toggle" (click)="showPassword = !showPassword">
           <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
         </button>
       </div>
-      <div class="invalid-feedback d-block" *ngIf="password.invalid && password.touched">Min 6 characters required.</div>
+      <div class="field-error" *ngIf="password.invalid && password.touched">
+        <span *ngIf="password.errors?.['required']">Password is required.</span>
+        <span *ngIf="password.errors?.['minlength']">Minimum 8 characters required.</span>
+      </div>
     </div>
 
-    <button type="submit" class="btn w-100 mt-2" style="background: var(--ims-warning); color:#fff; border-radius:8px; padding:.6rem; font-weight:600;" [disabled]="loading">
-      <span *ngIf="!loading"><i class="bi bi-person-check me-2"></i>Create Account</span>
-      <span *ngIf="loading"><span class="spinner-border spinner-border-sm me-2"></span>Registering...</span>
+    <button type="submit" class="btn w-100 mt-1 register-btn" [disabled]="loading">
+      <span *ngIf="!loading"><i class="bi bi-person-check me-2"></i>Create Supplier Account</span>
+      <span *ngIf="loading"><span class="spinner-border spinner-border-sm me-2"></span>Creating...</span>
     </button>
+
   </form>
 
-  <div class="login-footer">
+  <div class="hint-box mt-3">
+    <i class="bi bi-info-circle me-1"></i>
+    After registration, login and complete your company profile. Admin approval is required before accessing the system.
+  </div>
+
+  <div class="login-footer mt-3">
     <span class="text-muted">Already have an account?</span>
     <a routerLink="/auth/login" class="register-link">Sign in</a>
   </div>

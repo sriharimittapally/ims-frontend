@@ -1,0 +1,263 @@
+<div class="status-page animate-fade-in">
+
+    <!-- LOADING -->
+    <div class="status-center" *ngIf="state() === 'loading'">
+        <div class="spinner-border text-primary" style="width:3rem; height:3rem;"></div>
+    </div>
+
+    <!-- NO PROFILE — Complete Your Profile Form -->
+    <ng-container *ngIf="state() === 'no-profile'">
+        <div class="complete-profile-wrap">
+            <div class="profile-form-header">
+                <div class="pf-icon gradient-warning"><i class="bi bi-person-vcard"></i></div>
+                <h2>Complete Your Supplier Profile</h2>
+                <p class="text-muted">Fill in your company details and select the product categories you wish to supply.
+                </p>
+            </div>
+
+            <div class="ims-card profile-form-card">
+                <form [formGroup]="form">
+
+                    <!-- Company Details -->
+                    <div class="section-title"><i class="bi bi-building me-2"></i>Company Information</div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="ims-form-label">Company Name *</label>
+                            <input class="ims-form-control" formControlName="companyName"
+                                placeholder="Your registered company name"
+                                [class.border-danger]="f['companyName'].invalid && f['companyName'].touched">
+                            <div class="field-error" *ngIf="f['companyName'].invalid && f['companyName'].touched">
+                                Company name is required (min 2 chars).
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="ims-form-label">Phone Number *</label>
+                            <input class="ims-form-control" formControlName="phone" placeholder="+91XXXXXXXXXX"
+                                [class.border-danger]="f['phone'].invalid && f['phone'].touched">
+                            <div class="field-error" *ngIf="f['phone'].invalid && f['phone'].touched">
+                                Valid phone number required.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="ims-form-label">GST Number *</label>
+                            <input class="ims-form-control" formControlName="gstNumber"
+                                placeholder="e.g. 22AAAAA0000A1Z5"
+                                style="text-transform: uppercase; font-family: monospace;"
+                                [class.border-danger]="f['gstNumber'].invalid && f['gstNumber'].touched">
+                            <div class="field-error" *ngIf="f['gstNumber'].invalid && f['gstNumber'].touched">
+                                <span *ngIf="f['gstNumber'].errors?.['required']">GST number is required.</span>
+                                <span *ngIf="f['gstNumber'].errors?.['pattern']">Invalid GST format. Example:
+                                    22AAAAA0000A1Z5</span>
+                            </div>
+                            <div class="gst-hint">15-character GST Identification Number</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="ims-form-label">Business Address *</label>
+                            <textarea class="ims-form-control" formControlName="address" rows="3"
+                                placeholder="Full business address including city and state"
+                                [class.border-danger]="f['address'].invalid && f['address'].touched"></textarea>
+                            <div class="field-error" *ngIf="f['address'].invalid && f['address'].touched">
+                                Address required (min 10 chars).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Selection -->
+                    <div class="section-title mt-2">
+                        <i class="bi bi-tags me-2"></i>
+                        Product Categories You Supply *
+                    </div>
+
+                    <p class="text-muted mb-3" style="font-size:.85rem">
+                        Select all categories whose products you can supply.
+                    </p>
+
+                    <!-- SEARCH -->
+                    <div class="mb-3">
+                        <div class="position-relative">
+
+                            <i class="bi bi-search search-icon"></i>
+
+                            <input type="text" name="categorySearch" class="ims-form-control search-input"
+                                placeholder="Search categories..." [(ngModel)]="searchText"
+                                [ngModelOptions]="{ standalone: true }" />
+
+                        </div>
+                    </div>
+
+                    <!-- CATEGORY CARDS -->
+                    <div class="category-grid">
+
+                        <div *ngFor="let cat of filteredCategories" class="category-chip"
+                            [class.selected]="isCategorySelected(cat.id)" (click)="toggleCategory(cat.id)">
+
+                            <div class="chip-icon">
+                                <i class="bi bi-tag-fill"></i>
+                            </div>
+
+                            <div class="chip-info">
+
+                                <div class="chip-name">
+                                    {{ cat.name }}
+                                </div>
+
+
+
+                            </div>
+
+                            <div class="chip-check" *ngIf="isCategorySelected(cat.id)">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- NO RESULTS -->
+                    <div class="empty-state py-4" *ngIf="searchText.trim() && filteredCategories.length === 0">
+
+                        <div class="empty-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+
+                        <h6>No Categories Found</h6>
+
+                        <p class="text-muted mb-0">
+                            Try searching with another keyword.
+                        </p>
+
+                    </div>
+
+                    <!-- SELECTED CATEGORIES -->
+                    <div class="selected-section mt-4" *ngIf="selectedCategoryIds.length > 0">
+
+                        <div class="selected-title">
+                            <i class="bi bi-check2-circle me-2"></i>
+                            Selected Categories
+                        </div>
+
+                        <div class="selected-chip-wrap">
+
+                            <ng-container *ngFor="let cat of categories">
+
+                                <div class="selected-chip" *ngIf="isCategorySelected(cat.id)">
+
+                                    <div class="selected-chip-label">
+
+                                        <i class="bi bi-tag-fill"></i>
+
+                                        <span>
+                                            {{ cat.name }}
+                                        </span>
+
+                                    </div>
+
+                                    <button type="button" class="chip-remove"
+                                        (click)="toggleCategory(cat.id); $event.stopPropagation()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+
+                                </div>
+
+                            </ng-container>
+
+                        </div>
+
+                    </div>
+
+                    <!-- VALIDATION -->
+                    <div class="selected-hint mt-3" *ngIf="selectedCategoryIds.length > 0">
+                        <i class="bi bi-check2-circle me-1"></i>
+                        {{ selectedCategoryIds.length }}
+                        category/categories selected
+                    </div>
+
+                    <div class="field-error mt-2" *ngIf="selectedCategoryIds.length === 0">
+                        Please select at least one category.
+                    </div>
+
+                    <div class="mt-4">
+                        <button class="btn w-100 submit-btn" (click)="submitProfile()" [disabled]="submitLoading">
+                            <span *ngIf="!submitLoading"><i class="bi bi-send me-2"></i>Submit Profile for
+                                Approval</span>
+                            <span *ngIf="submitLoading"><span
+                                    class="spinner-border spinner-border-sm me-2"></span>Submitting...</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- PENDING -->
+    <ng-container *ngIf="state() === 'pending'">
+        <div class="status-center">
+            <div class="status-card pending-card">
+                <div class="status-icon-wrap pending-icon">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <h3>Profile Under Review</h3>
+                <p class="text-muted">Your supplier profile has been submitted and is awaiting admin approval. This
+                    usually takes 1–2 business days.</p>
+
+                <div class="profile-summary" *ngIf="profile">
+                    <div class="ps-row"><span>Company</span><strong>{{ profile.companyName }}</strong></div>
+                    <div class="ps-row"><span>GST</span><strong>{{ profile.gstNumber }}</strong></div>
+                    <div class="ps-row"><span>Categories</span>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span *ngFor="let c of profile.categories" class="badge-ims badge-sent"
+                                style="font-size:.7rem">{{ c.name }}</span>
+                        </div>
+                    </div>
+                    <div class="ps-row"><span>Submitted</span><strong>{{ profile.createdAt | date:'dd MMM yyyy'
+                            }}</strong></div>
+                </div>
+
+                <div class="status-notice">
+                    <i class="bi bi-bell me-1"></i>
+                    You can only access your account status page until approval is granted. Come back once you've been
+                    notified of approval.
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- REJECTED -->
+    <ng-container *ngIf="state() === 'rejected'">
+        <div class="status-center">
+            <div class="status-card rejected-card">
+                <div class="status-icon-wrap rejected-icon">
+                    <i class="bi bi-shield-x"></i>
+                </div>
+                <h3>Account Rejected</h3>
+                <p class="text-muted">Unfortunately, your supplier application has been rejected by the administrator.
+                </p>
+
+                <div class="rejection-reason" *ngIf="profile?.rejectionReason">
+                    <div class="rr-label"><i class="bi bi-info-circle me-1"></i>Reason for Rejection</div>
+                    <div class="rr-text">{{ profile!.rejectionReason }}</div>
+                </div>
+
+                <div class="profile-summary" *ngIf="profile">
+                    <div class="ps-row"><span>Company</span><strong>{{ profile.companyName }}</strong></div>
+                    <div class="ps-row"><span>Reviewed</span><strong>{{ profile.reviewedAt | date:'dd MMM yyyy'
+                            }}</strong></div>
+                </div>
+
+                <div class="status-notice rejected-notice">
+                    <i class="bi bi-lock me-1"></i>
+                    This account cannot be used. Your application was rejected. Please contact support or submit a new
+                    application request.
+                </div>
+
+                <a routerLink="/auth/login" class="btn mt-3 w-100"
+                    style="background:var(--ims-danger);color:#fff;border-radius:10px;font-weight:600">
+                    <i class="bi bi-box-arrow-left me-2"></i>Go to Login
+                </a>
+            </div>
+        </div>
+    </ng-container>
+
+</div>

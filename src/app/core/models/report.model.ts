@@ -122,19 +122,42 @@ export interface MyIssueHistoryReport {
   issuedCount: number;
   cancelledCount: number;
   rejectedCount: number;
-  issues: StockIssueSummary[];
-}
-
-export interface StockIssueSummary {
-  issueNumber: string;
-  status: string;
-  itemCount: number;
-  createdAt: string;
+  issues: SupplierPORow[];
 }
 
 export interface SupplierPOReport {
+  companyName: string;
+
   totalPOs: number;
+
+  sentPOs: number;
+  acceptedPOs: number;
+  shippedPOs: number;
+  receivedPOs: number;
+  rejectedPOs: number;
+
   totalRevenue: number;
-  statusBreakdown: Record<string, number>;
-  orders: PurchaseOrderSummary[];
+
+  orders: SupplierPORow[];
+}
+
+export interface SupplierPORow {
+  id: number;
+  poNumber: string;
+
+  status: string;
+
+  warehouseName: string;
+
+  amount: number;
+
+  itemCount: number;
+
+  expectedDelivery: string;
+
+  createdAt: string;
+
+  shippedAt?: string;
+
+  receivedAt?: string;
 }

@@ -26,7 +26,9 @@ export class RegisterSupplierComponent {
     this.form = this.fb.group({
       name:     ['', Validators.required],
       email:    ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      // Backend requires min 8 characters
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      phone:    ['', [Validators.pattern(/^[+]?[0-9]{10,15}$/)]]
     });
   }
 
@@ -34,15 +36,20 @@ export class RegisterSupplierComponent {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
     this.auth.registerSupplier(this.form.value).subscribe({
-      next: () => {
-        this.toastr.success('Registration successful! Please login.', 'Welcome');
+      next: (res) => {
+        this.toastr.success(
+          `Account created! Your code: ${res.data}. Please login.`,
+          'Registration Successful',
+          { timeOut: 6000 }
+        );
         this.router.navigate(['/auth/login']);
       },
       error: () => { this.loading = false; }
     });
   }
 
-  get name() { return this.form.get('name')!; }
-  get email() { return this.form.get('email')!; }
+  get name()     { return this.form.get('name')!; }
+  get email()    { return this.form.get('email')!; }
   get password() { return this.form.get('password')!; }
+  get phone()    { return this.form.get('phone')!; }
 }

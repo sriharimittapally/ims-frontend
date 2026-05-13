@@ -22,7 +22,7 @@ export class SupplierProfileComponent implements OnInit {
   constructor(private svc: SupplierService, private toastr: ToastrService, private fb: FormBuilder) {
     this.form = this.fb.group({
       companyName:   ['', Validators.required],
-      contactPerson: ['', Validators.required],
+      gstNumber: ['', Validators.required],
       phone:         ['', Validators.required],
       address:       ['', Validators.required]
     });

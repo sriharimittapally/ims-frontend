@@ -29,6 +29,12 @@ export class LoginComponent {
     });
   }
 
+  ngOnInit():void{
+    if(this.auth.isLoggedIn()){
+      this.auth.redirectByRole();
+    }
+  }
+
   submit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;

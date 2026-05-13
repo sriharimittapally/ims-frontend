@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { supplierApprovedGuard } from './core/guards/supplier-approved.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
@@ -26,9 +27,9 @@ export const routes: Routes = [
       { path: 'warehouses',      loadComponent: () => import('./features/admin/warehouses/warehouse-management.component').then(m => m.WarehouseManagementComponent) },
       { path: 'categories',      loadComponent: () => import('./features/admin/categories/category-management.component').then(m => m.CategoryManagementComponent) },
       { path: 'products',        loadComponent: () => import('./features/admin/products/product-management.component').then(m => m.ProductManagementComponent) },
+      { path: 'inventory',       loadComponent: () => import('./features/admin/inventory/admin-inventory.component').then(m => m.AdminInventoryComponent) },
       { path: 'suppliers',       loadComponent: () => import('./features/admin/suppliers/supplier-management.component').then(m => m.SupplierManagementComponent) },
       { path: 'purchase-orders', loadComponent: () => import('./features/admin/purchase-orders/admin-po.component').then(m => m.AdminPoComponent) },
-      { path: 'inventory',       loadComponent: () => import('./features/admin/inventory/admin-inventory.component').then(m => m.AdminInventoryComponent) },
       { path: 'reports',         loadComponent: () => import('./features/admin/reports/admin-reports.component').then(m => m.AdminReportsComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
@@ -71,11 +72,17 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPPLIER'] },
     children: [
-      { path: 'dashboard',       loadComponent: () => import('./features/supplier/dashboard/supplier-dashboard.component').then(m => m.SupplierDashboardComponent) },
-      { path: 'profile',         loadComponent: () => import('./features/supplier/profile/supplier-profile.component').then(m => m.SupplierProfileComponent) },
-      { path: 'purchase-orders', loadComponent: () => import('./features/supplier/purchase-orders/supplier-po.component').then(m => m.SupplierPoComponent) },
-      { path: 'reports',         loadComponent: () => import('./features/supplier/reports/supplier-reports.component').then(m => m.SupplierReportsComponent) },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      // Status page — accessible regardless of approval (for pending/rejected/no-profile states)
+      { path: 'status', loadComponent: () => import('./features/supplier/status/supplier-status.component').then(m => m.SupplierStatusComponent) },
+
+      // These pages require APPROVED status
+      { path: 'dashboard',       canActivate: [supplierApprovedGuard], loadComponent: () => import('./features/supplier/dashboard/supplier-dashboard.component').then(m => m.SupplierDashboardComponent) },
+      { path: 'profile',         canActivate: [supplierApprovedGuard], loadComponent: () => import('./features/supplier/profile/supplier-profile.component').then(m => m.SupplierProfileComponent) },
+      { path: 'my-products',     canActivate: [supplierApprovedGuard], loadComponent: () => import('./features/supplier/my-products/supplier-my-products.component').then(m => m.SupplierMyProductsComponent) },
+      { path: 'purchase-orders', canActivate: [supplierApprovedGuard], loadComponent: () => import('./features/supplier/purchase-orders/supplier-po.component').then(m => m.SupplierPoComponent) },
+      { path: 'reports',         canActivate: [supplierApprovedGuard], loadComponent: () => import('./features/supplier/reports/supplier-reports.component').then(m => m.SupplierReportsComponent) },
+
+      { path: '', redirectTo: 'status', pathMatch: 'full' }
     ]
   },
 

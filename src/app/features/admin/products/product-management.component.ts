@@ -195,7 +195,7 @@ export class ProductManagementComponent implements OnInit {
       this.linkForm.markAllAsTouched();
       return;
     }
-    this.pSvc.linkSupplier(this.linkProductId!, this.linkForm.value).subscribe({
+    this.pSvc.linkProduct(this.linkProductId!, this.linkForm.value).subscribe({
       next: () => {
         this.toastr.success('Supplier linked');
         this.showLinkModal = false;

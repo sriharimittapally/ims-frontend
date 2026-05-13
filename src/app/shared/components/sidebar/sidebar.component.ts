@@ -1,7 +1,8 @@
-import { Component, Input, signal, computed } from '@angular/core';
+import { Component, Input, computed, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { SupplierService } from '../../../core/services/supplier.service';
 
 interface NavItem {
   label: string;
@@ -19,7 +20,16 @@ interface NavItem {
 export class SidebarComponent {
   @Input() collapsed = false;
 
-  constructor(public auth: AuthService, private router: Router) {}
+  supplierApproved = signal(false);
+
+  constructor(public auth: AuthService, private supSvc: SupplierService, private router: Router) {
+    if (auth.getRole() === 'SUPPLIER') {
+      this.supSvc.getMyProfile().subscribe({
+        next: r => this.supplierApproved.set(r.data.approvalStatus === 'APPROVED'),
+        error: () => this.supplierApproved.set(false)
+      });
+    }
+  }
 
   navItems = computed<NavItem[]>(() => {
     const role = this.auth.getRole();
@@ -50,32 +60,37 @@ export class SidebarComponent {
         { label: 'Inventory',       icon: 'bi-archive',          route: '/staff/inventory' },
         { label: 'Reports',         icon: 'bi-bar-chart-line',   route: '/staff/reports' }
       ];
-      case 'SUPPLIER': return [
-        { label: 'Dashboard',       icon: 'bi-speedometer2',     route: '/supplier/dashboard' },
-        { label: 'My Profile',      icon: 'bi-person-circle',    route: '/supplier/profile' },
-        { label: 'Purchase Orders', icon: 'bi-cart-check',       route: '/supplier/purchase-orders' },
-        { label: 'Reports',         icon: 'bi-bar-chart-line',   route: '/supplier/reports' }
-      ];
+      case 'SUPPLIER':
+        // Only show full nav when approved
+        if (this.supplierApproved()) {
+          return [
+            { label: 'Dashboard',       icon: 'bi-speedometer2',   route: '/supplier/dashboard' },
+            { label: 'My Profile',      icon: 'bi-person-circle',  route: '/supplier/profile' },
+            { label: 'My Products',     icon: 'bi-box-seam',       route: '/supplier/my-products' },
+            { label: 'Purchase Orders', icon: 'bi-cart-check',     route: '/supplier/purchase-orders' },
+            { label: 'Reports',         icon: 'bi-bar-chart-line', route: '/supplier/reports' }
+          ];
+        }
+        // Pending/rejected: only status page visible
+        return [
+          { label: 'Account Status', icon: 'bi-shield-check', route: '/supplier/status' }
+        ];
       default: return [];
     }
   });
 
   getRoleLabel(): string {
-    const role = this.auth.getRole();
-    const map: Record<string, string> = {
-      ADMIN: 'Administrator', MANAGER: 'Manager',
-      STAFF: 'Staff', SUPPLIER: 'Supplier'
+    const map: Record<string,string> = {
+      ADMIN:'Administrator', MANAGER:'Manager', STAFF:'Staff', SUPPLIER:'Supplier'
     };
-    return map[role ?? ''] ?? '';
+    return map[this.auth.getRole() ?? ''] ?? '';
   }
 
   getRoleColor(): string {
-    const role = this.auth.getRole();
-    const map: Record<string, string> = {
-      ADMIN: '#ef4444', MANAGER: '#6366f1',
-      STAFF: '#10b981', SUPPLIER: '#f59e0b'
+    const map: Record<string,string> = {
+      ADMIN:'#ef4444', MANAGER:'#6366f1', STAFF:'#10b981', SUPPLIER:'#f59e0b'
     };
-    return map[role ?? ''] ?? '#6366f1';
+    return map[this.auth.getRole() ?? ''] ?? '#6366f1';
   }
 
   logout(): void { this.auth.logout(); }

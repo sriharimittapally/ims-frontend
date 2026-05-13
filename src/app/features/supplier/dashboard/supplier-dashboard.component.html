@@ -1,59 +1,108 @@
 <div class="animate-fade-in-up">
   <div class="page-header d-flex align-items-center justify-content-between">
     <div>
-      <h1 class="page-title">Supplier Dashboard</h1>
-      <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.companyName }}</p>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.companyName }} — Welcome back!</p>
     </div>
-    <div class="d-flex gap-2 align-items-center" *ngIf="dashboard">
-      <span class="badge-ims"
-        [ngClass]="{'badge-active': dashboard.approvalStatus==='APPROVED', 'badge-pending': dashboard.approvalStatus==='PENDING', 'badge-inactive': dashboard.approvalStatus==='REJECTED'}"
-        style="font-size:.8rem; padding:.4rem .875rem">
-        <i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>{{ dashboard.approvalStatus }}
-      </span>
-      <a routerLink="/supplier/profile" class="btn-ims-outline btn btn-sm">My Profile</a>
-    </div>
-  </div>
-
-  <!-- Pending Approval Banner -->
-  <div class="pending-banner" *ngIf="dashboard?.approvalStatus === 'PENDING'">
-    <i class="bi bi-clock-history me-2"></i>
-    Your account is pending approval from the admin. You will receive access to purchase orders once approved.
-    <a routerLink="/supplier/profile" class="ms-2 fw-600">Complete your profile →</a>
+    <a routerLink="/supplier/purchase-orders" class="btn-ims-primary btn">
+      <i class="bi bi-cart-check me-1"></i> View POs
+    </a>
   </div>
 
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <ng-container *ngIf="!loading && dashboard && dashboard.approvalStatus === 'APPROVED'">
+  <ng-container *ngIf="!loading && dashboard">
+
+    <!-- KPI Stats -->
     <div class="row g-3 mb-4">
-      <div class="col-md-2 col-6"><app-stats-card label="Total POs"    [value]="dashboard.totalPOs"    icon="bi-cart-check-fill" color="primary"   /></div>
-      <div class="col-md-2 col-6"><app-stats-card label="Pending"      [value]="dashboard.pendingPOs"  icon="bi-clock-history"   color="warning"   /></div>
-      <div class="col-md-2 col-6"><app-stats-card label="Accepted"     [value]="dashboard.acceptedPOs" icon="bi-check-circle"    color="success"   /></div>
-      <div class="col-md-2 col-6"><app-stats-card label="Shipped"      [value]="dashboard.shippedPOs"  icon="bi-truck"           color="info"      /></div>
-      <div class="col-md-2 col-6"><app-stats-card label="Received"     [value]="dashboard.receivedPOs" icon="bi-inbox-fill"      color="secondary" /></div>
-      <div class="col-md-2 col-6"><app-stats-card label="Rejected"     [value]="dashboard.rejectedPOs" icon="bi-x-circle-fill"   color="danger"    /></div>
+      <div class="col-md-2 col-6">
+        <app-stats-card
+          label="Linked Products"
+          [value]="dashboard.linkedProducts"
+          icon="bi-box-seam-fill"
+          color="primary" />
+      </div>
+      <div class="col-md-2 col-6">
+        <app-stats-card
+          label="Total POs"
+          [value]="dashboard.totalPOs"
+          icon="bi-cart-check-fill"
+          color="info" />
+      </div>
+      <div class="col-md-2 col-6">
+        <app-stats-card
+          label="Pending"
+          [value]="dashboard.pendingPOs"
+          icon="bi-clock-history"
+          color="warning" />
+      </div>
+      <div class="col-md-2 col-6">
+        <app-stats-card
+          label="Accepted"
+          [value]="dashboard.acceptedPOs"
+          icon="bi-check-circle-fill"
+          color="success" />
+      </div>
+      <div class="col-md-2 col-6">
+        <app-stats-card
+          label="Shipped"
+          [value]="dashboard.shippedPOs"
+          icon="bi-truck"
+          color="secondary" />
+      </div>
     </div>
 
+    <!-- Quick Action Cards -->
     <div class="row g-3">
-      <div class="col-md-6">
-        <div class="ims-card revenue-card">
-          <div class="d-flex align-items-center gap-3">
-            <div class="rev-icon"><i class="bi bi-currency-rupee"></i></div>
-            <div>
-              <div class="rev-value">₹{{ dashboard.totalRevenue | number:'1.2-2' }}</div>
-              <div class="text-muted" style="font-size:.8rem">Total Revenue from Delivered POs</div>
+      <div class="col-md-4">
+        <a routerLink="/supplier/my-products" class="quick-action-card ims-card text-decoration-none">
+          <div class="qa-icon gradient-primary"><i class="bi bi-box-seam"></i></div>
+          <div class="qa-body">
+            <div class="qa-title">My Products</div>
+            <div class="qa-sub">Manage linked products and pricing</div>
+          </div>
+          <i class="bi bi-arrow-right qa-arrow"></i>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a routerLink="/supplier/purchase-orders" class="quick-action-card ims-card text-decoration-none">
+          <div class="qa-icon gradient-success"><i class="bi bi-cart-check"></i></div>
+          <div class="qa-body">
+            <div class="qa-title">Purchase Orders</div>
+            <div class="qa-sub">
+              <span *ngIf="dashboard.pendingPOs > 0" class="text-warning fw-600">
+                {{ dashboard.pendingPOs }} awaiting action
+              </span>
+              <span *ngIf="dashboard.pendingPOs === 0" class="text-muted">All orders up to date</span>
             </div>
           </div>
-        </div>
+          <i class="bi bi-arrow-right qa-arrow"></i>
+        </a>
       </div>
-      <div class="col-md-6">
-        <div class="ims-card">
-          <h6 class="fw-700 mb-3">Quick Actions</h6>
-          <div class="d-flex gap-2 flex-wrap">
-            <a routerLink="/supplier/purchase-orders" class="quick-btn"><i class="bi bi-cart-check me-1"></i>View POs</a>
-            <a routerLink="/supplier/reports" class="quick-btn"><i class="bi bi-bar-chart-line me-1"></i>My Reports</a>
+
+      <div class="col-md-4">
+        <a routerLink="/supplier/reports" class="quick-action-card ims-card text-decoration-none">
+          <div class="qa-icon gradient-info"><i class="bi bi-bar-chart-line"></i></div>
+          <div class="qa-body">
+            <div class="qa-title">Reports</div>
+            <div class="qa-sub">PO history and performance</div>
           </div>
-        </div>
+          <i class="bi bi-arrow-right qa-arrow"></i>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a routerLink="/supplier/profile" class="quick-action-card ims-card text-decoration-none">
+          <div class="qa-icon gradient-warning"><i class="bi bi-person-circle"></i></div>
+          <div class="qa-body">
+            <div class="qa-title">My Profile</div>
+            <div class="qa-sub">View company details and categories</div>
+          </div>
+          <i class="bi bi-arrow-right qa-arrow"></i>
+        </a>
       </div>
     </div>
+
   </ng-container>
 </div>

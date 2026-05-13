@@ -1,4 +1,5 @@
 import { CategoryResponse } from "./category.model";
+import { ProductSupplierResponse } from "./product-supplier.model";
 
 export interface ProductResponse {
   id: number;
@@ -15,21 +16,7 @@ export interface ProductResponse {
   suppliers?: ProductSupplierResponse[];
 }
 
-export interface ProductSupplierResponse {
-  id: number;
-  productId:number;
-  productName:string;
-  sku:string;
-  categoryName:string
-  supplierId:number;
-  supplierName: string;
-  companyName:string;
-  purhchasePrice: number;
-  leadTimeDays:number;
-  isPreferred: boolean;
-  isActive:boolean;
-  createdAt?:string;
-}
+
 
 export interface ProductRequest {
   productName: string;

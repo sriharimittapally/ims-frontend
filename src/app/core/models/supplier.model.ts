@@ -1,3 +1,5 @@
+import { CategoryResponse } from "./category.model";
+
 export interface SupplierProfileResponse {
   id: number;
   name:string;
@@ -10,14 +12,17 @@ export interface SupplierProfileResponse {
   approvalStatus: string;
   rejectionReason?: string;
   createdAt?: string;
-  reviewdAt:string;
+  reviewedAt?:string;
+  categories: CategoryResponse[];
+
 }
 
 export interface SupplierProfileRequest {
   companyName: string;
-  contactPerson: string;
+  gstNumber: string;
   phone: string;
   address: string;
+  categoryIds: number[]
 }
 
 export interface ApprovalRequest {

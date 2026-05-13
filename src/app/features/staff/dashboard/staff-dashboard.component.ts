@@ -9,7 +9,8 @@ import { StaffDashboardResponse } from '../../../core/models/dashboard.model';
   selector: 'app-staff-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink, StatsCardComponent],
-  templateUrl: './staff-dashboard.component.html'
+  templateUrl: './staff-dashboard.component.html',
+  styleUrls:['./staff-dashboard.component.scss']
 })
 export class StaffDashboardComponent implements OnInit {
   dashboard: StaffDashboardResponse | null = null;

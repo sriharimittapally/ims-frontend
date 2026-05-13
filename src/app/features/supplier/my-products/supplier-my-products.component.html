@@ -1,0 +1,296 @@
+<div class="animate-fade-in-up">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+      <h1 class="page-title">My Products</h1>
+      <p class="page-subtitle">Manage the products you supply and set your pricing</p>
+    </div>
+    <div class="d-flex gap-2">
+      <span class="badge-ims badge-active" style="font-size:.8rem; padding:.4rem .875rem">
+        <i class="bi bi-link-45deg me-1"></i>{{ myLinkedProducts.length }} Linked
+      </span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="ims-card mb-4">
+    <div class="d-flex gap-2">
+      <button class="prod-tab" [class.active]="activeTab()==='my-linked'" (click)="setTab('my-linked')">
+        <i class="bi bi-link-45deg me-2"></i>My Linked Products
+        <span class="tab-count">{{ myLinkedProducts.length }}</span>
+      </button>
+      <button class="prod-tab" [class.active]="activeTab()==='browse'" (click)="setTab('browse')">
+        <i class="bi bi-search me-2"></i>Browse Available Products
+      </button>
+    </div>
+  </div>
+
+  <!-- ── MY LINKED PRODUCTS ───────────────────────────────────────────────── -->
+  <ng-container *ngIf="activeTab() === 'my-linked'">
+
+    <div class="page-loader" *ngIf="linkedLoading"><div class="spinner-border"></div></div>
+
+    <div *ngIf="!linkedLoading">
+      <!-- Empty State -->
+      <div class="ims-card" *ngIf="myLinkedProducts.length === 0">
+        <div class="empty-state">
+          <div class="empty-icon"><i class="bi bi-box-seam"></i></div>
+          <h5>No products linked yet</h5>
+          <p>Browse available products and link the ones you can supply.</p>
+          <button class="btn-ims-primary btn mt-2" (click)="setTab('browse')">
+            <i class="bi bi-search me-1"></i> Browse Products
+          </button>
+        </div>
+      </div>
+
+      <!-- Linked Products Grid -->
+      <div class="row g-3" *ngIf="myLinkedProducts.length > 0">
+        <div class="col-xl-4 col-md-6" *ngFor="let product of myLinkedProducts">
+          <div class="linked-card ims-card">
+            <div class="lc-header">
+              <div class="lc-prod-icon"><i class="bi bi-box-seam"></i></div>
+              <div class="lc-info">
+                <div class="lc-name">{{ product.productName }}</div>
+                <code class="lc-sku">{{ product.sku }}</code>
+              </div>
+              <span class="badge-ims badge-sent ms-auto">{{ product.category.name }}</span>
+            </div>
+
+            <div class="lc-details">
+              <div class="lc-detail-row">
+                <span class="lc-label"><i class="bi bi-tag-fill me-1"></i>Unit</span>
+                <span>{{ product.unit }}</span>
+              </div>
+              <div class="lc-detail-row">
+                <span class="lc-label"><i class="bi bi-bar-chart-fill me-1"></i>Reorder Level</span>
+                <span>{{ product.reorderLevel }}</span>
+              </div>
+            </div>
+
+            <!-- My Pricing (from suppliers array) -->
+            <ng-container *ngIf="getMyLinkForProduct(product) as link">
+              <div class="lc-pricing">
+                <div class="lc-price">
+                  <div class="price-label">My Purchase Price</div>
+                  <div class="price-value">₹{{ link.purchasePrice | number:'1.2-2' }}</div>
+                </div>
+                <div class="lc-lead">
+                  <div class="price-label">Lead Time</div>
+                  <div class="price-value accent">{{ link.leadTimeDays }} days</div>
+                </div>
+              </div>
+              <div class="lc-tags mt-2">
+                <span class="badge-ims badge-active" *ngIf="link.isPreferred">
+                  <i class="bi bi-star-fill me-1"></i>Preferred Supplier
+                </span>
+              </div>
+            </ng-container>
+
+            <button class="btn w-100 edit-link-btn mt-3" (click)="openEditModal(product)">
+              <i class="bi bi-pencil-square me-1"></i> Edit Price & Lead Time
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── BROWSE PRODUCTS ──────────────────────────────────────────────────── -->
+  <ng-container *ngIf="activeTab() === 'browse'">
+
+    <!-- Filters -->
+    <div class="ims-card mb-3">
+      <div class="d-flex gap-3 flex-wrap">
+        <div class="search-input-wrap" style="flex:1; min-width:200px">
+          <i class="bi bi-search search-icon"></i>
+          <input class="ims-form-control" (input)="onBrowseSearch($event)"
+            placeholder="Search product name or SKU..." style="padding-left:2.25rem">
+        </div>
+        <select class="ims-form-control" style="width:200px" (change)="onBrowseCategoryFilter($event)">
+          <option value="">All My Categories</option>
+          <option *ngFor="let c of myCategories" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="page-loader" *ngIf="browseLoading"><div class="spinner-border"></div></div>
+
+    <div *ngIf="!browseLoading">
+      <div class="ims-card p-0 overflow-hidden">
+        <div class="table-responsive">
+          <table class="ims-table w-100">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Unit</th>
+                <th>Selling Price</th>
+                <th>Reorder Lvl</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of browseFiltered">
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="browse-icon"><i class="bi bi-box-seam"></i></div>
+                    <div>
+                      <div class="fw-600">{{ p.productName }}</div>
+                      <div style="font-size:.72rem; color:var(--ims-text-muted)">{{ p.description | slice:0:45 }}...</div>
+                    </div>
+                  </div>
+                </td>
+                <td><code class="sku-badge">{{ p.sku }}</code></td>
+                <td>
+                  <span class="badge-ims badge-sent" style="font-size:.72rem">{{ p.category.name }}</span>
+                </td>
+                <td class="text-muted">{{ p.unit }}</td>
+                <td class="fw-600">₹{{ p.sellingPrice | number:'1.2-2' }}</td>
+                <td class="text-muted">{{ p.reorderLevel }}</td>
+                <td>
+                  <button *ngIf="!isLinked(p.id)"
+                    class="btn btn-sm link-btn"
+                    (click)="openLinkModal(p)">
+                    <i class="bi bi-plus-circle me-1"></i>Link & Set Price
+                  </button>
+                  <span *ngIf="isLinked(p.id)" class="already-linked">
+                    <i class="bi bi-check-circle-fill me-1"></i>Linked
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="browseFiltered.length === 0">
+                <td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-box-seam"></i></div>
+                    <h5>No products found in your categories</h5>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+</div>
+
+<!-- Link Product Modal -->
+<div class="modal-overlay" *ngIf="showLinkModal" (click)="showLinkModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="bi bi-link-45deg me-2" style="color:var(--ims-primary)"></i>
+        Link Product & Set Pricing
+      </h5>
+      <button class="btn-close" (click)="showLinkModal=false"></button>
+    </div>
+    <div class="modal-body" *ngIf="linkingProduct">
+      <!-- Product Summary -->
+      <div class="link-product-summary">
+        <div class="lps-icon"><i class="bi bi-box-seam"></i></div>
+        <div>
+          <div class="fw-600">{{ linkingProduct.productName }}</div>
+          <code style="font-size:.75rem; color:var(--ims-text-muted)">{{ linkingProduct.sku }}</code>
+          <span class="badge-ims badge-sent ms-2" style="font-size:.7rem">{{ linkingProduct.category.name }}</span>
+        </div>
+      </div>
+
+      <form [formGroup]="linkForm">
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <label class="ims-form-label">Your Purchase Price (₹) *</label>
+            <div class="input-with-prefix">
+              <span class="prefix">₹</span>
+              <input class="ims-form-control" type="number" step="0.01" min="0.01"
+                formControlName="purchasePrice" placeholder="0.00">
+            </div>
+            <div class="field-error" *ngIf="linkForm.get('purchasePrice')?.invalid && linkForm.get('purchasePrice')?.touched">
+              Valid price required (min ₹0.01).
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="ims-form-label">Lead Time (Days) *</label>
+            <div class="input-with-prefix">
+              <span class="prefix"><i class="bi bi-clock"></i></span>
+              <input class="ims-form-control" type="number" min="1" max="365"
+                formControlName="leadTimeDays" placeholder="e.g. 7">
+            </div>
+            <div class="field-error" *ngIf="linkForm.get('leadTimeDays')?.invalid && linkForm.get('leadTimeDays')?.touched">
+              Lead time required (1–365 days).
+            </div>
+          </div>
+        </div>
+        <div class="link-hint mt-2">
+          <i class="bi bi-info-circle me-1"></i>
+          Your purchase price is the amount you charge per unit. Lead time is your delivery time in days.
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showLinkModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submitLink()" [disabled]="linkLoading">
+        <span *ngIf="!linkLoading"><i class="bi bi-link-45deg me-1"></i>Link Product</span>
+        <span *ngIf="linkLoading"><span class="spinner-border spinner-border-sm me-1"></span>Linking...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Link Modal -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="showEditModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="bi bi-pencil-square me-2" style="color:var(--ims-primary)"></i>
+        Update Price & Lead Time
+      </h5>
+      <button class="btn-close" (click)="showEditModal=false"></button>
+    </div>
+    <div class="modal-body" *ngIf="editingLink">
+      <div class="link-product-summary">
+        <div class="lps-icon"><i class="bi bi-box-seam"></i></div>
+        <div>
+          <div class="fw-600">{{ editingLink.productName }}</div>
+          <code style="font-size:.75rem; color:var(--ims-text-muted)">{{ editingLink.sku }}</code>
+        </div>
+      </div>
+
+      <form [formGroup]="editForm">
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <label class="ims-form-label">Purchase Price (₹) *</label>
+            <div class="input-with-prefix">
+              <span class="prefix">₹</span>
+              <input class="ims-form-control" type="number" step="0.01" min="0.01"
+                formControlName="purchasePrice">
+            </div>
+            <div class="field-error" *ngIf="editForm.get('purchasePrice')?.invalid && editForm.get('purchasePrice')?.touched">
+              Valid price required.
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="ims-form-label">Lead Time (Days) *</label>
+            <div class="input-with-prefix">
+              <span class="prefix"><i class="bi bi-clock"></i></span>
+              <input class="ims-form-control" type="number" min="1" max="365"
+                formControlName="leadTimeDays">
+            </div>
+            <div class="field-error" *ngIf="editForm.get('leadTimeDays')?.invalid && editForm.get('leadTimeDays')?.touched">
+              Lead time required (1–365 days).
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ims-outline btn" (click)="showEditModal=false">Cancel</button>
+      <button class="btn-ims-primary btn" (click)="submitEdit()" [disabled]="editLoading">
+        <span *ngIf="!editLoading">Save Changes</span>
+        <span *ngIf="editLoading"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+      </button>
+    </div>
+  </div>
+</div>

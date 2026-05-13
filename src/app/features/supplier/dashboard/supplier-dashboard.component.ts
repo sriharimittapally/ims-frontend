@@ -19,6 +19,9 @@ export class SupplierDashboardComponent implements OnInit {
   constructor(private svc: DashboardService) {}
 
   ngOnInit(): void {
-    this.svc.getSupplierDashboard().subscribe({ next: r => { this.dashboard = r.data; this.loading = false; }, error: () => { this.loading = false; } });
+    this.svc.getSupplierDashboard().subscribe({
+      next: r => { this.dashboard = r.data; this.loading = false; },
+      error: () => { this.loading = false; }
+    });
   }
 }
