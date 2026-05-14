@@ -153,7 +153,6 @@ export interface SupplierPORow {
 
   itemCount: number;
 
-  expectedDelivery: string;
 
   createdAt: string;
 

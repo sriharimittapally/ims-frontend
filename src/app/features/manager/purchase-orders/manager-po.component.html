@@ -42,50 +42,219 @@
 </div>
 
 <!-- Create PO Modal -->
-<div class="modal-overlay" *ngIf="showCreateModal" (click)="showCreateModal=false">
-  <div class="modal-box modal-xl-box" (click)="$event.stopPropagation()">
-    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-cart-plus me-2"></i>Create Purchase Order</h5><button class="btn-close" (click)="showCreateModal=false"></button></div>
+
+<div
+  class="modal-overlay"
+  *ngIf="showCreateModal"
+  (click)="showCreateModal=false">
+
+  <div
+    class="modal-box modal-xl-box"
+    (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+
+    <div class="modal-header">
+
+      <h5 class="modal-title">
+
+        <i class="bi bi-cart-plus me-2"></i>
+
+        Create Purchase Order
+
+      </h5>
+
+      <button
+        class="btn-close"
+        (click)="showCreateModal=false">
+      </button>
+
+    </div>
+
+    <!-- BODY -->
+
     <div class="modal-body">
+
       <form [formGroup]="form">
-        <div class="row g-3 mb-3">
+
+        <!-- TOP -->
+
+        <div class="row g-3 mb-4">
+
           <div class="col-md-6">
-            <label class="ims-form-label">Supplier *</label>
-            <select class="ims-form-control" formControlName="supplierId">
-              <option value="">Select supplier</option>
-              <option *ngFor="let s of suppliers" [value]="s.id">{{ s.companyName }}</option>
+
+            <label class="ims-form-label">
+              Supplier *
+            </label>
+
+            <select
+              class="ims-form-control"
+              formControlName="supplierId">
+
+              <option [ngValue]="null">
+                Select supplier
+              </option>
+
+              <option
+                *ngFor="let s of suppliers"
+                [ngValue]="s.id">
+
+                {{ s.companyName }}
+
+              </option>
+
             </select>
+
           </div>
-          <div class="col-md-6"><label class="ims-form-label">Note (Optional)</label><input class="ims-form-control" formControlName="note" placeholder="Internal note..."></div>
+
+          <div class="col-md-6">
+
+            <label class="ims-form-label">
+              Note (Optional)
+            </label>
+
+            <input
+              class="ims-form-control"
+              formControlName="note"
+              placeholder="Internal note..." />
+
+          </div>
+
         </div>
 
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <h6 class="mb-0 fw-700">Order Items</h6>
-          <button type="button" class="btn-ims-outline btn btn-sm" (click)="addItem()"><i class="bi bi-plus me-1"></i>Add Item</button>
+        <!-- ITEMS HEADER -->
+
+        <div
+          class="d-flex align-items-center justify-content-between mb-3">
+
+          <h6 class="mb-0 fw-700">
+
+            Order Items
+
+          </h6>
+
+          <button
+            type="button"
+            class="btn-ims-outline btn btn-sm"
+            (click)="addItem()">
+
+            <i class="bi bi-plus me-1"></i>
+
+            Add Item
+
+          </button>
+
         </div>
+
+        <!-- ITEMS -->
 
         <div formArrayName="items">
-          <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i" class="item-row">
-            <select class="ims-form-control" formControlName="productId" style="flex:2">
-              <option value="">Select product</option>
-              <option *ngFor="let p of products" [value]="p.id">{{ p.productName }} ({{ p.sku }})</option>
+
+          <div
+            *ngFor="let item of items.controls; let i = index"
+            [formGroupName]="i"
+            class="item-row">
+
+            <!-- PRODUCT -->
+
+            <select
+              class="ims-form-control"
+              formControlName="productId"
+              style="flex:2">
+
+              <option [ngValue]="null">
+                Select product
+              </option>
+
+              <option
+                *ngFor="let p of getFilteredProducts()"
+                [ngValue]="p.id">
+
+                {{ p.productName }}
+                ({{ p.sku }})
+
+              </option>
+
             </select>
-            <input class="ims-form-control" type="number" formControlName="quantity" placeholder="Qty" style="width:80px">
-            <input class="ims-form-control" type="number" formControlName="unitCost" placeholder="Cost ₹" style="width:110px">
-            <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius:8px;flex-shrink:0" (click)="removeItem(i)" [disabled]="items.length === 1">
+
+            <!-- QUANTITY -->
+
+            <input
+              class="ims-form-control"
+              type="number"
+              min="1"
+              formControlName="quantity"
+              placeholder="Qty"
+              style="width:90px" />
+
+            <!-- TOTAL -->
+
+            <div class="price-box">
+
+              ₹{{ getLineTotal(item) | number:'1.2-2' }}
+
+            </div>
+
+            <!-- DELETE -->
+
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-danger"
+              style="border-radius:8px;flex-shrink:0"
+              (click)="removeItem(i)"
+              [disabled]="items.length === 1">
+
               <i class="bi bi-trash"></i>
+
             </button>
+
           </div>
+
         </div>
+
       </form>
+
     </div>
+
+    <!-- FOOTER -->
+
     <div class="modal-footer">
-      <button class="btn-ims-outline btn" (click)="showCreateModal=false">Cancel</button>
-      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">
-        <span *ngIf="!submitLoading"><i class="bi bi-cart-check me-1"></i>Create PO</span>
-        <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
+
+      <button
+        class="btn-ims-outline btn"
+        (click)="showCreateModal=false">
+
+        Cancel
+
       </button>
+
+      <button
+        class="btn-ims-primary btn"
+        (click)="submit()"
+        [disabled]="submitLoading">
+
+        <span *ngIf="!submitLoading">
+
+          <i class="bi bi-cart-check me-1"></i>
+
+          Create PO
+
+        </span>
+
+        <span *ngIf="submitLoading">
+
+          <span class="spinner-border spinner-border-sm me-1"></span>
+
+          Creating...
+
+        </span>
+
+      </button>
+
     </div>
+
   </div>
+
 </div>
 
 <!-- Detail Panel (reuse same pattern as admin PO) -->
@@ -104,7 +273,7 @@
       <table class="ims-table w-100">
         <thead><tr><th>Product</th><th>Qty</th><th>Cost</th><th>Total</th></tr></thead>
         <tbody>
-          <tr *ngFor="let it of selectedOrder.items"><td>{{ it.productName }}</td><td>{{ it.quantity }}</td><td>₹{{ it.unitCost | number:'1.2-2' }}</td><td class="fw-600">₹{{ it.totalCost | number:'1.2-2' }}</td></tr>
+          <tr *ngFor="let it of selectedOrder.items"><td>{{ it.productName }}</td><td>{{ it.quantity }}</td><td>₹{{ it.purchasePrice | number:'1.2-2' }}</td><td class="fw-600">₹{{ it.lineTotal | number:'1.2-2' }}</td></tr>
         </tbody>
       </table>
       <div class="detail-total"><span>Total</span><span class="fw-700">₹{{ selectedOrder.totalAmount | number:'1.2-2' }}</span></div>

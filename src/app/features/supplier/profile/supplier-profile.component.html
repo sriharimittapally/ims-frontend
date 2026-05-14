@@ -1,91 +1,268 @@
 <div class="animate-fade-in-up">
-  <div class="page-header"><h1 class="page-title">My Profile</h1><p class="page-subtitle">Your company information and approved categories</p></div>
 
-  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
 
+    <h1 class="page-title">
+      My Profile
+    </h1>
+
+    <p class="page-subtitle">
+      Your company information and approved categories
+    </p>
+
+  </div>
+
+  <!-- LOADER -->
+  <div class="page-loader" *ngIf="loading">
+
+    <div class="spinner-border"></div>
+
+  </div>
+
+  <!-- CONTENT -->
   <ng-container *ngIf="!loading && profile">
+
     <div class="row g-4">
 
-      <!-- Left — Avatar + Status -->
+      <!-- LEFT SIDEBAR -->
       <div class="col-lg-4">
-        <div class="ims-card text-center">
-          <div class="profile-avatar">{{ profile.companyName[0].toUpperCase() }}</div>
-          <h5 class="mt-3 mb-1">{{ profile.companyName }}</h5>
-          <div class="text-muted mb-2" style="font-size:.85rem">{{ profile.email }}</div>
-          <code class="user-code">{{ profile.userCode }}</code>
-          <div class="mt-3">
-            <span class="badge-ims badge-active" style="font-size:.8rem; padding:.4rem .875rem">
-              <i class="bi bi-check-circle-fill me-1"></i>APPROVED
-            </span>
+
+        <!-- PROFILE CARD -->
+        <div class="ims-card text-center profile-sidebar">
+
+          <div class="profile-avatar">
+            {{ profile.companyName[0].toUpperCase() }}
           </div>
-          <div class="mt-3 text-muted" style="font-size:.78rem">
-            Member since {{ profile.createdAt | date:'dd MMM yyyy' }}
+
+          <div class="company-name">
+            {{ profile.companyName }}
           </div>
+
+          <div class="company-email">
+            {{ profile.email }}
+          </div>
+
+          <code class="user-code">
+            {{ profile.userCode }}
+          </code>
+
+          <div class="approved-badge">
+            <i class="bi bi-check-circle-fill"></i>
+            APPROVED
+          </div>
+
+          <div class="member-date">
+            Member since
+            {{ profile.createdAt | date:'dd MMM yyyy' }}
+          </div>
+
         </div>
 
-        <!-- Categories Card -->
+        <!-- CATEGORY CARD -->
         <div class="ims-card mt-3">
-          <h6 class="fw-700 mb-3">
-            <i class="bi bi-tags me-2" style="color:var(--ims-primary)"></i>Approved Categories
-          </h6>
-          <div class="d-flex flex-wrap gap-2">
-            <div *ngFor="let cat of profile.categories" class="cat-badge">
-              <i class="bi bi-tag-fill me-1"></i>{{ cat.name }}
+
+          <div class="section-heading">
+
+            <i class="bi bi-tags"></i>
+
+            <span>
+              Approved Categories
+            </span>
+
+          </div>
+
+          <div
+            class="category-wrap"
+            *ngIf="profile.categories.length > 0">
+
+            <div
+              *ngFor="let cat of profile.categories"
+              class="cat-badge">
+
+              <i class="bi bi-tag-fill"></i>
+
+              <span>
+                {{ cat.name }}
+              </span>
+
             </div>
+
           </div>
-          <div *ngIf="profile.categories.length === 0" class="text-muted" style="font-size:.85rem">
+
+          <div
+            *ngIf="profile.categories.length === 0"
+            class="empty-text">
+
             No categories assigned.
+
           </div>
+
         </div>
+
       </div>
 
-      <!-- Right — Details -->
+      <!-- RIGHT SIDE -->
       <div class="col-lg-8">
+
         <div class="ims-card">
-          <h6 class="fw-700 mb-4">
-            <i class="bi bi-building me-2" style="color:var(--ims-primary)"></i>Company Details
-          </h6>
 
+          <div class="section-heading">
+
+            <i class="bi bi-building"></i>
+
+            <span>
+              Company Details
+            </span>
+
+          </div>
+
+          <!-- DETAILS GRID -->
           <div class="detail-grid">
+
+            <!-- COMPANY -->
             <div class="detail-item">
-              <div class="di-label"><i class="bi bi-building me-1"></i>Company Name</div>
-              <div class="di-value">{{ profile.companyName }}</div>
-            </div>
-            <div class="detail-item">
-              <div class="di-label"><i class="bi bi-person me-1"></i>Account Name</div>
-              <div class="di-value">{{ profile.name }}</div>
-            </div>
-            <div class="detail-item">
-              <div class="di-label"><i class="bi bi-envelope me-1"></i>Email</div>
-              <div class="di-value">{{ profile.email }}</div>
-            </div>
-            <div class="detail-item">
-              <div class="di-label"><i class="bi bi-telephone me-1"></i>Phone</div>
-              <div class="di-value">{{ profile.phone }}</div>
-            </div>
-            <div class="detail-item full-width">
-              <div class="di-label"><i class="bi bi-geo-alt me-1"></i>Business Address</div>
-              <div class="di-value">{{ profile.address }}</div>
-            </div>
-            <div class="detail-item">
-              <div class="di-label"><i class="bi bi-file-text me-1"></i>GST Number</div>
-              <div class="di-value">
-                <code style="font-size:.85rem; letter-spacing:.5px">{{ profile.gstNumber }}</code>
+
+              <div class="di-label">
+
+                <i class="bi bi-building"></i>
+
+                Company Name
+
               </div>
+
+              <div class="di-value">
+                {{ profile.companyName }}
+              </div>
+
             </div>
+
+            <!-- ACCOUNT NAME -->
             <div class="detail-item">
-              <div class="di-label"><i class="bi bi-calendar-check me-1"></i>Reviewed At</div>
-              <div class="di-value">{{ profile.reviewedAt | date:'dd MMM yyyy, HH:mm' }}</div>
+
+              <div class="di-label">
+
+                <i class="bi bi-person"></i>
+
+                Account Name
+
+              </div>
+
+              <div class="di-value">
+                {{ profile.name }}
+              </div>
+
             </div>
+
+            <!-- EMAIL -->
+            <div class="detail-item">
+
+              <div class="di-label">
+
+                <i class="bi bi-envelope"></i>
+
+                Email
+
+              </div>
+
+              <div class="di-value">
+                {{ profile.email }}
+              </div>
+
+            </div>
+
+            <!-- PHONE -->
+            <div class="detail-item">
+
+              <div class="di-label">
+
+                <i class="bi bi-telephone"></i>
+
+                Phone
+
+              </div>
+
+              <div class="di-value">
+                {{ profile.phone }}
+              </div>
+
+            </div>
+
+            <!-- ADDRESS -->
+            <div class="detail-item full-width">
+
+              <div class="di-label">
+
+                <i class="bi bi-geo-alt"></i>
+
+                Business Address
+
+              </div>
+
+              <div class="di-value">
+                {{ profile.address }}
+              </div>
+
+            </div>
+
+            <!-- GST -->
+            <div class="detail-item">
+
+              <div class="di-label">
+
+                <i class="bi bi-file-text"></i>
+
+                GST Number
+
+              </div>
+
+              <div class="di-value">
+
+                <code class="gst-code">
+                  {{ profile.gstNumber }}
+                </code>
+
+              </div>
+
+            </div>
+
+            <!-- REVIEWED -->
+            <div class="detail-item">
+
+              <div class="di-label">
+
+                <i class="bi bi-calendar-check"></i>
+
+                Reviewed At
+
+              </div>
+
+              <div class="di-value">
+                {{ profile.reviewedAt | date:'dd MMM yyyy, HH:mm' }}
+              </div>
+
+            </div>
+
           </div>
 
-          <div class="profile-note mt-4">
-            <i class="bi bi-info-circle me-1"></i>
-            To update your profile details, please contact the system administrator. Profile changes require re-verification.
+          <!-- NOTE -->
+          <div class="profile-note">
+
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+              To update your supplier profile details, please contact the administrator.
+              Profile updates may require re-verification and approval.
+            </span>
+
           </div>
+
         </div>
+
       </div>
 
     </div>
+
   </ng-container>
+
 </div>

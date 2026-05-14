@@ -29,7 +29,7 @@ export class StaffPoComponent implements OnInit {
     // Use getMyWarehousePOs isn't available for staff, so filter from manager endpoint
     // Actually, for staff we need to use the admin endpoint filtered - but staff only have receive endpoint
     // Let's use the best approach - staff can view POs by status SHIPPED
-    this.svc.getByStatus('SHIPPED' as any).subscribe({
+    this.svc.getMyWarehousePOsByStatus('SHIPPED' as any).subscribe({
       next: r => { this.orders = r.data; this.loading = false; },
       error: () => {
         // If ADMIN endpoint fails for staff, fallback to empty

@@ -9,7 +9,7 @@ export interface ProductResponse {
   category: CategoryResponse;
   unit: string;
   reorderLevel: number;
-  sellingPrice: number;
+  sellingPrice:number;
   status: string;
   createdAt: string;
   updatedAt: string;

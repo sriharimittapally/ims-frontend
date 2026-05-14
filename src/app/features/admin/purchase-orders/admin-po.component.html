@@ -51,7 +51,7 @@
     <div class="detail-body">
       <div class="detail-row"><span class="detail-label">Warehouse</span><span>{{ selectedOrder.warehouseName }}</span></div>
       <div class="detail-row"><span class="detail-label">Supplier</span><span>{{ selectedOrder.supplierName }}</span></div>
-      <div class="detail-row"><span class="detail-label">Created By</span><span>{{ selectedOrder.createdBy }}</span></div>
+      <div class="detail-row"><span class="detail-label">Created By</span><span>{{ selectedOrder.createdByName }}</span></div>
       <div class="detail-row"><span class="detail-label">Created At</span><span>{{ selectedOrder.createdAt | date:'dd MMM yyyy, HH:mm' }}</span></div>
       <div class="detail-row" *ngIf="selectedOrder.note"><span class="detail-label">Note</span><span>{{ selectedOrder.note }}</span></div>
 
@@ -60,10 +60,10 @@
         <thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th></tr></thead>
         <tbody>
           <tr *ngFor="let item of selectedOrder.items">
-            <td>{{ item.productName }}<br><small class="text-muted">{{ item.productSku }}</small></td>
+            <td>{{ item.productName }}<br><small class="text-muted">{{ item.sku }}</small></td>
             <td>{{ item.quantity }}</td>
-            <td>₹{{ item.unitCost | number:'1.2-2' }}</td>
-            <td class="fw-600">₹{{ item.totalCost | number:'1.2-2' }}</td>
+            <td>₹{{ item.purchasePrice | number:'1.2-2' }}</td>
+            <td class="fw-600">₹{{ item.lineTotal | number:'1.2-2' }}</td>
           </tr>
         </tbody>
       </table>

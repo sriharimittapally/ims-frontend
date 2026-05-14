@@ -48,9 +48,9 @@
         <thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th></tr></thead>
         <tbody>
           <tr *ngFor="let it of selectedOrder.items">
-            <td>{{ it.productName }}<br><small class="text-muted">{{ it.productSku }}</small></td>
+            <td>{{ it.productName }}<br><small class="text-muted">{{ it.sku }}</small></td>
             <td class="fw-600">{{ it.quantity }}</td>
-            <td>₹{{ it.unitCost | number:'1.2-2' }}</td>
+            <td>₹{{ it.purchasePrice | number:'1.2-2' }}</td>
           </tr>
         </tbody>
       </table>
