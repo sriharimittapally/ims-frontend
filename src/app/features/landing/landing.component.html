@@ -1,0 +1,302 @@
+<div class="landing-root">
+
+  <!-- ═══════════════════════ NAVBAR ═══════════════════════════════════════ -->
+  <nav class="lp-nav" [class.scrolled]="scrolled">
+    <div class="lp-nav-inner">
+      <a class="lp-brand" routerLink="/auth/login">
+        <div class="brand-mark"><i class="bi bi-boxes"></i></div>
+        <span class="brand-name">IMS <span class="brand-pro">Pro</span></span>
+      </a>
+
+      <ul class="lp-nav-links desktop-only">
+        <li><a (click)="scrollTo('features')">Features</a></li>
+        <li><a (click)="scrollTo('roles')">Roles</a></li>
+        <li><a (click)="scrollTo('workflow')">How It Works</a></li>
+        <li><a (click)="scrollTo('stats-section')">Stats</a></li>
+      </ul>
+
+      <div class="lp-nav-actions">
+        <a routerLink="/auth/register" class="btn-ghost desktop-only">Supplier Register</a>
+        <a routerLink="/auth/login" class="btn-cta-nav">Sign In</a>
+        <button class="mobile-menu-btn" (click)="menuOpen = !menuOpen">
+          <i class="bi" [class.bi-list]="!menuOpen" [class.bi-x]="menuOpen"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="mobile-menu" [class.open]="menuOpen">
+      <a (click)="scrollTo('features')">Features</a>
+      <a (click)="scrollTo('roles')">Roles</a>
+      <a (click)="scrollTo('workflow')">How It Works</a>
+      <a routerLink="/auth/register" (click)="menuOpen=false">Supplier Register</a>
+      <a routerLink="/auth/login" class="mobile-cta" (click)="menuOpen=false">Sign In →</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════ HERO ═════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="hero-orb orb-1"></div>
+      <div class="hero-orb orb-2"></div>
+      <div class="hero-orb orb-3"></div>
+      <div class="hero-grid"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Enterprise Inventory Management System
+      </div>
+
+      <h1 class="hero-headline">
+        Command Your Entire
+        <span class="headline-gradient">Supply Chain</span>
+        From One Place
+      </h1>
+
+      <p class="hero-sub">
+        A complete B2B wholesale distributor platform — managing warehouses, suppliers, purchase orders,
+        stock movements and analytics for every level of your organisation.
+      </p>
+
+      <div class="hero-actions">
+        <a routerLink="/auth/login" class="btn-hero-primary">
+          <i class="bi bi-box-arrow-in-right me-2"></i>
+          Get Started
+          <span class="btn-arrow">→</span>
+        </a>
+        <a routerLink="/auth/register" class="btn-hero-outline">
+          <i class="bi bi-truck me-2"></i>
+          Register as Supplier
+        </a>
+      </div>
+
+      <div class="hero-trust">
+        <div class="trust-item" *ngFor="let t of ['Role-Based Access','Real-Time Movements','JWT Secured','Dark & Light Mode']">
+          <i class="bi bi-check-circle-fill"></i> {{ t }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Preview Card -->
+    <div class="hero-visual">
+      <div class="preview-card">
+        <div class="preview-topbar">
+          <div class="preview-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="preview-url">app.ims-pro.com/admin/dashboard</div>
+        </div>
+        <div class="preview-body">
+          <!-- Mini stat cards -->
+          <div class="preview-stats">
+            <div class="pstat pstat-primary">
+              <div class="pstat-icon"><i class="bi bi-box-seam"></i></div>
+              <div>
+                <div class="pstat-value">2,840</div>
+                <div class="pstat-label">Products</div>
+              </div>
+            </div>
+            <div class="pstat pstat-success">
+              <div class="pstat-icon"><i class="bi bi-building"></i></div>
+              <div>
+                <div class="pstat-value">14</div>
+                <div class="pstat-label">Warehouses</div>
+              </div>
+            </div>
+            <div class="pstat pstat-warning">
+              <div class="pstat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+              <div>
+                <div class="pstat-value">7</div>
+                <div class="pstat-label">Low Stock</div>
+              </div>
+            </div>
+            <div class="pstat pstat-info">
+              <div class="pstat-icon"><i class="bi bi-cart-check"></i></div>
+              <div>
+                <div class="pstat-value">156</div>
+                <div class="pstat-label">Active POs</div>
+              </div>
+            </div>
+          </div>
+          <!-- Mini chart bars -->
+          <div class="preview-chart">
+            <div class="chart-label">Stock Movement — Last 7 Days</div>
+            <div class="chart-bars">
+              <div class="cbar-group" *ngFor="let b of [
+                {d:'Mon',in:65,out:40},{d:'Tue',in:80,out:55},{d:'Wed',in:45,out:70},
+                {d:'Thu',in:90,out:35},{d:'Fri',in:75,out:60},{d:'Sat',in:50,out:45},{d:'Sun',in:85,out:50}
+              ]">
+                <div class="cbar-in"  [style.height]="(b.in * 1.2) + 'px'"></div>
+                <div class="cbar-out" [style.height]="(b.out * 1.2) + 'px'"></div>
+                <div class="cbar-day">{{ b.d }}</div>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <span class="cl-in">▊ Stock In</span>
+              <span class="cl-out">▊ Stock Out</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ STATS ════════════════════════════════════════ -->
+  <section class="stats-section" id="stats-section">
+    <div class="section-container">
+      <div class="stats-grid">
+        <div class="stat-counter" *ngFor="let c of counters">
+          <div class="sc-icon"><i class="bi {{ c.icon }}"></i></div>
+          <div class="sc-number">{{ c.current | number:'1.0-1' }}{{ c.suffix }}</div>
+          <div class="sc-label">{{ c.label }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FEATURES ════════════════════════════════════ -->
+  <section class="features-section" id="features">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-tag">Platform Capabilities</div>
+        <h2 class="section-title">Everything You Need to Run Inventory at Scale</h2>
+        <p class="section-sub">From supplier onboarding to final stock issue — complete end-to-end traceability in a single system.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card" *ngFor="let f of features">
+          <div class="fc-icon-wrap {{ f.gradient }}">
+            <i class="bi {{ f.icon }}"></i>
+          </div>
+          <h3 class="fc-title">{{ f.title }}</h3>
+          <p class="fc-desc">{{ f.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ ROLES ════════════════════════════════════════ -->
+  <section class="roles-section" id="roles">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-tag">User Levels</div>
+        <h2 class="section-title">Designed for Every Member of Your Team</h2>
+        <p class="section-sub">Four distinct role levels, each with scoped access, tailored dashboards, and targeted workflows.</p>
+      </div>
+
+      <div class="roles-grid">
+        <div class="role-card {{ r.bgGrad }}" *ngFor="let r of roles">
+          <div class="rc-header">
+            <div class="rc-icon" [style.background]="r.color + '20'" [style.color]="r.color">
+              <i class="bi {{ r.icon }}"></i>
+            </div>
+            <h3 class="rc-name" [style.color]="r.color">{{ r.name }}</h3>
+          </div>
+          <ul class="rc-list">
+            <li *ngFor="let cap of r.capabilities">
+              <i class="bi bi-check2" [style.color]="r.color"></i>
+              {{ cap }}
+            </li>
+          </ul>
+          <a routerLink="/auth/login" class="rc-cta" [style.border-color]="r.color" [style.color]="r.color">
+            Access as {{ r.name }} →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ WORKFLOW ════════════════════════════════════ -->
+  <section class="workflow-section" id="workflow">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-tag">Platform Workflow</div>
+        <h2 class="section-title">Six Steps. Complete Inventory Control.</h2>
+        <p class="section-sub">From initial setup to daily operations — a structured, secure process every time.</p>
+      </div>
+
+      <div class="workflow-grid">
+        <div class="workflow-card" *ngFor="let w of workflow; let i = index" [style.animation-delay]="(i * 0.1) + 's'">
+          <div class="wf-step">{{ w.step }}</div>
+          <div class="wf-icon-wrap"><i class="bi {{ w.icon }}"></i></div>
+          <h3 class="wf-title">{{ w.title }}</h3>
+          <p class="wf-desc">{{ w.desc }}</p>
+          <div class="wf-connector" *ngIf="i < workflow.length - 1"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ CTA ══════════════════════════════════════════ -->
+  <section class="cta-section">
+    <div class="cta-bg">
+      <div class="cta-orb"></div>
+    </div>
+    <div class="section-container cta-inner">
+      <div class="cta-badge">Ready to Get Started?</div>
+      <h2 class="cta-title">Take Full Control of Your Inventory Today</h2>
+      <p class="cta-sub">Join thousands of businesses using IMS Pro to manage their supply chain with precision and confidence.</p>
+      <div class="cta-actions">
+        <a routerLink="/auth/login" class="btn-hero-primary">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to System
+        </a>
+        <a routerLink="/auth/register" class="btn-hero-outline">
+          <i class="bi bi-truck me-2"></i>Register as Supplier
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ FOOTER ══════════════════════════════════════ -->
+  <footer class="lp-footer">
+    <div class="section-container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="lp-brand">
+            <div class="brand-mark"><i class="bi bi-boxes"></i></div>
+            <span class="brand-name">IMS <span class="brand-pro">Pro</span></span>
+          </div>
+          <p class="footer-brand-desc">
+            Enterprise-grade inventory management for modern B2B wholesale distribution.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <div class="fc-title">Platform</div>
+          <a (click)="scrollTo('features')">Features</a>
+          <a (click)="scrollTo('roles')">User Roles</a>
+          <a (click)="scrollTo('workflow')">How It Works</a>
+          <a (click)="scrollTo('stats-section')">Statistics</a>
+        </div>
+
+        <div class="footer-col">
+          <div class="fc-title">Access</div>
+          <a routerLink="/auth/login">Administrator Login</a>
+          <a routerLink="/auth/login">Manager Login</a>
+          <a routerLink="/auth/login">Staff Login</a>
+          <a routerLink="/auth/register">Supplier Registration</a>
+        </div>
+
+        <div class="footer-col">
+          <div class="fc-title">Roles</div>
+          <a>Admin Dashboard</a>
+          <a>Manager Dashboard</a>
+          <a>Staff Dashboard</a>
+          <a>Supplier Portal</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="fb-copy">© {{ currentYear }} IMS Pro. All rights reserved.</div>
+        <div class="fb-stack">
+          <span class="tech-badge"><i class="bi bi-lightning-fill"></i> Angular 17</span>
+          <span class="tech-badge"><i class="bi bi-server"></i> Spring Boot</span>
+          <span class="tech-badge"><i class="bi bi-database-fill"></i> MySQL</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>

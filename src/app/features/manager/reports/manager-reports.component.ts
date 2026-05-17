@@ -64,15 +64,70 @@ export class ManagerReportsComponent implements OnInit {
   }
   loadPO(): void { this.loading = true; this.svc.managerPOReport().subscribe({ next: r => { this.poReport = r.data; this.loading = false; }, error: () => { this.loading = false; } }); }
   loadStaff(): void {
-    this.loading = true;
-    this.svc.managerStaffActivity().subscribe({
-      next: r => {
-        this.staffActivity = r.data;
-        this.staffBarData = { labels: r.data.staff.map((s: any) => s.staffName), datasets: [{ label: 'Total', data: r.data.staff.map((s: any) => s.totalIssues), backgroundColor: 'rgba(99,102,241,0.7)' }, { label: 'Issued', data: r.data.staff.map((s: any) => s.issuedCount), backgroundColor: 'rgba(16,185,129,0.7)' }, { label: 'Rejected', data: r.data.staff.map((s: any) => s.rejectedCount), backgroundColor: 'rgba(239,68,68,0.7)' }] };
-        this.loading = false;
-      }, error: () => { this.loading = false; }
-    });
-  }
+
+  this.loading = true;
+
+  this.svc.managerStaffActivity().subscribe({
+
+    next: r => {
+
+      this.staffActivity = r.data;
+
+      const staff = r.data.staffActivity;
+
+      this.staffBarData = {
+
+        labels: staff.map(s => s.staffName),
+
+        datasets: [
+
+          {
+
+            label: 'Total Issues',
+
+            data: staff.map(s => s.totalIssuesCreated),
+
+            backgroundColor: 'rgba(99,102,241,0.7)'
+
+          },
+
+          {
+
+            label: 'Issued',
+
+            data: staff.map(s => s.issuesIssued),
+
+            backgroundColor: 'rgba(16,185,129,0.7)'
+
+          },
+
+          {
+
+            label: 'Rejected',
+
+            data: staff.map(s => s.issuesRejected),
+
+            backgroundColor: 'rgba(239,68,68,0.7)'
+
+          }
+
+        ]
+
+      };
+
+      this.loading = false;
+
+    },
+
+    error: () => {
+
+      this.loading = false;
+
+    }
+
+  });
+
+}
   loadTop(): void { this.loading = true; this.svc.managerTopProducts().subscribe({ next: r => { this.topProducts = r.data; this.loading = false; }, error: () => { this.loading = false; } }); }
 
   private today(): string { return new Date().toISOString().split('T')[0]; }

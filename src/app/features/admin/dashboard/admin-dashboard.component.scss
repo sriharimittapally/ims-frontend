@@ -1,37 +1,59 @@
-.alert-stat-card {
+.fw-700 { font-weight: 700; }
+
+.alert-kpi-card {
   display: flex; align-items: center; gap: 1rem;
-  padding: 1.25rem 1.5rem;
   background: var(--ims-surface);
   border: 1px solid var(--ims-border);
   border-radius: var(--ims-radius);
+  padding: 1.25rem 1.5rem;
   box-shadow: var(--ims-card-shadow);
+  transition: all .2s;
 
-  .as-icon { font-size: 1.6rem; }
-  .as-value { font-size: 1.75rem; font-weight: 800; line-height: 1; }
-  .as-label { font-size: 0.78rem; color: var(--ims-text-secondary); font-weight: 500; }
-  .as-body  { flex: 1; }
-  .as-action {
-    font-size: 0.78rem; font-weight: 600; text-decoration: none;
-    display: flex; align-items: center; gap: 0.25rem; white-space: nowrap;
-    padding: 0.4rem 0.875rem; border-radius: 8px; transition: all 0.2s;
-  }
+  &:hover { transform: translateY(-2px); box-shadow: var(--ims-card-shadow-hover); }
 
-  &.danger  { border-left: 3px solid var(--ims-danger);  .as-icon { color: var(--ims-danger);  } .as-value { color: var(--ims-danger);  } .as-action { color: var(--ims-danger);  background: rgba(239,68,68,0.08);  &:hover { background: rgba(239,68,68,0.15); } } }
-  &.warning { border-left: 3px solid var(--ims-warning); .as-icon { color: var(--ims-warning); } .as-value { color: var(--ims-warning); } .as-action { color: var(--ims-warning); background: rgba(245,158,11,0.08); &:hover { background: rgba(245,158,11,0.15); } } }
-  &.info    { border-left: 3px solid var(--ims-info);    .as-icon { color: var(--ims-info);    } .as-value { color: var(--ims-info);    } .as-action { color: var(--ims-info);    background: rgba(59,130,246,0.08);  &:hover { background: rgba(59,130,246,0.15); } } }
+  .akc-icon { font-size: 1.75rem; flex-shrink: 0; }
+  .akc-value { font-size: 1.75rem; font-weight: 800; line-height: 1; }
+  .akc-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-top: .15rem; }
+  .akc-body  { flex: 1; }
+  .akc-arrow { font-size: .9rem; opacity: .6; transition: transform .2s; }
+  &:hover .akc-arrow { transform: translateX(4px); }
+
+  &.danger  { border-left: 3px solid var(--ims-danger);  .akc-icon { color: var(--ims-danger);  } .akc-value { color: var(--ims-danger);  } .akc-label { color: var(--ims-danger);  } .akc-arrow { color: var(--ims-danger);  } }
+  &.warning { border-left: 3px solid var(--ims-warning); .akc-icon { color: var(--ims-warning); } .akc-value { color: var(--ims-warning); } .akc-label { color: var(--ims-warning); } .akc-arrow { color: var(--ims-warning); } }
+  &.info    { border-left: 3px solid var(--ims-info);    .akc-icon { color: var(--ims-info);    } .akc-value { color: var(--ims-info);    } .akc-label { color: var(--ims-info);    } .akc-arrow { color: var(--ims-info);    } }
 }
 
-.quick-action-btn {
+.inventory-value-banner {
+  background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(139,92,246,.06));
+  border-color: rgba(99,102,241,.2) !important;
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 1.25rem 1.75rem;
+
+  .ivb-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--ims-primary); }
+  .ivb-value { font-size: 2rem; font-weight: 800; color: var(--ims-primary); line-height: 1; }
+  .ivb-sub   { font-size: .8rem; color: var(--ims-text-muted); margin-left: auto; }
+}
+
+.po-summary {
+  .ps-item { display: flex; justify-content: space-between; padding: .35rem 0; border-bottom: 1px solid var(--ims-border-light); font-size: .82rem; &:last-child { border: none; } }
+  .psi-label { color: var(--ims-text-muted); }
+  .psi-value { font-weight: 700; }
+}
+
+.quick-actions-grid {
+  display: flex; flex-wrap: wrap; gap: .625rem;
+}
+
+.qa-btn {
   display: inline-flex; align-items: center;
-  padding: 0.5rem 1rem;
+  padding: .5rem 1rem;
   background: var(--ims-bg-secondary);
   border: 1px solid var(--ims-border);
   border-radius: var(--ims-radius-sm);
   color: var(--ims-text-primary);
-  font-size: 0.85rem; font-weight: 500;
-  text-decoration: none; transition: all 0.2s;
+  font-size: .85rem; font-weight: 500;
+  text-decoration: none; transition: all .2s;
   &:hover { background: var(--ims-primary); color: #fff; border-color: var(--ims-primary); transform: translateY(-1px); }
 }
 
-.fw-700 { font-weight: 700; }
-
+.text-success { color: var(--ims-success) !important; }

@@ -32,18 +32,59 @@ export interface LowStockItem {
 }
 
 export interface PurchaseOrderReport {
+
   totalPOs: number;
-  totalAmount: number;
-  statusBreakdown: Record<string, number>;
-  recentOrders: PurchaseOrderSummary[];
+
+  draftPOs: number;
+
+  sentPOs: number;
+
+  acceptedPOs: number;
+
+  shippedPOs: number;
+
+  receivedPOs: number;
+
+  rejectedPOs: number;
+
+  cancelledPOs: number;
+
+  totalSpend: number;
+
+  bySupplier: POBySupplierRow[];
+
+  byWarehouse: POByWarehouseRow[];
+
 }
 
-export interface PurchaseOrderSummary {
-  poNumber: string;
+export interface POBySupplierRow {
+
+  supplierId: number;
+
   supplierName: string;
-  status: string;
+
+  companyName: string;
+
+  totalPOs: number;
+
+  receivedPOs: number;
+
   totalAmount: number;
-  createdAt: string;
+
+}
+
+export interface POByWarehouseRow {
+
+  warehouseId: number;
+
+  warehouseName: string;
+
+  totalPOs: number;
+
+  receivedPOs: number;
+
+  totalAmount: number;
+
 }
 
 export interface SupplierPerformanceReport {
@@ -62,29 +103,57 @@ export interface SupplierPerformance {
 }
 
 export interface StockTrendReport {
-  from: string;
-  to: string;
-  dailyTrends: DailyTrend[];
+
+  warehouseName: string;
+
+  period: string;
+
   totalIn: number;
+
   totalOut: number;
+
+  dailyTrends: DailyTrend[];
+
 }
 
 export interface DailyTrend {
+
   date: string;
+
   stockIn: number;
+
   stockOut: number;
+
+  net: number;
+
 }
 
 export interface TopProductsReport {
-  topMoving: ProductMovement[];
-  slowMoving: ProductMovement[];
+
+  scope: string;
+
+  topMovingProducts: ProductMovement[];
+
+  slowMovingProducts: ProductMovement[];
+
 }
 
 export interface ProductMovement {
+
   productId: number;
-  productName: string;
+
   sku: string;
-  totalMovement: number;
+
+  productName: string;
+
+  categoryName: string;
+
+  totalUnitsOut: number;
+
+  currentStock: number;
+
+  stockValue: number;
+
 }
 
 export interface WarehouseStockReport {
@@ -105,24 +174,81 @@ export interface WarehouseStockItem {
 }
 
 export interface StaffActivityReport {
-  staff: StaffActivity[];
+
+  warehouseId: number;
+
+  warehouseName: string;
+
+  staffActivity: StaffActivity[];
+
 }
 
 export interface StaffActivity {
+
   staffId: number;
+
   staffName: string;
-  totalIssues: number;
-  issuedCount: number;
-  rejectedCount: number;
-  cancelledCount: number;
+
+  userCode: string;
+
+  totalIssuesCreated: number;
+
+  issuesPending: number;
+
+  issuesApproved: number;
+
+  issuesIssued: number;
+
+  issuesRejected: number;
+
+  issuesCancelled: number;
+
+  totalUnitsIssued: number;
+
 }
 
 export interface MyIssueHistoryReport {
+
+  staffName: string;
+
+  warehouseName: string;
+
   totalIssues: number;
-  issuedCount: number;
-  cancelledCount: number;
-  rejectedCount: number;
-  issues: SupplierPORow[];
+
+  pendingIssues: number;
+
+  approvedIssues: number;
+
+  issuedIssues: number;
+
+  rejectedIssues: number;
+
+  cancelledIssues: number;
+
+  totalUnitsIssued: number;
+
+  issues: IssueRow[];
+
+}
+
+export interface IssueRow {
+
+  issueId: number;
+
+  issueNumber: string;
+
+  status: string;
+
+  itemCount: number;
+
+  totalUnits: number;
+
+  createdAt: string;
+
+  issuedAt?: string;
+
+  note?: string;
+
 }
 
 export interface SupplierPOReport {

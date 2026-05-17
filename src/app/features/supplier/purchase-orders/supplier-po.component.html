@@ -36,7 +36,7 @@
             <td class="text-muted">{{ o.warehouseName }}</td>
             <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
             <td><span class="badge-ims badge-sent">{{ o.items.length }}</span></td>
-            <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
+            <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ getDisplayStatus(o.status)  }}</span></td>
             <td class="text-muted">{{ o.createdAt | date:'dd MMM, yy' }}</td>
             <td>
               <div class="d-flex gap-1">
@@ -73,7 +73,7 @@
     <div class="detail-header">
       <div>
         <h5 class="mb-1">{{ selectedOrder.poNumber }}</h5><span class="badge-ims"
-          [ngClass]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span>
+          [ngClass]="getStatusClass(selectedOrder.status)">{{ getDisplayStatus(selectedOrder.status) }}</span>
       </div>
       <button class="btn-close" (click)="showDetail=false"></button>
     </div>

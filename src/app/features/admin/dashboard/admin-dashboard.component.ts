@@ -8,6 +8,7 @@ import { DashboardService } from '../../../core/services/dashboard.service';
 import { ReportService } from '../../../core/services/report.service';
 import { StatsCardComponent } from '../../../shared/components/stats-card/stats-card.component';
 import { AdminDashboardResponse } from '../../../core/models/dashboard.model';
+import { PurchaseOrderReport, StockTrendReport } from '../../../core/models/report.model';
 
 Chart.register(...registerables);
 
@@ -20,61 +21,120 @@ Chart.register(...registerables);
 })
 export class AdminDashboardComponent implements OnInit {
   dashboard: AdminDashboardResponse | null = null;
+  poReport: PurchaseOrderReport | null = null;
   loading = true;
 
-  // Stock Trend Chart
-  stockTrendData: ChartData<'line'> = { labels: [], datasets: [] };
-  stockTrendOptions: ChartConfiguration<'line'>['options'] = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'top', labels: { font: { size: 12 }, usePointStyle: true } } },
+  // ── Stock Trend Line Chart ─────────────────────────────────────────────────
+  trendData: ChartData<'line'> = { labels: [], datasets: [] };
+  trendOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, font: { size: 12 } } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} units` } }
+    },
     scales: {
       x: { grid: { display: false }, ticks: { font: { size: 11 } } },
       y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { font: { size: 11 } } }
     },
-    elements: { line: { tension: 0.4 }, point: { radius: 3 } }
+    elements: { line: { tension: 0.4 }, point: { radius: 3, hoverRadius: 6 } }
   };
 
-  // PO Status Doughnut
-  poStatusData: ChartData<'doughnut'> = { labels: ['Draft', 'Sent', 'Accepted', 'Shipped', 'Received', 'Cancelled', 'Rejected'], datasets: [{ data: [], backgroundColor: ['#94a3b8','#3b82f6','#10b981','#8b5cf6','#06b6d4','#ef4444','#f59e0b'], borderWidth: 0, hoverOffset: 8 }] };
+  // ── PO Status Doughnut ─────────────────────────────────────────────────────
+  poDonutData: ChartData<'doughnut'> = { labels: [], datasets: [] };
   donutOptions: ChartConfiguration<'doughnut'>['options'] = {
-    responsive: true, maintainAspectRatio: false, cutout: '72%',
-    plugins: { legend: { position: 'right', labels: { font: { size: 11 }, usePointStyle: true, padding: 12 } } }
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '72%',
+    plugins: {
+      legend: { position: 'right', labels: { font: { size: 11 }, usePointStyle: true, padding: 14 } }
+    }
+  };
+
+  // ── PO by Supplier Bar Chart ───────────────────────────────────────────────
+  supplierBarData: ChartData<'bar'> = { labels: [], datasets: [] };
+  barOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+      y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { font: { size: 11 } } }
+    }
   };
 
   constructor(private dashSvc: DashboardService, private reportSvc: ReportService) {}
 
   ngOnInit(): void {
+    // Dashboard KPIs
     this.dashSvc.getAdminDashboard().subscribe({
-      next: res => {
-        console.log(res.data);
-        
-         this.dashboard = res.data; this.loading = false; },
+      next: res => { this.dashboard = res.data; this.loading = false; },
       error: () => { this.loading = false; }
     });
 
+    // Stock Trend (last 14 days) — use correct field names from backend
     const from = new Date(); from.setDate(from.getDate() - 14);
     const fromStr = from.toISOString().split('T')[0];
-    const toStr = new Date().toISOString().split('T')[0];
+    const toStr   = new Date().toISOString().split('T')[0];
 
-    this.reportSvc.adminStockTrend(fromStr, toStr).subscribe(res => {
-      const trend = res.data;
-      this.stockTrendData = {
-        labels: trend.dailyTrends.map(d => d.date),
-        datasets: [
-          { label: 'Stock In', data: trend.dailyTrends.map(d => d.stockIn), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true },
-          { label: 'Stock Out', data: trend.dailyTrends.map(d => d.stockOut), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true }
-        ]
-      };
+    this.reportSvc.adminStockTrend(fromStr, toStr).subscribe({
+      next: res => {
+        const trend: StockTrendReport = res.data;
+        this.trendData = {
+          labels: trend.dailyTrends.map(d => d.date),   // CORRECTED: dailyTrend not dailyTrends
+          datasets: [
+            {
+              label: 'Units In',
+              // CORRECTED: unitsIn not stockIn
+              data: trend.dailyTrends.map(d => d.stockIn),
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.08)',
+              fill: true
+            },
+            {
+              label: 'Units Out',
+              // CORRECTED: unitsOut not stockOut
+              data: trend.dailyTrends.map(d => d.stockOut),
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239,68,68,0.08)',
+              fill: true
+            }
+          ]
+        };
+      }
     });
 
-    this.reportSvc.adminPOReport().subscribe(res => {
-      const breakdown = res.data.statusBreakdown;
-      const labels = Object.keys(breakdown);
-      const values = Object.values(breakdown);
-      this.poStatusData = {
-        labels,
-        datasets: [{ data: values, backgroundColor: ['#94a3b8','#3b82f6','#10b981','#8b5cf6','#06b6d4','#ef4444','#f59e0b'], borderWidth: 0, hoverOffset: 8 }]
-      };
+    // PO Report — use actual backend structure (no statusBreakdown)
+    this.reportSvc.adminPOReport().subscribe({
+      next: res => {
+        this.poReport = res.data;
+        // Build doughnut from individual status counts
+        this.poDonutData = {
+          labels: ['Draft', 'Sent', 'Accepted', 'Shipped', 'Received', 'Rejected', 'Cancelled'],
+          datasets: [{
+            data: [
+              res.data.draftPOs, res.data.sentPOs, res.data.acceptedPOs,
+              res.data.shippedPOs, res.data.receivedPOs, res.data.rejectedPOs, res.data.cancelledPOs
+            ],
+            backgroundColor: ['#94a3b8','#3b82f6','#10b981','#8b5cf6','#06b6d4','#ef4444','#64748b'],
+            borderWidth: 0,
+            hoverOffset: 8
+          }]
+        };
+
+        // Build supplier bar from bySupplier
+        if (res.data.bySupplier?.length) {
+          const top5 = res.data.bySupplier.slice(0, 6);
+          this.supplierBarData = {
+            labels: top5.map(s => s.companyName || s.supplierName),
+            datasets: [
+              { label: 'Total POs',    data: top5.map(s => s.totalPOs),    backgroundColor: 'rgba(99,102,241,0.7)',   borderRadius: 6 },
+              { label: 'Received POs', data: top5.map(s => s.receivedPOs), backgroundColor: 'rgba(16,185,129,0.7)',  borderRadius: 6 }
+            ]
+          };
+        }
+      }
     });
   }
 }

@@ -52,7 +52,26 @@ export class AdminPoComponent implements OnInit {
   }
 
   getStatusClass(s: string): string {
-    const m: Record<string, string> = { DRAFT:'badge-pending', SENT:'badge-sent', ACCEPTED:'badge-active', SHIPPED:'badge-secondary', RECEIVED:'badge-active', CANCELLED:'badge-inactive', REJECTED:'badge-inactive' };
-    return m[s] ?? 'badge-pending';
-  }
+
+  const m: Record<string, string> = {
+
+    DRAFT: 'badge-draft',
+
+    SENT: 'badge-sent',
+
+    ACCEPTED: 'badge-accepted',
+
+    SHIPPED: 'badge-shipped',
+
+    RECEIVED: 'badge-received',
+
+    REJECTED: 'badge-rejected',
+
+    CANCELLED: 'badge-cancelled'
+
+  };
+
+  return m[s] ?? 'badge-draft';
+
+}
 }

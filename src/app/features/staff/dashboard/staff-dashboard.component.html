@@ -1,43 +1,62 @@
 <div class="animate-fade-in-up">
-    <div class="page-header d-flex align-items-center justify-content-between">
-        <div>
-            <h1 class="page-title">Staff Dashboard</h1>
-            <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.warehouseName }}</p>
-        </div>
-        <a routerLink="/staff/stock-issues" class="btn-ims-primary btn"><i class="bi bi-plus-circle me-1"></i> New Stock
-            Issue</a>
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Staff Dashboard</h1>
+      <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.warehouseName }}</p>
+    </div>
+    <a routerLink="/staff/stock-issues" class="btn-ims-primary btn"><i class="bi bi-plus-circle me-1"></i>New Stock Issue</a>
+  </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <ng-container *ngIf="!loading && dashboard">
+
+    <!-- ── Stats Row ─────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <app-stats-card label="My Total Issues"   [value]="dashboard.myTotalIssues"       icon="bi-list-check"       color="primary" />
+      </div>
+      <div class="col-md-3 col-6">
+        <app-stats-card label="Pending / Draft"   [value]="dashboard.myPendingIssues"     icon="bi-hourglass-split"  color="warning" />
+      </div>
+      <div class="col-md-3 col-6">
+        <app-stats-card label="Issued"            [value]="dashboard.myIssuedIssues"      icon="bi-check2-circle"    color="success" />
+      </div>
+      <div class="col-md-3 col-6">
+        <app-stats-card label="POs to Receive"    [value]="dashboard.pendingPOsToReceive" icon="bi-cart-check-fill"  color="info" />
+      </div>
     </div>
 
-    <div class="page-loader" *ngIf="loading">
-        <div class="spinner-border"></div>
+    <!-- ── Charts Row ─────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+      <div class="col-lg-5">
+        <div class="ims-card h-100">
+          <h6 class="fw-700 mb-3">My Issue Breakdown</h6>
+          <div class="chart-container" style="height: 220px;">
+            <canvas baseChart [data]="issueDonutData" [options]="donutOpts" type="doughnut"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="ims-card h-100">
+          <h6 class="fw-700 mb-3">Warehouse Stock Movement (Last 7 Days)</h6>
+          <div class="chart-container" style="height: 220px;">
+            <canvas baseChart [data]="trendData" [options]="trendOpts" type="bar"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <ng-container *ngIf="!loading && dashboard">
-        <div class="row g-3 mb-4">
-            <div class="col-md-3 col-6"><app-stats-card label="My Open Issues" [value]="dashboard.myPendingIssues"
-                    icon="bi-arrow-left-right" color="warning" /></div>
-            <div class="col-md-3 col-6"><app-stats-card label="Total My Issues" [value]="dashboard.myTotalIssues"
-                    icon="bi-list-check" color="primary" /></div>
-            <div class="col-md-3 col-6"><app-stats-card label="POs to Receive" [value]="dashboard.pendingPOsToReceive"
-                    icon="bi-cart-check-fill" color="info" /></div>
-            <div class="col-md-3 col-6">
-                <app-stats-card label="Issued Issues" [value]="dashboard.myIssuedIssues" icon="bi-check-circle-fill"
-                    color="success" />
-            </div>
-        </div>
+    <!-- ── Quick Actions ──────────────────────────────────────────────────── -->
+    <div class="ims-card">
+      <h6 class="fw-700 mb-3"><i class="bi bi-lightning-fill me-1" style="color:var(--ims-warning)"></i>Quick Actions</h6>
+      <div class="d-flex flex-wrap gap-2">
+        <a routerLink="/staff/stock-issues"    class="qa-btn"><i class="bi bi-plus-circle me-1"></i>Create Stock Issue</a>
+        <a routerLink="/staff/purchase-orders" class="qa-btn"><i class="bi bi-cart-check me-1"></i>Receive PO</a>
+        <a routerLink="/staff/inventory"       class="qa-btn"><i class="bi bi-archive me-1"></i>View Inventory</a>
+        <a routerLink="/staff/reports"         class="qa-btn"><i class="bi bi-bar-chart-line me-1"></i>My Reports</a>
+      </div>
+    </div>
 
-        <div class="ims-card">
-            <h6 class="mb-3 fw-700">Quick Actions</h6>
-            <div class="row g-2">
-                <div class="col-auto"><a routerLink="/staff/stock-issues" class="quick-btn"><i
-                            class="bi bi-plus-circle me-1"></i>Create Stock Issue</a></div>
-                <div class="col-auto"><a routerLink="/staff/purchase-orders" class="quick-btn"><i
-                            class="bi bi-cart-check me-1"></i>Receive PO</a></div>
-                <div class="col-auto"><a routerLink="/staff/inventory" class="quick-btn"><i
-                            class="bi bi-archive me-1"></i>View Inventory</a></div>
-                <div class="col-auto"><a routerLink="/staff/reports" class="quick-btn"><i
-                            class="bi bi-bar-chart-line me-1"></i>My Reports</a></div>
-            </div>
-        </div>
-    </ng-container>
+  </ng-container>
 </div>

@@ -1,0 +1,56 @@
+.fw-700 {
+  font-weight: 700;
+}
+.fw-600 {
+  font-weight: 600;
+}
+.kpi-chip {
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 1rem;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  &.in-chip {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--ims-success);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+  }
+  &.out-chip {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--ims-danger);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+  }
+}
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  &.type-in {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--ims-success);
+  }
+  &.type-out {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--ims-danger);
+  }
+}
+.ref-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: monospace;
+  &.ref-po {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--ims-primary);
+  }
+  &.ref-si {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--ims-warning);
+  }
+}

@@ -1,186 +1,146 @@
 <div class="animate-fade-in-up">
 
   <!-- Page Header -->
-  <div class="page-header d-flex align-items-center justify-content-between">
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
     <div>
       <h1 class="page-title">Admin Dashboard</h1>
-      <p class="page-subtitle">System-wide overview and key metrics</p>
+      <p class="page-subtitle">System-wide overview — all warehouses, all users, all metrics</p>
     </div>
     <a routerLink="/admin/reports" class="btn-ims-primary btn">
-      <i class="bi bi-bar-chart-line me-1"></i> Full Reports
+      <i class="bi bi-bar-chart-line me-1"></i>Full Reports
     </a>
   </div>
 
   <!-- Loading -->
-  <div class="page-loader" *ngIf="loading">
-    <div class="spinner-border" role="status"></div>
-  </div>
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
   <ng-container *ngIf="!loading && dashboard">
 
-    <!-- Stats Row 1 -->
-<div class="row g-3 mb-4">
-
-  <div class="col-xl-2 col-md-4 col-6">
-    <app-stats-card
-      label="Total Users"
-      [value]="dashboard.totalUsers"
-      icon="bi-people-fill"
-      color="primary" />
-  </div>
-
-  <div class="col-xl-2 col-md-4 col-6">
-    <app-stats-card
-      label="Warehouses"
-      [value]="dashboard.totalWarehouses"
-      icon="bi-building-fill"
-      color="info" />
-  </div>
-
-  <div class="col-xl-2 col-md-4 col-6">
-    <app-stats-card
-      label="Active WH"
-      [value]="dashboard.activeWarehouses"
-      icon="bi-building-check"
-      color="success" />
-  </div>
-
-  <div class="col-xl-2 col-md-4 col-6">
-    <app-stats-card
-      label="Products"
-      [value]="dashboard.totalProducts"
-      icon="bi-box-seam-fill"
-      color="secondary" />
-  </div>
-
-  <div class="col-xl-2 col-md-4 col-6">
-    <app-stats-card
-      label="Suppliers"
-      [value]="dashboard.totalSuppliers"
-      icon="bi-truck"
-      color="warning" />
-  </div>
-
-  <div class="col-xl-2 col-md-4 col-6">
-    <app-stats-card
-      label="Inventory Value"
-      [value]="dashboard.totalInventoryValue"
-      icon="bi-cash-stack"
-      color="success" />
-  </div>
-
-</div>
-
-    <!-- Alerts Row -->
-<div class="row g-3 mb-4">
-
-  <div class="col-md-4">
-    <div class="alert-stat-card danger">
-      <div class="as-icon">
-        <i class="bi bi-exclamation-triangle-fill"></i>
+    <!-- ── KPI Row 1 ─────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+      <div class="col-xl-3 col-md-6">
+        <app-stats-card label="Total Users"           [value]="dashboard.totalUsers"                icon="bi-people-fill"         color="primary" />
       </div>
-
-      <div class="as-body">
-        <div class="as-value">
-          {{ dashboard.lowStockProducts }}
-        </div>
-
-        <div class="as-label">
-          Low Stock Products
-        </div>
+      <div class="col-xl-3 col-md-6">
+        <app-stats-card label="Active Warehouses"     [value]="dashboard.activeWarehouses"          icon="bi-building-fill"       color="info" />
       </div>
-
-      <a routerLink="/admin/inventory" class="as-action">
-        View
-        <i class="bi bi-arrow-right"></i>
-      </a>
+      <div class="col-xl-3 col-md-6">
+        <app-stats-card label="Total Products"        [value]="dashboard.totalProducts"             icon="bi-box-seam-fill"       color="secondary" />
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <app-stats-card label="Total Suppliers"       [value]="dashboard.totalSuppliers"            icon="bi-truck"               color="warning" />
+      </div>
     </div>
-  </div>
 
-  <div class="col-md-4">
-    <div class="alert-stat-card warning">
-
-      <div class="as-icon">
-        <i class="bi bi-clock-history"></i>
+    <!-- ── Alert Row ─────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <a routerLink="/admin/inventory" class="alert-kpi-card danger text-decoration-none">
+          <div class="akc-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <div class="akc-body">
+            <div class="akc-value">{{ dashboard.lowStockProducts }}</div>
+            <div class="akc-label">Low Stock Alerts</div>
+          </div>
+          <i class="bi bi-arrow-right akc-arrow"></i>
+        </a>
       </div>
-
-      <div class="as-body">
-        <div class="as-value">
-          {{ dashboard.pendingSupplierApprovals }}
-        </div>
-
-        <div class="as-label">
-          Pending Supplier Approvals
-        </div>
+      <div class="col-md-4">
+        <a routerLink="/admin/suppliers" class="alert-kpi-card warning text-decoration-none">
+          <div class="akc-icon"><i class="bi bi-clock-history"></i></div>
+          <div class="akc-body">
+            <div class="akc-value">{{ dashboard.pendingSupplierApprovals }}</div>
+            <div class="akc-label">Pending Supplier Approvals</div>
+          </div>
+          <i class="bi bi-arrow-right akc-arrow"></i>
+        </a>
       </div>
-
-      <a routerLink="/admin/suppliers" class="as-action">
-        Review
-        <i class="bi bi-arrow-right"></i>
-      </a>
+      <div class="col-md-4">
+        <a routerLink="/admin/purchase-orders" class="alert-kpi-card info text-decoration-none">
+          <div class="akc-icon"><i class="bi bi-cart-check-fill"></i></div>
+          <div class="akc-body">
+            <div class="akc-value">{{ dashboard.pendingPurchaseOrders }}</div>
+            <div class="akc-label">Pending Purchase Orders</div>
+          </div>
+          <i class="bi bi-arrow-right akc-arrow"></i>
+        </a>
+      </div>
     </div>
-  </div>
 
-  <div class="col-md-4">
-    <div class="alert-stat-card info">
-
-      <div class="as-icon">
-        <i class="bi bi-cart-check-fill"></i>
-      </div>
-
-      <div class="as-body">
-        <div class="as-value">
-          {{ dashboard.pendingPurchaseOrders }}
-        </div>
-
-        <div class="as-label">
-          Pending Purchase Orders
-        </div>
-      </div>
-
-      <a routerLink="/admin/purchase-orders" class="as-action">
-        View
-        <i class="bi bi-arrow-right"></i>
-      </a>
+    <!-- ── Inventory Value Banner ─────────────────────────────────────── -->
+    <div class="inventory-value-banner ims-card mb-4">
+      <div class="ivb-label"><i class="bi bi-currency-rupee me-1"></i>Total Inventory Value</div>
+      <div class="ivb-value">₹{{ dashboard.totalInventoryValue | number:'1.2-2' }}</div>
+      <div class="ivb-sub">Across {{ dashboard.totalWarehouses }} warehouses ({{ dashboard.activeWarehouses }} active)</div>
     </div>
-  </div>
 
-</div>
-    <!-- Charts Row -->
+    <!-- ── Charts Row 1 ────────────────────────────────────────────────── -->
     <div class="row g-3 mb-4">
       <!-- Stock Trend -->
       <div class="col-lg-8">
-        <div class="ims-card">
+        <div class="ims-card h-100">
           <div class="d-flex align-items-center justify-content-between mb-3">
-            <h6 class="mb-0 fw-700">Stock In / Out Trend (14 Days)</h6>
-            <span class="badge-ims badge-pending">Last 14 Days</span>
+            <div>
+              <h6 class="fw-700 mb-0">Stock Movement Trend</h6>
+              <small class="text-muted">Units in / out — last 14 days</small>
+            </div>
+            <span class="badge-ims badge-pending">Live</span>
           </div>
-          <div class="chart-container" style="height: 280px;">
-            <canvas baseChart [data]="stockTrendData" [options]="stockTrendOptions" type="line"></canvas>
+          <div class="chart-container" style="height: 260px;">
+            <canvas baseChart [data]="trendData" [options]="trendOptions" type="line"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- PO Status -->
+      <!-- PO Status Doughnut -->
       <div class="col-lg-4">
         <div class="ims-card h-100">
-          <h6 class="mb-3 fw-700">Purchase Order Status</h6>
-          <div class="chart-container" style="height: 250px;">
-            <canvas baseChart [data]="poStatusData" [options]="donutOptions" type="doughnut"></canvas>
+          <div class="mb-3">
+            <h6 class="fw-700 mb-0">PO Status Distribution</h6>
+            <small class="text-muted">All warehouses combined</small>
+          </div>
+          <div class="chart-container" style="height: 240px;">
+            <canvas baseChart [data]="poDonutData" [options]="donutOptions" type="doughnut"></canvas>
+          </div>
+          <!-- PO Summary badges -->
+          <div class="po-summary mt-3" *ngIf="poReport">
+            <div class="ps-item">
+              <span class="psi-label">Total POs</span>
+              <span class="psi-value">{{ poReport.totalPOs | number }}</span>
+            </div>
+            <div class="ps-item">
+              <span class="psi-label">Total Spend</span>
+              <span class="psi-value text-success">₹{{ poReport.totalSpend | number:'1.0-0' }}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Actions -->
+    <!-- ── Charts Row 2 ────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4" *ngIf="supplierBarData.labels?.length">
+      <div class="col-12">
+        <div class="ims-card">
+          <div class="mb-3">
+            <h6 class="fw-700 mb-0">Purchase Orders by Supplier (Top 6)</h6>
+            <small class="text-muted">Comparison of total vs received orders</small>
+          </div>
+          <div class="chart-container" style="height: 260px;">
+            <canvas baseChart [data]="supplierBarData" [options]="barOptions" type="bar"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Quick Actions ──────────────────────────────────────────────── -->
     <div class="ims-card">
-      <h6 class="mb-3 fw-700">Quick Actions</h6>
-      <div class="row g-2">
-        <div class="col-auto"><a routerLink="/admin/users" class="quick-action-btn"><i class="bi bi-person-plus me-2"></i>Add User</a></div>
-        <div class="col-auto"><a routerLink="/admin/warehouses" class="quick-action-btn"><i class="bi bi-building me-2"></i>New Warehouse</a></div>
-        <div class="col-auto"><a routerLink="/admin/products" class="quick-action-btn"><i class="bi bi-plus-circle me-2"></i>Add Product</a></div>
-        <div class="col-auto"><a routerLink="/admin/suppliers" class="quick-action-btn"><i class="bi bi-check2-circle me-2"></i>Approve Suppliers</a></div>
-        <div class="col-auto"><a routerLink="/admin/reports" class="quick-action-btn"><i class="bi bi-download me-2"></i>View Reports</a></div>
+      <h6 class="fw-700 mb-3"><i class="bi bi-lightning-fill me-1" style="color:var(--ims-warning)"></i>Quick Actions</h6>
+      <div class="quick-actions-grid">
+        <a routerLink="/admin/users"           class="qa-btn"><i class="bi bi-person-plus me-2"></i>Add User</a>
+        <a routerLink="/admin/warehouses"      class="qa-btn"><i class="bi bi-building me-2"></i>New Warehouse</a>
+        <a routerLink="/admin/products"        class="qa-btn"><i class="bi bi-plus-circle me-2"></i>Add Product</a>
+        <a routerLink="/admin/suppliers"       class="qa-btn"><i class="bi bi-check2-circle me-2"></i>Approve Suppliers</a>
+        <a routerLink="/admin/stock-movements" class="qa-btn"><i class="bi bi-arrow-left-right me-2"></i>Stock Movements</a>
+        <a routerLink="/admin/reports"         class="qa-btn"><i class="bi bi-download me-2"></i>View Reports</a>
       </div>
     </div>
 

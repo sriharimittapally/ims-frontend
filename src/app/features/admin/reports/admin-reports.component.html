@@ -1,169 +1,278 @@
 <div class="animate-fade-in-up">
-  <div class="page-header"><h1 class="page-title">Reports & Analytics</h1><p class="page-subtitle">Comprehensive system-wide analytics and insights</p></div>
+  <div class="page-header">
+    <h1 class="page-title">Reports & Analytics</h1>
+    <p class="page-subtitle">Comprehensive system-wide analytics and insights</p>
+  </div>
 
   <!-- Report Tabs -->
   <div class="ims-card mb-4">
     <div class="report-tabs">
-      <button class="report-tab" [class.active]="activeTab==='inventory'"   (click)="setTab('inventory')">   <i class="bi bi-archive me-1"></i>Inventory Summary</button>
-      <button class="report-tab" [class.active]="activeTab==='lowstock'"    (click)="setTab('lowstock')">    <i class="bi bi-exclamation-triangle me-1"></i>Low Stock</button>
-      <button class="report-tab" [class.active]="activeTab==='trend'"       (click)="setTab('trend')">       <i class="bi bi-graph-up me-1"></i>Stock Trend</button>
-      <button class="report-tab" [class.active]="activeTab==='po'"          (click)="setTab('po')">          <i class="bi bi-cart-check me-1"></i>Purchase Orders</button>
-      <button class="report-tab" [class.active]="activeTab==='supplier'"    (click)="setTab('supplier')">    <i class="bi bi-truck me-1"></i>Supplier Performance</button>
-      <button class="report-tab" [class.active]="activeTab==='topproducts'" (click)="setTab('topproducts')"> <i class="bi bi-trophy me-1"></i>Top Products</button>
+      <button class="report-tab" [class.active]="activeTab==='inventory'" (click)="setTab('inventory')"> <i
+          class="bi bi-archive me-1"></i>Inventory Summary</button>
+      <button class="report-tab" [class.active]="activeTab==='lowstock'" (click)="setTab('lowstock')"> <i
+          class="bi bi-exclamation-triangle me-1"></i>Low Stock</button>
+      <button class="report-tab" [class.active]="activeTab==='trend'" (click)="setTab('trend')"> <i
+          class="bi bi-graph-up me-1"></i>Stock Trend</button>
+      <button class="report-tab" [class.active]="activeTab==='po'" (click)="setTab('po')"> <i
+          class="bi bi-cart-check me-1"></i>Purchase Orders</button>
+      <button class="report-tab" [class.active]="activeTab==='supplier'" (click)="setTab('supplier')"> <i
+          class="bi bi-truck me-1"></i>Supplier Performance</button>
+      <button class="report-tab" [class.active]="activeTab==='topproducts'" (click)="setTab('topproducts')"> <i
+          class="bi bi-trophy me-1"></i>Top Products</button>
     </div>
   </div>
 
-  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+  <div class="page-loader" *ngIf="loading">
+    <div class="spinner-border"></div>
+  </div>
 
   <!-- Inventory Summary -->
   <ng-container *ngIf="activeTab === 'inventory' && !loading && inventorySummary">
     <div class="row g-3 mb-4">
-      <div class="col-md-3"><div class="stat-card stat-primary"><div class="d-flex align-items-center justify-content-between mb-2"><div class="stat-icon"><i class="bi bi-box-seam"></i></div></div><div class="stat-value">{{ inventorySummary.totalProducts }}</div><div class="stat-label">Total Products</div></div></div>
-      <div class="col-md-3"><div class="stat-card stat-info"><div class="d-flex align-items-center justify-content-between mb-2"><div class="stat-icon"><i class="bi-archive"></i></div></div><div class="stat-value">{{ inventorySummary.totalQuantity | number }}</div><div class="stat-label">Total Quantity</div></div></div>
-<div class="col-md-3"><div class="stat-card stat-warning"><div class="d-flex align-items-center justify-content-between mb-2"><div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div></div><div class="stat-value">{{ inventorySummary.lowStockCount }}</div><div class="stat-label">Low Stock Items</div></div></div>
-<div class="col-md-3"><div class="stat-card stat-danger"><div class="d-flex align-items-center justify-content-between mb-2"><div class="stat-icon"><i class="bi bi-x-circle"></i></div></div><div class="stat-value">{{ inventorySummary.outOfStockCount }}</div><div class="stat-label">Out of Stock</div></div></div>
-</div>
-<div class="ims-card">
-<h6 class="mb-3 fw-700">Per Warehouse Breakdown</h6>
-<div class="table-responsive">
-<table class="ims-table w-100">
-<thead><tr><th>Warehouse</th><th>Products</th><th>Total Quantity</th><th>Low Stock</th></tr></thead>
-<tbody>
-<tr *ngFor="let w of inventorySummary.warehouseBreakdowns">
-<td class="fw-600">{{ w.warehouseName }}</td>
-<td>{{ w.totalProducts }}</td>
-<td>{{ w.totalQuantity | number }}</td>
-<td><span class="badge-ims" [ngClass]="w.lowStockCount > 0 ? 'badge-inactive' : 'badge-active'">{{ w.lowStockCount }}</span></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</ng-container>
+      <div class="col-md-3">
+        <div class="stat-card stat-primary">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+          </div>
+          <div class="stat-value">{{ inventorySummary.totalProducts }}</div>
+          <div class="stat-label">Total Products</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card stat-info">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="stat-icon"><i class="bi-archive"></i></div>
+          </div>
+          <div class="stat-value">{{ inventorySummary.totalQuantity | number }}</div>
+          <div class="stat-label">Total Quantity</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card stat-warning">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+          </div>
+          <div class="stat-value">{{ inventorySummary.lowStockCount }}</div>
+          <div class="stat-label">Low Stock Items</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card stat-danger">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
+          </div>
+          <div class="stat-value">{{ inventorySummary.outOfStockCount }}</div>
+          <div class="stat-label">Out of Stock</div>
+        </div>
+      </div>
+    </div>
+    <div class="ims-card">
+      <h6 class="mb-3 fw-700">Per Warehouse Breakdown</h6>
+      <div class="table-responsive">
+        <table class="ims-table w-100">
+          <thead>
+            <tr>
+              <th>Warehouse</th>
+              <th>Products</th>
+              <th>Total Quantity</th>
+              <th>Low Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let w of inventorySummary.warehouseBreakdowns">
+              <td class="fw-600">{{ w.warehouseName }}</td>
+              <td>{{ w.totalProducts }}</td>
+              <td>{{ w.totalQuantity | number }}</td>
+              <td><span class="badge-ims" [ngClass]="w.lowStockCount > 0 ? 'badge-inactive' : 'badge-active'">{{
+                  w.lowStockCount }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
   <!-- Low Stock -->
-<ng-container *ngIf="activeTab === 'lowstock' && !loading && lowStockAlerts">
-<div class="ims-card mb-3 d-flex align-items-center gap-3" style="border-left:3px solid var(--ims-danger)">
-<i class="bi bi-exclamation-triangle-fill" style="font-size:1.5rem; color:var(--ims-danger)"></i>
-<div><div class="fw-700" style="font-size:1.1rem">{{ lowStockAlerts.totalAlerts }} Low Stock Alerts</div><div class="text-muted">Items below their reorder level</div></div>
-</div>
-<div class="ims-card p-0 overflow-hidden">
-<table class="ims-table w-100">
-<thead><tr><th>Product</th><th>SKU</th><th>Warehouse</th><th>Current Qty</th><th>Reorder Level</th><th>Deficit</th></tr></thead>
-<tbody>
-<tr *ngFor="let a of lowStockAlerts.alerts">
-<td class="fw-600">{{ a.productName }}</td>
-<td><code style="font-size:.75rem; background:var(--ims-bg-secondary); padding:.1rem .4rem; border-radius:4px">{{ a.sku }}</code></td>
-<td class="text-muted">{{ a.warehouseName }}</td>
-<td><span style="color:var(--ims-danger); font-weight:700">{{ a.currentQuantity }}</span></td>
-<td class="text-muted">{{ a.reorderLevel }}</td>
-<td><span class="badge-ims badge-inactive">-{{ a.reorderLevel - a.currentQuantity }}</span></td>
-</tr>
-<tr *ngIf="lowStockAlerts.alerts?.length === 0"><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="bi bi-check-circle"></i></div><h5>All stock levels are healthy!</h5></div></td></tr>
-</tbody>
-</table>
-</div>
-</ng-container>
+  <ng-container *ngIf="activeTab === 'lowstock' && !loading && lowStockAlerts">
+    <div class="ims-card mb-3 d-flex align-items-center gap-3" style="border-left:3px solid var(--ims-danger)">
+      <i class="bi bi-exclamation-triangle-fill" style="font-size:1.5rem; color:var(--ims-danger)"></i>
+      <div>
+        <div class="fw-700" style="font-size:1.1rem">{{ lowStockAlerts.totalAlerts }} Low Stock Alerts</div>
+        <div class="text-muted">Items below their reorder level</div>
+      </div>
+    </div>
+    <div class="ims-card p-0 overflow-hidden">
+      <table class="ims-table w-100">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Warehouse</th>
+            <th>Current Qty</th>
+            <th>Reorder Level</th>
+            <th>Deficit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of lowStockAlerts.alerts">
+            <td class="fw-600">{{ a.productName }}</td>
+            <td><code
+                style="font-size:.75rem; background:var(--ims-bg-secondary); padding:.1rem .4rem; border-radius:4px">{{ a.sku }}</code>
+            </td>
+            <td class="text-muted">{{ a.warehouseName }}</td>
+            <td><span style="color:var(--ims-danger); font-weight:700">{{ a.currentQuantity }}</span></td>
+            <td class="text-muted">{{ a.reorderLevel }}</td>
+            <td><span class="badge-ims badge-inactive">-{{ a.reorderLevel - a.currentQuantity }}</span></td>
+          </tr>
+          <tr *ngIf="lowStockAlerts.alerts?.length === 0">
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-check-circle"></i></div>
+                <h5>All stock levels are healthy!</h5>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
   <!-- Stock Trend -->
-<ng-container *ngIf="activeTab === 'trend' && !loading">
-<div class="ims-card mb-3">
-<div class="d-flex align-items-center gap-3 flex-wrap">
-<div><label class="ims-form-label">From</label><input type="date" class="ims-form-control" [(ngModel)]="fromDate" style="width:160px"></div>
-<div><label class="ims-form-label">To</label><input type="date" class="ims-form-control" [(ngModel)]="toDate" style="width:160px"></div>
-<div class="align-self-end"><button class="btn-ims-primary btn" (click)="loadTrend()">Apply</button></div>
-</div>
-</div>
-<div class="ims-card">
-<h6 class="mb-3 fw-700">Stock In / Out Daily Trend</h6>
-<div class="chart-container" style="height:320px">
-<canvas baseChart [data]="trendData" [options]="trendOptions" type="line"></canvas>
-</div>
-</div>
-</ng-container>
+  <ng-container *ngIf="activeTab === 'trend' && !loading">
+    <div class="ims-card mb-3">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div><label class="ims-form-label">From</label><input type="date" class="ims-form-control"
+            [(ngModel)]="fromDate" style="width:160px"></div>
+        <div><label class="ims-form-label">To</label><input type="date" class="ims-form-control" [(ngModel)]="toDate"
+            style="width:160px"></div>
+        <div class="align-self-end"><button class="btn-ims-primary btn" (click)="loadTrend()">Apply</button></div>
+      </div>
+    </div>
+    <div class="ims-card">
+      <h6 class="mb-3 fw-700">Stock In / Out Daily Trend</h6>
+      <div class="chart-container" style="height:320px">
+        <canvas baseChart [data]="trendData" [options]="trendOptions" type="line"></canvas>
+      </div>
+    </div>
+  </ng-container>
   <!-- PO Report -->
-<ng-container *ngIf="activeTab === 'po' && !loading && poReport">
-<div class="row g-3 mb-4">
-<div class="col-md-4"><div class="stat-card stat-primary"><div class="stat-value">{{ poReport.totalPOs }}</div><div class="stat-label">Total POs</div></div></div>
-<div class="col-md-4"><div class="stat-card stat-success"><div class="stat-value">₹{{ poReport.totalAmount | number:'1.2-2' }}</div><div class="stat-label">Total Amount</div></div></div>
-</div>
-<div class="row g-3">
-<div class="col-lg-5">
-<div class="ims-card">
-<h6 class="mb-3 fw-700">Status Distribution</h6>
-<div class="chart-container" style="height:260px">
-<canvas baseChart [data]="poDonut" [options]="donutOptions" type="doughnut"></canvas>
-</div>
-</div>
-</div>
-<div class="col-lg-7">
-<div class="ims-card p-0 overflow-hidden">
-<div class="p-3"><h6 class="mb-0 fw-700">Recent Orders</h6></div>
-<table class="ims-table w-100">
-<thead><tr><th>PO Number</th><th>Supplier</th><th>Status</th><th>Amount</th><th>Date</th></tr></thead>
-<tbody>
-<tr *ngFor="let o of poReport.recentOrders">
-<td><span class="po-num">{{ o.poNumber }}</span></td>
-<td class="text-muted">{{ o.supplierName }}</td>
-<td><span class="badge-ims badge-pending">{{ o.status }}</span></td>
-<td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
-<td class="text-muted">{{ o.createdAt | date:'dd MMM yy' }}</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</ng-container>
+  <ng-container *ngIf="activeTab === 'po' && !loading && poReport">
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="stat-card stat-primary">
+          <div class="stat-value">{{ poReport.totalPOs }}</div>
+          <div class="stat-label">Total POs</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card stat-success">
+          <div class="stat-value">₹{{ poReport.totalSpend | number:'1.2-2' }}</div>
+          <div class="stat-label">Total Amount</div>
+        </div>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-lg-5">
+        <div class="ims-card">
+          <h6 class="mb-3 fw-700">Status Distribution</h6>
+          <div class="chart-container" style="height:260px">
+            <canvas baseChart [data]="poDonut" [options]="donutOptions" type="doughnut"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="ims-card p-0 overflow-hidden">
+          <div class="p-3">
+            <h6 class="mb-0 fw-700">Recent Orders</h6>
+          </div>
+          <table class="ims-table w-100">
+            <thead>
+              <tr>
+                <th>PO Number</th>
+                <th>Supplier</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let o of poReport.recentOrders">
+                <td><span class="po-num">{{ o.poNumber }}</span></td>
+                <td class="text-muted">{{ o.supplierName }}</td>
+                <td><span class="badge-ims badge-pending">{{ o.status }}</span></td>
+                <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
+                <td class="text-muted">{{ o.createdAt | date:'dd MMM yy' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </ng-container>
   <!-- Supplier Performance -->
-<ng-container *ngIf="activeTab === 'supplier' && !loading && supplierPerf">
-<div class="ims-card mb-4">
-<h6 class="mb-3 fw-700">Supplier PO Comparison</h6>
-<div class="chart-container" style="height:300px">
-<canvas baseChart [data]="perfBarData" [options]="perfBarOptions" type="bar"></canvas>
-</div>
-</div>
-<div class="ims-card p-0 overflow-hidden">
-<table class="ims-table w-100">
-<thead><tr><th>Supplier</th><th>Total POs</th><th>Accepted</th><th>Rejected</th><th>Shipped</th><th>Fulfillment Rate</th><th>Total Spend</th></tr></thead>
-<tbody>
-<tr *ngFor="let s of supplierPerf.suppliers">
-<td class="fw-600">{{ s.supplierName }}</td>
-<td>{{ s.totalPOs }}</td>
-<td style="color:var(--ims-success)">{{ s.acceptedPOs }}</td>
-<td style="color:var(--ims-danger)">{{ s.rejectedPOs }}</td>
-<td style="color:var(--ims-info)">{{ s.shippedPOs }}</td>
-<td>
-<div class="d-flex align-items-center gap-2">
-<div class="progress-bar-custom" style="width:80px"><div class="progress-fill" [style.width]="s.fulfillmentRate + '%'"></div></div>
-<span class="fw-600">{{ s.fulfillmentRate | number:'1.0-1' }}%</span>
-</div>
-</td>
-<td class="fw-600">₹{{ s.totalSpend | number:'1.2-2' }}</td>
-</tr>
-</tbody>
-</table>
-</div>
-</ng-container>
+  <ng-container *ngIf="activeTab === 'supplier' && !loading && supplierPerf">
+    <div class="ims-card mb-4">
+      <h6 class="mb-3 fw-700">Supplier PO Comparison</h6>
+      <div class="chart-container" style="height:300px">
+        <canvas baseChart [data]="perfBarData" [options]="perfBarOptions" type="bar"></canvas>
+      </div>
+    </div>
+    <div class="ims-card p-0 overflow-hidden">
+      <table class="ims-table w-100">
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Total POs</th>
+            <th>Accepted</th>
+            <th>Rejected</th>
+            <th>Shipped</th>
+            <th>Fulfillment Rate</th>
+            <th>Total Spend</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of supplierPerf.suppliers">
+            <td class="fw-600">{{ s.supplierName }}</td>
+            <td>{{ s.totalPOs }}</td>
+            <td style="color:var(--ims-success)">{{ s.acceptedPOs }}</td>
+            <td style="color:var(--ims-danger)">{{ s.rejectedPOs }}</td>
+            <td style="color:var(--ims-info)">{{ s.shippedPOs }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress-bar-custom" style="width:80px">
+                  <div class="progress-fill" [style.width]="s.fulfillmentRate + '%'"></div>
+                </div>
+                <span class="fw-600">{{ s.fulfillmentRate | number:'1.0-1' }}%</span>
+              </div>
+            </td>
+            <td class="fw-600">₹{{ s.totalSpend | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
   <!-- Top Products -->
-<ng-container *ngIf="activeTab === 'topproducts' && !loading && topProducts">
-<div class="row g-3">
-<div class="col-lg-8">
-<div class="ims-card">
-<h6 class="mb-3 fw-700">Top Moving Products</h6>
-<div class="chart-container" style="height:300px">
-<canvas baseChart [data]="topBarData" [options]="perfBarOptions" type="bar"></canvas>
-</div>
-</div>
-</div>
-<div class="col-lg-4">
-<div class="ims-card">
-<h6 class="mb-3 fw-700">Slow Moving Products</h6>
-<div *ngFor="let p of topProducts.slowMoving; let i = index" class="slow-item">
-<span class="slow-rank">{{ i+1 }}</span>
-<div class="flex-1"><div class="fw-600" style="font-size:.875rem">{{ p.productName }}</div><div style="font-size:.75rem;color:var(--ims-text-muted)">{{ p.sku }}</div></div>
-<span class="badge-ims badge-pending">{{ p.totalMovement }}</span>
-</div>
-</div>
-</div>
-</div>
-</ng-container>
+  <ng-container *ngIf="activeTab === 'topproducts' && !loading && topProducts">
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="ims-card">
+          <h6 class="mb-3 fw-700">Top Moving Products</h6>
+          <div class="chart-container" style="height:300px">
+            <canvas baseChart [data]="topBarData" [options]="perfBarOptions" type="bar"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="ims-card">
+          <h6 class="mb-3 fw-700">Slow Moving Products</h6>
+          <div *ngFor="let p of topProducts.slowMovingProducts; let i = index" class="slow-item">
+            <span class="slow-rank">{{ i+1 }}</span>
+            <div class="flex-1">
+              <div class="fw-600" style="font-size:.875rem">{{ p.productName }}</div>
+              <div style="font-size:.75rem;color:var(--ims-text-muted)">{{ p.sku }}</div>
+            </div>
+            <span class="badge-ims badge-pending">{{ p.totalUnitsOut }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
 </div>
