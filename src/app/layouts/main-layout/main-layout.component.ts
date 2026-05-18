@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet, ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { RouterOutlet, NavigationEnd, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { TopbarComponent } from '../../shared/components/topbar/topbar.component';
-import { filter, map } from 'rxjs';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-main-layout',
@@ -14,19 +14,29 @@ import { filter, map } from 'rxjs';
 })
 export class MainLayoutComponent {
   sidebarCollapsed = signal(false);
+  mobileSidebarOpen = signal(false);
   pageTitle = signal('Dashboard');
 
-  constructor(private router: Router, private route: ActivatedRoute) {
+  constructor(private router: Router) {
     this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd),
-      map(() => {
-        const url = this.router.url.split('/').pop() ?? '';
-        return url.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      })
-    ).subscribe(title => this.pageTitle.set(title));
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe(() => {
+      // Auto-close mobile sidebar on navigation
+      this.mobileSidebarOpen.set(false);
+      // Derive page title from URL
+      const url = this.router.url.split('/').pop() ?? '';
+      const title = url.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      this.pageTitle.set(title || 'Dashboard');
+    });
   }
 
   toggleSidebar(): void {
-    this.sidebarCollapsed.update(v => !v);
+    if (window.innerWidth <= 768) {
+      this.mobileSidebarOpen.update(v => !v);
+    } else {
+      this.sidebarCollapsed.update(v => !v);
+    }
   }
+
+  closeMobileSidebar(): void { this.mobileSidebarOpen.set(false); }
 }

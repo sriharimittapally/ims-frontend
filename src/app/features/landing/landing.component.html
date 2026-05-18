@@ -1,302 +1,280 @@
-<div class="landing-root">
+<div class="lp-root" [attr.data-theme]="theme.isDark() ? 'dark' : 'light'">
 
-  <!-- ═══════════════════════ NAVBAR ═══════════════════════════════════════ -->
+  <!-- ══ NAVBAR ════════════════════════════════════════════════════════════ -->
   <nav class="lp-nav" [class.scrolled]="scrolled">
     <div class="lp-nav-inner">
-      <a class="lp-brand" routerLink="/auth/login">
+
+      <a class="lp-brand" (click)="scrollTo('hero')">
         <div class="brand-mark"><i class="bi bi-boxes"></i></div>
-        <span class="brand-name">IMS <span class="brand-pro">Pro</span></span>
+        <span class="brand-name">Inventra <span class="brand-accent">IMS</span></span>
       </a>
 
-      <ul class="lp-nav-links desktop-only">
+      <ul class="lp-links">
         <li><a (click)="scrollTo('features')">Features</a></li>
         <li><a (click)="scrollTo('roles')">Roles</a></li>
-        <li><a (click)="scrollTo('workflow')">How It Works</a></li>
         <li><a (click)="scrollTo('stats-section')">Stats</a></li>
       </ul>
 
       <div class="lp-nav-actions">
-        <a routerLink="/auth/register" class="btn-ghost desktop-only">Supplier Register</a>
-        <a routerLink="/auth/login" class="btn-cta-nav">Sign In</a>
+        <!-- Theme Toggle on landing -->
+        <button class="lp-theme-btn" (click)="theme.toggle()" [title]="theme.isDark() ? 'Light Mode' : 'Dark Mode'">
+          <i class="bi" [class.bi-sun-fill]="theme.isDark()" [class.bi-moon-fill]="!theme.isDark()"></i>
+        </button>
+        <button class="btn-ghost" (click)="openRegister()">Supplier Register</button>
+        <button class="btn-signin" (click)="openLogin()">Sign In →</button>
         <button class="mobile-menu-btn" (click)="menuOpen = !menuOpen">
           <i class="bi" [class.bi-list]="!menuOpen" [class.bi-x]="menuOpen"></i>
         </button>
       </div>
     </div>
 
-    <!-- Mobile menu -->
+    <!-- Mobile Menu -->
     <div class="mobile-menu" [class.open]="menuOpen">
       <a (click)="scrollTo('features')">Features</a>
       <a (click)="scrollTo('roles')">Roles</a>
-      <a (click)="scrollTo('workflow')">How It Works</a>
-      <a routerLink="/auth/register" (click)="menuOpen=false">Supplier Register</a>
-      <a routerLink="/auth/login" class="mobile-cta" (click)="menuOpen=false">Sign In →</a>
+      <a (click)="scrollTo('stats-section')">Stats</a>
+      <a (click)="openRegister(); menuOpen=false">Supplier Register</a>
+      <a (click)="openLogin(); menuOpen=false" class="mobile-cta">Sign In →</a>
     </div>
   </nav>
 
-  <!-- ═══════════════════════ HERO ═════════════════════════════════════════ -->
-  <section class="hero">
-    <div class="hero-bg">
-      <div class="hero-orb orb-1"></div>
-      <div class="hero-orb orb-2"></div>
-      <div class="hero-orb orb-3"></div>
+  <!-- ══ HERO ═══════════════════════════════════════════════════════════════ -->
+  <section class="lp-hero" id="hero">
+    <div class="hero-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
       <div class="hero-grid"></div>
     </div>
-
     <div class="hero-content">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        Enterprise Inventory Management System
+      <div class="hero-tag">
+        <span class="tag-dot"></span>Enterprise Inventory Management
       </div>
-
       <h1 class="hero-headline">
-        Command Your Entire
-        <span class="headline-gradient">Supply Chain</span>
-        From One Place
+        One Platform.<br>
+        <span class="headline-grad">Total Inventory Control.</span>
       </h1>
-
       <p class="hero-sub">
-        A complete B2B wholesale distributor platform — managing warehouses, suppliers, purchase orders,
-        stock movements and analytics for every level of your organisation.
+        Manage warehouses, suppliers, purchase orders, stock movements and analytics
+        — all in a single secure, role-based system.
       </p>
-
-      <div class="hero-actions">
-        <a routerLink="/auth/login" class="btn-hero-primary">
-          <i class="bi bi-box-arrow-in-right me-2"></i>
-          Get Started
-          <span class="btn-arrow">→</span>
-        </a>
-        <a routerLink="/auth/register" class="btn-hero-outline">
-          <i class="bi bi-truck me-2"></i>
-          Register as Supplier
-        </a>
+      <div class="hero-btns">
+        <button class="btn-hero-primary" (click)="openLogin()">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to System
+        </button>
+        <button class="btn-hero-outline" (click)="openRegister()">
+          <i class="bi bi-truck me-2"></i>Supplier Registration
+        </button>
       </div>
-
-      <div class="hero-trust">
-        <div class="trust-item" *ngFor="let t of ['Role-Based Access','Real-Time Movements','JWT Secured','Dark & Light Mode']">
-          <i class="bi bi-check-circle-fill"></i> {{ t }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard Preview Card -->
-    <div class="hero-visual">
-      <div class="preview-card">
-        <div class="preview-topbar">
-          <div class="preview-dots">
-            <span></span><span></span><span></span>
-          </div>
-          <div class="preview-url">app.ims-pro.com/admin/dashboard</div>
-        </div>
-        <div class="preview-body">
-          <!-- Mini stat cards -->
-          <div class="preview-stats">
-            <div class="pstat pstat-primary">
-              <div class="pstat-icon"><i class="bi bi-box-seam"></i></div>
-              <div>
-                <div class="pstat-value">2,840</div>
-                <div class="pstat-label">Products</div>
-              </div>
-            </div>
-            <div class="pstat pstat-success">
-              <div class="pstat-icon"><i class="bi bi-building"></i></div>
-              <div>
-                <div class="pstat-value">14</div>
-                <div class="pstat-label">Warehouses</div>
-              </div>
-            </div>
-            <div class="pstat pstat-warning">
-              <div class="pstat-icon"><i class="bi bi-exclamation-triangle"></i></div>
-              <div>
-                <div class="pstat-value">7</div>
-                <div class="pstat-label">Low Stock</div>
-              </div>
-            </div>
-            <div class="pstat pstat-info">
-              <div class="pstat-icon"><i class="bi bi-cart-check"></i></div>
-              <div>
-                <div class="pstat-value">156</div>
-                <div class="pstat-label">Active POs</div>
-              </div>
-            </div>
-          </div>
-          <!-- Mini chart bars -->
-          <div class="preview-chart">
-            <div class="chart-label">Stock Movement — Last 7 Days</div>
-            <div class="chart-bars">
-              <div class="cbar-group" *ngFor="let b of [
-                {d:'Mon',in:65,out:40},{d:'Tue',in:80,out:55},{d:'Wed',in:45,out:70},
-                {d:'Thu',in:90,out:35},{d:'Fri',in:75,out:60},{d:'Sat',in:50,out:45},{d:'Sun',in:85,out:50}
-              ]">
-                <div class="cbar-in"  [style.height]="(b.in * 1.2) + 'px'"></div>
-                <div class="cbar-out" [style.height]="(b.out * 1.2) + 'px'"></div>
-                <div class="cbar-day">{{ b.d }}</div>
-              </div>
-            </div>
-            <div class="chart-legend">
-              <span class="cl-in">▊ Stock In</span>
-              <span class="cl-out">▊ Stock Out</span>
-            </div>
-          </div>
-        </div>
+      <div class="hero-checks">
+        <span *ngFor="let t of ['JWT Secured','4 User Roles','Real-Time Stock','Dark & Light Mode']">
+          <i class="bi bi-check-circle-fill"></i>{{ t }}
+        </span>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════ STATS ════════════════════════════════════════ -->
-  <section class="stats-section" id="stats-section">
-    <div class="section-container">
+  <!-- ══ STATS ═══════════════════════════════════════════════════════════════ -->
+  <section class="lp-stats" id="stats-section">
+    <div class="lp-container">
       <div class="stats-grid">
-        <div class="stat-counter" *ngFor="let c of counters">
-          <div class="sc-icon"><i class="bi {{ c.icon }}"></i></div>
-          <div class="sc-number">{{ c.current | number:'1.0-1' }}{{ c.suffix }}</div>
-          <div class="sc-label">{{ c.label }}</div>
+        <div class="stat-item" *ngFor="let c of counters">
+          <div class="si-icon"><i class="bi {{ c.icon }}"></i></div>
+          <div class="si-num">{{ c.current | number:'1.0-1' }}{{ c.suffix }}</div>
+          <div class="si-label">{{ c.label }}</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════ FEATURES ════════════════════════════════════ -->
-  <section class="features-section" id="features">
-    <div class="section-container">
-      <div class="section-header">
-        <div class="section-tag">Platform Capabilities</div>
-        <h2 class="section-title">Everything You Need to Run Inventory at Scale</h2>
-        <p class="section-sub">From supplier onboarding to final stock issue — complete end-to-end traceability in a single system.</p>
+  <!-- ══ FEATURES ══════════════════════════════════════════════════════════ -->
+  <section class="lp-features" id="features">
+    <div class="lp-container">
+      <div class="lp-section-header">
+        <div class="lp-tag">Platform Capabilities</div>
+        <h2>Everything You Need</h2>
+        <p>A complete end-to-end inventory management platform built for modern B2B operations.</p>
       </div>
-
       <div class="features-grid">
         <div class="feature-card" *ngFor="let f of features">
-          <div class="fc-icon-wrap {{ f.gradient }}">
+          <div class="fc-icon" [style.background]="f.color + '18'" [style.color]="f.color">
             <i class="bi {{ f.icon }}"></i>
           </div>
-          <h3 class="fc-title">{{ f.title }}</h3>
-          <p class="fc-desc">{{ f.desc }}</p>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.desc }}</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════ ROLES ════════════════════════════════════════ -->
-  <section class="roles-section" id="roles">
-    <div class="section-container">
-      <div class="section-header">
-        <div class="section-tag">User Levels</div>
-        <h2 class="section-title">Designed for Every Member of Your Team</h2>
-        <p class="section-sub">Four distinct role levels, each with scoped access, tailored dashboards, and targeted workflows.</p>
+  <!-- ══ ROLES ═══════════════════════════════════════════════════════════════ -->
+  <section class="lp-roles" id="roles">
+    <div class="lp-container">
+      <div class="lp-section-header">
+        <div class="lp-tag">Access Levels</div>
+        <h2>Built for Every Role</h2>
+        <p>Four distinct roles with scoped access and tailored dashboards.</p>
       </div>
-
       <div class="roles-grid">
-        <div class="role-card {{ r.bgGrad }}" *ngFor="let r of roles">
-          <div class="rc-header">
-            <div class="rc-icon" [style.background]="r.color + '20'" [style.color]="r.color">
-              <i class="bi {{ r.icon }}"></i>
-            </div>
-            <h3 class="rc-name" [style.color]="r.color">{{ r.name }}</h3>
+        <div class="role-card" *ngFor="let r of roles" (click)="openLogin()">
+          <div class="rc-icon" [style.background]="r.color + '18'" [style.color]="r.color">
+            <i class="bi {{ r.icon }}"></i>
           </div>
-          <ul class="rc-list">
-            <li *ngFor="let cap of r.capabilities">
-              <i class="bi bi-check2" [style.color]="r.color"></i>
-              {{ cap }}
-            </li>
-          </ul>
-          <a routerLink="/auth/login" class="rc-cta" [style.border-color]="r.color" [style.color]="r.color">
-            Access as {{ r.name }} →
-          </a>
+          <h3 [style.color]="r.color">{{ r.name }}</h3>
+          <p>{{ r.desc }}</p>
+          <div class="rc-cta" [style.color]="r.color">Sign in as {{ r.name }} →</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════ WORKFLOW ════════════════════════════════════ -->
-  <section class="workflow-section" id="workflow">
-    <div class="section-container">
-      <div class="section-header">
-        <div class="section-tag">Platform Workflow</div>
-        <h2 class="section-title">Six Steps. Complete Inventory Control.</h2>
-        <p class="section-sub">From initial setup to daily operations — a structured, secure process every time.</p>
-      </div>
-
-      <div class="workflow-grid">
-        <div class="workflow-card" *ngFor="let w of workflow; let i = index" [style.animation-delay]="(i * 0.1) + 's'">
-          <div class="wf-step">{{ w.step }}</div>
-          <div class="wf-icon-wrap"><i class="bi {{ w.icon }}"></i></div>
-          <h3 class="wf-title">{{ w.title }}</h3>
-          <p class="wf-desc">{{ w.desc }}</p>
-          <div class="wf-connector" *ngIf="i < workflow.length - 1"></div>
-        </div>
+  <!-- ══ CTA ════════════════════════════════════════════════════════════════ -->
+  <section class="lp-cta">
+    <div class="lp-container cta-inner">
+      <h2>Ready to Take Control?</h2>
+      <p>Sign in to your account or register as a supplier to get started.</p>
+      <div class="hero-btns">
+        <button class="btn-hero-primary" (click)="openLogin()"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</button>
+        <button class="btn-hero-outline" (click)="openRegister()"><i class="bi bi-truck me-2"></i>Register as Supplier</button>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════ CTA ══════════════════════════════════════════ -->
-  <section class="cta-section">
-    <div class="cta-bg">
-      <div class="cta-orb"></div>
-    </div>
-    <div class="section-container cta-inner">
-      <div class="cta-badge">Ready to Get Started?</div>
-      <h2 class="cta-title">Take Full Control of Your Inventory Today</h2>
-      <p class="cta-sub">Join thousands of businesses using IMS Pro to manage their supply chain with precision and confidence.</p>
-      <div class="cta-actions">
-        <a routerLink="/auth/login" class="btn-hero-primary">
-          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to System
-        </a>
-        <a routerLink="/auth/register" class="btn-hero-outline">
-          <i class="bi bi-truck me-2"></i>Register as Supplier
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════ FOOTER ══════════════════════════════════════ -->
+  <!-- ══ FOOTER ════════════════════════════════════════════════════════════ -->
   <footer class="lp-footer">
-    <div class="section-container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <div class="lp-brand">
-            <div class="brand-mark"><i class="bi bi-boxes"></i></div>
-            <span class="brand-name">IMS <span class="brand-pro">Pro</span></span>
-          </div>
-          <p class="footer-brand-desc">
-            Enterprise-grade inventory management for modern B2B wholesale distribution.
-          </p>
-        </div>
-
-        <div class="footer-col">
-          <div class="fc-title">Platform</div>
-          <a (click)="scrollTo('features')">Features</a>
-          <a (click)="scrollTo('roles')">User Roles</a>
-          <a (click)="scrollTo('workflow')">How It Works</a>
-          <a (click)="scrollTo('stats-section')">Statistics</a>
-        </div>
-
-        <div class="footer-col">
-          <div class="fc-title">Access</div>
-          <a routerLink="/auth/login">Administrator Login</a>
-          <a routerLink="/auth/login">Manager Login</a>
-          <a routerLink="/auth/login">Staff Login</a>
-          <a routerLink="/auth/register">Supplier Registration</a>
-        </div>
-
-        <div class="footer-col">
-          <div class="fc-title">Roles</div>
-          <a>Admin Dashboard</a>
-          <a>Manager Dashboard</a>
-          <a>Staff Dashboard</a>
-          <a>Supplier Portal</a>
-        </div>
+    <div class="lp-container footer-inner">
+      <div class="lp-brand footer-brand">
+        <div class="brand-mark"><i class="bi bi-boxes"></i></div>
+        <span class="brand-name">Inventra <span class="brand-accent">IMS</span></span>
       </div>
-
-      <div class="footer-bottom">
-        <div class="fb-copy">© {{ currentYear }} IMS Pro. All rights reserved.</div>
-        <div class="fb-stack">
-          <span class="tech-badge"><i class="bi bi-lightning-fill"></i> Angular 17</span>
-          <span class="tech-badge"><i class="bi bi-server"></i> Spring Boot</span>
-          <span class="tech-badge"><i class="bi bi-database-fill"></i> MySQL</span>
-        </div>
+      <div class="footer-links">
+        <a (click)="scrollTo('features')">Features</a>
+        <a (click)="scrollTo('roles')">Roles</a>
+        <a (click)="openLogin()">Sign In</a>
+        <a (click)="openRegister()">Supplier Register</a>
       </div>
+      <div class="footer-copy">© {{ currentYear }} Inventra IMS · Built with Angular 17 + Spring Boot</div>
     </div>
   </footer>
 
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     AUTH MODAL OVERLAY
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="auth-modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="auth-modal-box" (click)="$event.stopPropagation()">
+
+    <!-- LOGIN FORM -->
+    <ng-container *ngIf="showModal === 'login'">
+      <div class="am-header">
+        <div class="am-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+          <i class="bi bi-box-arrow-in-right"></i>
+        </div>
+        <h3>Welcome Back</h3>
+        <p>Sign in to your IMS account</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <div class="am-field">
+          <label class="ims-form-label">Email Address</label>
+          <div class="am-input-wrap">
+            <i class="bi bi-envelope am-icon-field"></i>
+            <input type="email" class="ims-form-control" formControlName="email" placeholder="you@company.com"
+              [class.is-invalid]="lf['email'].invalid && lf['email'].touched">
+          </div>
+          <div class="am-error" *ngIf="lf['email'].invalid && lf['email'].touched">
+            {{ lf['email'].errors?.['required'] ? 'Email is required.' : 'Enter a valid email.' }}
+          </div>
+        </div>
+
+        <div class="am-field">
+          <label class="ims-form-label">Password</label>
+          <div class="am-input-wrap">
+            <i class="bi bi-lock am-icon-field"></i>
+            <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control" formControlName="password" placeholder="••••••••"
+              [class.is-invalid]="lf['password'].invalid && lf['password'].touched">
+            <button type="button" class="pw-toggle" (click)="showPassword = !showPassword">
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+          <div class="am-error" *ngIf="lf['password'].invalid && lf['password'].touched">Password is required.</div>
+        </div>
+
+        <button type="submit" class="am-btn-primary" [disabled]="authLoading">
+          <span *ngIf="!authLoading"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</span>
+          <span *ngIf="authLoading"><span class="spinner-border spinner-border-sm me-2"></span>Signing in...</span>
+        </button>
+      </form>
+
+      <div class="am-footer-link">
+        New supplier? <button (click)="openRegister()">Register here</button>
+      </div>
+    </ng-container>
+
+    <!-- REGISTER FORM -->
+    <ng-container *ngIf="showModal === 'register'">
+      <div class="am-header">
+        <div class="am-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)">
+          <i class="bi bi-truck"></i>
+        </div>
+        <h3>Supplier Registration</h3>
+        <p>Create your supplier account</p>
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+        <div class="am-field">
+          <label class="ims-form-label">Full Name</label>
+          <div class="am-input-wrap">
+            <i class="bi bi-person am-icon-field"></i>
+            <input type="text" class="ims-form-control" formControlName="name" placeholder="Your full name"
+              [class.is-invalid]="rf['name'].invalid && rf['name'].touched">
+          </div>
+          <div class="am-error" *ngIf="rf['name'].invalid && rf['name'].touched">Name is required.</div>
+        </div>
+
+        <div class="am-field">
+          <label class="ims-form-label">Email Address</label>
+          <div class="am-input-wrap">
+            <i class="bi bi-envelope am-icon-field"></i>
+            <input type="email" class="ims-form-control" formControlName="email" placeholder="you@company.com"
+              [class.is-invalid]="rf['email'].invalid && rf['email'].touched">
+          </div>
+          <div class="am-error" *ngIf="rf['email'].invalid && rf['email'].touched">Valid email required.</div>
+        </div>
+
+        <div class="am-field">
+          <label class="ims-form-label">Phone (Optional)</label>
+          <div class="am-input-wrap">
+            <i class="bi bi-telephone am-icon-field"></i>
+            <input type="tel" class="ims-form-control" formControlName="phone" placeholder="+91XXXXXXXXXX">
+          </div>
+        </div>
+
+        <div class="am-field">
+          <label class="ims-form-label">Password</label>
+          <div class="am-input-wrap">
+            <i class="bi bi-lock am-icon-field"></i>
+            <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control" formControlName="password" placeholder="Min. 8 characters"
+              [class.is-invalid]="rf['password'].invalid && rf['password'].touched">
+            <button type="button" class="pw-toggle" (click)="showPassword = !showPassword">
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+          <div class="am-error" *ngIf="rf['password'].invalid && rf['password'].touched">Min 8 characters required.</div>
+        </div>
+
+        <button type="submit" class="am-btn-warning" [disabled]="authLoading">
+          <span *ngIf="!authLoading"><i class="bi bi-person-check me-2"></i>Create Account</span>
+          <span *ngIf="authLoading"><span class="spinner-border spinner-border-sm me-2"></span>Registering...</span>
+        </button>
+      </form>
+
+      <div class="am-footer-link">
+        Already have an account? <button (click)="openLogin()">Sign in</button>
+      </div>
+    </ng-container>
+
+    <!-- Close -->
+    <button class="am-close" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+  </div>
 </div>

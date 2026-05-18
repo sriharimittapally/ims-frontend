@@ -1,5 +1,9 @@
 <div class="main-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
-  <app-sidebar [collapsed]="sidebarCollapsed()" />
+  <app-sidebar
+    [collapsed]="sidebarCollapsed()"
+    [mobileOpen]="mobileSidebarOpen()"
+    (mobileClose)="closeMobileSidebar()" />
+
   <div class="main-content">
     <app-topbar
       [pageTitle]="pageTitle()"

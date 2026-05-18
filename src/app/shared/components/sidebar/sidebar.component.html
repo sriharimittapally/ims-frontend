@@ -1,44 +1,65 @@
-<aside class="ims-sidebar" [class.collapsed]="collapsed">
-  <!-- Logo -->
+<!-- Mobile Overlay -->
+<div class="sidebar-overlay" *ngIf="!collapsed && mobileOpen" (click)="closeMobile()"></div>
+
+<aside class="ims-sidebar"
+  [class.collapsed]="collapsed"
+  [class.mobile-open]="mobileOpen">
+
+  <!-- ── Brand ──────────────────────────────────────────────────────────── -->
   <div class="sidebar-brand">
     <div class="brand-icon">
       <i class="bi bi-boxes"></i>
     </div>
     <div class="brand-text" *ngIf="!collapsed">
-      <span class="brand-name">IMS</span>
-      <span class="brand-sub">Inventory System</span>
+      <span class="brand-name">Inventra</span>
+      <span class="brand-sub">IMS Platform</span>
     </div>
-  </div>
-
-  <!-- User Info -->
-  <!-- <div class="sidebar-user" *ngIf="!collapsed">
-    <div class="user-avatar" [style.background]="getRoleColor()">
-      {{ (auth.currentUser()?.name ?? 'U')[0].toUpperCase() }}
-    </div>
-    <div class="user-info">
-      <div class="user-name">{{ auth.currentUser()?.name }}</div>
-      <div class="user-role">{{ getRoleLabel() }}</div>
-    </div>
-  </div> -->
-
-  <!-- Navigation -->
-  <nav class="sidebar-nav">
-    <div class="nav-label" *ngIf="!collapsed">NAVIGATION</div>
-    <a *ngFor="let item of navItems()"
-       [routerLink]="item.route"
-       routerLinkActive="active"
-       class="nav-item"
-       [title]="collapsed ? item.label : ''">
-      <i class="bi {{ item.icon }} nav-icon"></i>
-      <span class="nav-label-text" *ngIf="!collapsed">{{ item.label }}</span>
-    </a>
-  </nav>
-
-  <!-- Logout -->
-  <div class="sidebar-footer">
-    <button class="nav-item logout-btn w-100" (click)="logout()" [title]="collapsed ? 'Logout' : ''">
-      <i class="bi bi-box-arrow-left nav-icon"></i>
-      <span class="nav-label-text" *ngIf="!collapsed">Logout</span>
+    <button class="mobile-close" (click)="closeMobile()" *ngIf="mobileOpen && !collapsed">
+      <i class="bi bi-x-lg"></i>
     </button>
   </div>
+
+  <!-- ── User Profile ───────────────────────────────────────────────────── -->
+  <div class="sidebar-profile" *ngIf="!collapsed">
+    <div class="sp-avatar" [style.background]="getRoleColor()">
+      {{ (auth.currentUser()?.name ?? 'U')[0].toUpperCase() }}
+    </div>
+    <div class="sp-info">
+      <div class="sp-name">{{ auth.currentUser()?.name }}</div>
+      <div class="sp-role">{{ getRoleLabel() }}</div>
+      <div class="sp-code" *ngIf="auth.currentUser()?.userCode">{{ auth.currentUser()?.userCode }}</div>
+    </div>
+  </div>
+  <div class="sidebar-profile-collapsed" *ngIf="collapsed">
+    <div class="sp-avatar-sm" [style.background]="getRoleColor()">
+      {{ (auth.currentUser()?.name ?? 'U')[0].toUpperCase() }}
+    </div>
+  </div>
+
+  <!-- ── Navigation ────────────────────────────────────────────────────── -->
+  <nav class="sidebar-nav">
+    <ng-container *ngFor="let section of navSections()">
+      <div class="nav-section-label" *ngIf="!collapsed && section.label">{{ section.label }}</div>
+      <a *ngFor="let item of section.items"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         class="nav-item"
+         [title]="item.label"
+         (click)="closeMobile()">
+        <i class="bi {{ item.icon }} nav-icon"></i>
+        <span class="nav-label-text" *ngIf="!collapsed">{{ item.label }}</span>
+        <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
+      </a>
+    </ng-container>
+  </nav>
+
+  <!-- ── Footer: Logout ────────────────────────────────────────────────── -->
+  <div class="sidebar-footer">
+    <div class="sidebar-divider"></div>
+    <button class="nav-item logout-btn" (click)="logout()" [title]="collapsed ? 'Logout' : ''">
+      <i class="bi bi-box-arrow-left nav-icon"></i>
+      <span class="nav-label-text" *ngIf="!collapsed">Sign Out</span>
+    </button>
+  </div>
+
 </aside>

@@ -1,11 +1,15 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { ThemeService } from '../../core/services/theme.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.scss']
 })
@@ -14,115 +18,61 @@ export class LandingComponent implements OnInit, OnDestroy {
   scrolled = false;
   currentYear = new Date().getFullYear();
 
-  // Animated counters
+  // Modal state
+  showModal: 'login' | 'register' | null = null;
+  authLoading = false;
+  showPassword = false;
+
+  // Forms
+  loginForm: FormGroup;
+  registerForm: FormGroup;
+
+  // Counters
   counters = [
-    { label: 'Warehouses Managed',   end: 500,    suffix: '+', current: 0, icon: 'bi-building' },
-    { label: 'Products Tracked',     end: 50000,  suffix: '+', current: 0, icon: 'bi-box-seam' },
-    { label: 'Orders Processed',     end: 1200000, suffix: '+', current: 0, icon: 'bi-cart-check' },
-    { label: 'Uptime Guaranteed',    end: 99.9,   suffix: '%', current: 0, icon: 'bi-shield-check' }
+    { label: 'Warehouses Managed', end: 500,    suffix: '+', current: 0, icon: 'bi-building' },
+    { label: 'Products Tracked',   end: 50000,  suffix: '+', current: 0, icon: 'bi-box-seam' },
+    { label: 'POs Processed',      end: 120000, suffix: '+', current: 0, icon: 'bi-cart-check' },
+    { label: 'Uptime',             end: 99.9,   suffix: '%', current: 0, icon: 'bi-shield-check' }
   ];
 
   features = [
-    {
-      icon: 'bi-speedometer2',
-      gradient: 'grad-indigo',
-      title: 'Real-Time Dashboard',
-      desc: 'Live KPIs, stock levels, and movement trends across every warehouse — refreshed in real time.'
-    },
-    {
-      icon: 'bi-truck',
-      gradient: 'grad-emerald',
-      title: 'Supplier Portal',
-      desc: 'External suppliers register, link products with custom pricing, and manage purchase orders independently.'
-    },
-    {
-      icon: 'bi-archive',
-      gradient: 'grad-amber',
-      title: 'Smart Stock Control',
-      desc: 'Auto-reserve stock on PO creation, track movements end-to-end, and trigger reorder alerts proactively.'
-    },
-    {
-      icon: 'bi-bar-chart-line',
-      gradient: 'grad-rose',
-      title: 'Deep Analytics',
-      desc: 'Multi-dimensional reports: stock trends, supplier performance, staff activity, top products, and more.'
-    },
-    {
-      icon: 'bi-shield-lock',
-      gradient: 'grad-cyan',
-      title: 'Role-Based Security',
-      desc: 'Granular access control across Admin, Manager, Staff, and Supplier — every action is authenticated and scoped.'
-    },
-    {
-      icon: 'bi-arrow-left-right',
-      gradient: 'grad-violet',
-      title: 'Full Audit Trail',
-      desc: 'Every stock movement is timestamped and attributed — from PO receipt to final stock issue.'
-    }
+    { icon: 'bi-speedometer2',    color: '#6366f1', title: 'Real-Time Dashboards',   desc: 'Role-specific KPIs, live stock levels, and movement analytics.' },
+    { icon: 'bi-truck',           color: '#10b981', title: 'Supplier Portal',         desc: 'Self-service supplier registration, product linking and PO management.' },
+    { icon: 'bi-archive',         color: '#f59e0b', title: 'Smart Inventory',        desc: 'Auto low-stock alerts, reorder drafts, and full movement tracking.' },
+    { icon: 'bi-bar-chart-line',  color: '#ef4444', title: 'Rich Analytics',          desc: 'Trend charts, supplier performance, staff activity and custom reports.' },
+    { icon: 'bi-shield-lock',     color: '#06b6d4', title: 'Role-Based Security',     desc: 'JWT-authenticated access with admin, manager, staff and supplier scoping.' },
+    { icon: 'bi-arrow-left-right', color: '#8b5cf6', title: 'Full Audit Trail',      desc: 'Every movement timestamped — PO receipts to final stock issues.' }
   ];
 
   roles = [
-    {
-      name: 'Administrator',
-      icon: 'bi-shield-fill',
-      color: '#ef4444',
-      bgGrad: 'grad-rose-card',
-      capabilities: [
-        'Manage all users, warehouses, categories and products',
-        'Approve or reject supplier registrations',
-        'View system-wide inventory and analytics',
-        'Full purchase order visibility across all warehouses'
-      ]
-    },
-    {
-      name: 'Manager',
-      icon: 'bi-person-badge-fill',
-      color: '#6366f1',
-      bgGrad: 'grad-indigo-card',
-      capabilities: [
-        'Manage staff within own warehouse',
-        'Create and send purchase orders to suppliers',
-        'Approve or reject stock issue requests',
-        'Warehouse-level reports and movement tracking'
-      ]
-    },
-    {
-      name: 'Staff',
-      icon: 'bi-person-fill-gear',
-      color: '#10b981',
-      bgGrad: 'grad-emerald-card',
-      capabilities: [
-        'Receive incoming purchase orders into inventory',
-        'Create and submit stock issue requests',
-        'View current warehouse stock levels',
-        'Personal issue history and trend reports'
-      ]
-    },
-    {
-      name: 'Supplier',
-      icon: 'bi-truck',
-      color: '#f59e0b',
-      bgGrad: 'grad-amber-card',
-      capabilities: [
-        'Self-register and complete company profile',
-        'Browse and link products by approved categories',
-        'Set purchase pricing and lead time per product',
-        'Accept, reject, and ship purchase orders'
-      ]
-    }
-  ];
-
-  workflow = [
-    { step: '01', icon: 'bi-person-plus',     title: 'Onboard & Configure',  desc: 'Admin creates warehouses, categories, products. Suppliers self-register and submit for approval.' },
-    { step: '02', icon: 'bi-link-45deg',      title: 'Link & Price',         desc: 'Approved suppliers browse products in their categories and link with custom pricing and lead times.' },
-    { step: '03', icon: 'bi-cart-plus',       title: 'Order & Fulfil',       desc: 'Managers create POs and send to suppliers. Suppliers accept, reject, or mark as shipped.' },
-    { step: '04', icon: 'bi-inbox-fill',      title: 'Receive & Update',     desc: 'Staff receives shipped POs. Inventory auto-updates with stock movements recorded and timestamped.' },
-    { step: '05', icon: 'bi-arrow-left-right', title: 'Issue & Track',       desc: 'Staff creates stock issues, manager approves. Stock reserved and issued with full audit trail.' },
-    { step: '06', icon: 'bi-bar-chart-fill',  title: 'Analyse & Optimise',   desc: 'All roles access role-scoped analytics — trends, performance, and reorder intelligence.' }
+    { name: 'Administrator', icon: 'bi-shield-fill', color: '#ef4444', desc: 'Full system control — users, warehouses, products, suppliers, and all analytics.' },
+    { name: 'Manager',       icon: 'bi-person-badge-fill', color: '#6366f1', desc: 'Warehouse operations — POs, stock issue approvals, staff management, and reports.' },
+    { name: 'Staff',         icon: 'bi-person-fill-gear', color: '#10b981', desc: 'Daily operations — receive POs, create stock issues, view inventory.' },
+    { name: 'Supplier',      icon: 'bi-truck', color: '#f59e0b', desc: 'External portal — product linking, pricing, and purchase order management.' }
   ];
 
   private animationFrame: number | null = null;
   private counterStarted = false;
+
+  constructor(
+    public theme: ThemeService,
+    private auth: AuthService,
+    private router: Router,
+    private toastr: ToastrService,
+    private fb: FormBuilder
+  ) {
+    this.loginForm = this.fb.group({
+      email:    ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required]
+    });
+
+    this.registerForm = this.fb.group({
+      name:     ['', Validators.required],
+      email:    ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      phone:    ['']
+    });
+  }
 
   @HostListener('window:scroll')
   onScroll(): void {
@@ -130,20 +80,54 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.tryStartCounters();
   }
 
+  @HostListener('document:keydown.escape')
+  onEscape(): void { this.showModal = null; }
+
   ngOnInit(): void {
-    setTimeout(() => this.tryStartCounters(), 300);
+    if (this.auth.isLoggedIn()) { this.auth.redirectByRole(); return; }
+    setTimeout(() => this.tryStartCounters(), 500);
   }
 
   ngOnDestroy(): void {
     if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
   }
 
+  openLogin():    void { this.showModal = 'login';    this.loginForm.reset();    }
+  openRegister(): void { this.showModal = 'register'; this.registerForm.reset(); }
+  closeModal():   void { this.showModal = null; }
+
+  submitLogin(): void {
+    if (this.loginForm.invalid) { this.loginForm.markAllAsTouched(); return; }
+    this.authLoading = true;
+    this.auth.login(this.loginForm.value).subscribe({
+      next: () => { this.authLoading = false; this.toastr.success('Welcome back!'); this.auth.redirectByRole(); },
+      error: () => { this.authLoading = false; }
+    });
+  }
+
+  submitRegister(): void {
+    if (this.registerForm.invalid) { this.registerForm.markAllAsTouched(); return; }
+    this.authLoading = true;
+    this.auth.registerSupplier(this.registerForm.value).subscribe({
+      next: (res) => {
+        this.authLoading = false;
+        this.toastr.success(`Registration successful! Your code: ${res.data}. Please sign in.`, 'Welcome', { timeOut: 6000 });
+        this.showModal = 'login';
+      },
+      error: () => { this.authLoading = false; }
+    });
+  }
+
+  scrollTo(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    this.menuOpen = false;
+  }
+
   private tryStartCounters(): void {
     if (this.counterStarted) return;
-    const statsEl = document.getElementById('stats-section');
-    if (!statsEl) return;
-    const rect = statsEl.getBoundingClientRect();
-    if (rect.top < window.innerHeight) {
+    const el = document.getElementById('stats-section');
+    if (!el) return;
+    if (el.getBoundingClientRect().top < window.innerHeight) {
       this.counterStarted = true;
       this.animateCounters();
     }
@@ -155,9 +139,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     const animate = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
       const ease = 1 - Math.pow(1 - progress, 4);
-      this.counters.forEach(c => {
-        c.current = parseFloat((c.end * ease).toFixed(c.end < 100 ? 1 : 0));
-      });
+      this.counters.forEach(c => c.current = parseFloat((c.end * ease).toFixed(c.end < 100 ? 1 : 0)));
       if (progress < 1) {
         this.animationFrame = requestAnimationFrame(animate);
       } else {
@@ -167,8 +149,6 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.animationFrame = requestAnimationFrame(animate);
   }
 
-  scrollTo(id: string): void {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-    this.menuOpen = false;
-  }
+  get lf() { return this.loginForm.controls; }
+  get rf() { return this.registerForm.controls; }
 }

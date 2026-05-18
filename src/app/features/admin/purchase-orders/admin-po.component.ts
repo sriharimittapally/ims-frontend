@@ -11,7 +11,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
   standalone: true,
   imports: [CommonModule],
   templateUrl: './admin-po.component.html',
-  styleUrls: ['./admin-po.component.scss']
+  styleUrls: ['./admin-po.component.scss'],
 })
 export class AdminPoComponent implements OnInit {
   orders: PurchaseOrderResponse[] = [];
@@ -21,26 +21,61 @@ export class AdminPoComponent implements OnInit {
   selectedOrder: PurchaseOrderResponse | null = null;
   showDetail = false;
 
-  statuses = ['ALL', 'DRAFT', 'SENT', 'ACCEPTED', 'SHIPPED', 'RECEIVED', 'CANCELLED', 'REJECTED'];
+  statuses = [
+    'ALL',
+    'DRAFT',
+    'SENT',
+    'ACCEPTED',
+    'SHIPPED',
+    'RECEIVED',
+    'CANCELLED',
+    'REJECTED',
+  ];
 
-  constructor(private svc: PurchaseOrderService, private modal: NgbModal, private toastr: ToastrService) {}
+  constructor(
+    private svc: PurchaseOrderService,
+    private modal: NgbModal,
+    private toastr: ToastrService,
+  ) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
     this.loading = true;
-    this.svc.getAll().subscribe({ next: r => { this.orders = r.data; this.applyFilter(); this.loading = false; }, error: () => { this.loading = false; } });
+    this.svc.getAll().subscribe({
+      next: (r) => {
+        this.orders = r.data;
+        this.applyFilter();
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
   }
 
   applyFilter(): void {
-    this.filtered = this.activeTab === 'ALL' ? this.orders : this.orders.filter(o => o.status === this.activeTab);
+    this.filtered =
+      this.activeTab === 'ALL'
+        ? this.orders
+        : this.orders.filter((o) => o.status === this.activeTab);
   }
 
-  setTab(tab: string): void { this.activeTab = tab; this.applyFilter(); }
+  setTab(tab: string): void {
+    this.activeTab = tab;
+    this.applyFilter();
+  }
 
-  countBy(status: string): number { return this.orders.filter(o => o.status === status).length; }
+  countBy(status: string): number {
+    return this.orders.filter((o) => o.status === status).length;
+  }
 
-  viewDetail(o: PurchaseOrderResponse): void { this.selectedOrder = o; this.showDetail = true; }
+  viewDetail(o: PurchaseOrderResponse): void {
+    this.selectedOrder = o;
+    this.showDetail = true;
+  }
 
   cancel(o: PurchaseOrderResponse): void {
     const ref = this.modal.open(ConfirmModalComponent);
@@ -48,30 +83,39 @@ export class AdminPoComponent implements OnInit {
     ref.componentInstance.message = `Cancel PO <strong>${o.poNumber}</strong>?`;
     ref.componentInstance.confirmLabel = 'Cancel PO';
     ref.componentInstance.confirmClass = 'danger';
-    ref.result.then(() => { this.svc.cancel(o.id).subscribe({ next: () => { this.toastr.success('PO cancelled'); this.load(); } }); }).catch(() => {});
+    ref.result
+      .then(() => {
+        this.svc.cancel(o.id).subscribe({
+          next: () => {
+            this.toastr.success('PO cancelled');
+            this.load();
+          },
+        });
+      })
+      .catch(() => {});
   }
 
   getStatusClass(s: string): string {
+    const m: Record<string, string> = {
+      DRAFT: 'badge-draft',
 
-  const m: Record<string, string> = {
+      SENT: 'badge-sent',
 
-    DRAFT: 'badge-draft',
+      ACCEPTED: 'badge-accepted',
 
-    SENT: 'badge-sent',
+      SHIPPED: 'badge-shipped',
 
-    ACCEPTED: 'badge-accepted',
+      RECEIVED: 'badge-received',
 
-    SHIPPED: 'badge-shipped',
+      REJECTED: 'badge-rejected',
 
-    RECEIVED: 'badge-received',
+      CANCELLED: 'badge-cancelled',
+    };
 
-    REJECTED: 'badge-rejected',
+    return m[s] ?? 'badge-draft';
+  }
 
-    CANCELLED: 'badge-cancelled'
-
-  };
-
-  return m[s] ?? 'badge-draft';
-
-}
+  isAutoDraft = (o: PurchaseOrderResponse): boolean => {
+  return !o.createdByName || (o.note?.includes('AUTO-DRAFT') ?? false);
+};
 }

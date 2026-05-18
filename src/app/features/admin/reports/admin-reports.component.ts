@@ -189,29 +189,32 @@ export class AdminReportsComponent implements OnInit {
     });
   }
 
-  loadTopProducts(): void {
-    this.loading = true;
-    this.svc.adminTopProducts().subscribe({
-      next: (r) => {
-        this.topProducts = r.data;
-        this.topBarData = {
-          labels: r.data.topMovingProducts.map((p: any) => p.productName),
-          datasets: [
-            {
-              label: 'Total Movement',
-              data: r.data.topMovingProducts.map((p: any) => p.totalMovement),
-              backgroundColor: 'rgba(6,182,212,0.7)',
-              borderRadius: 6,
-            },
-          ],
-        };
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
-  }
+ loadTopProducts(): void {
+  this.loading = true;
+  this.svc.adminTopProducts().subscribe({
+    next: r => {
+      this.topProducts = r.data;
+
+      // CORRECT fields: topMovingProducts (not topMoving), totalUnitsOut (not totalMovement)
+      const top = (r.data.topMovingProducts ?? []).slice(0, 8);
+
+      this.topBarData = {
+        labels: top.map(p => p.productName.length > 18 ? p.productName.slice(0, 18) + '…' : p.productName),
+        datasets: [{
+          label: 'Units Out',
+          data: top.map(p => p.totalUnitsOut),    // FIXED: totalUnitsOut
+          backgroundColor: top.map((_, i) =>
+            `hsla(${(i * 45) % 360}, 70%, 55%, 0.75)`
+          ),
+          borderRadius: 6
+        }]
+      };
+      this.loading = false;
+    },
+    error: () => { this.loading = false; }
+  });
+}
+
 
   loadPO(): void {
     this.loading = true;

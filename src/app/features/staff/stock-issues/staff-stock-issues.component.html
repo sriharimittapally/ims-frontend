@@ -1,96 +1,418 @@
-<div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between">
-    <div><h1 class="page-title">Stock Issues</h1><p class="page-subtitle">Request and manage stock issuances</p></div>
+<div class="animate-fade-in-up si-page">
+
+  <!-- ── Page Header ─────────────────────────────────────────────────────── -->
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Stock Issues</h1>
+      <p class="page-subtitle">Create and manage stock issuances from your warehouse</p>
+    </div>
+    <button class="btn-ims-primary btn" (click)="noteText=''; showDetail=false" data-bs-toggle="modal" data-bs-target="#createModal">
+      <i class="bi bi-plus-circle me-1"></i> New Stock Issue
+    </button>
   </div>
 
-  <!-- Create New Issue -->
+  <!-- ── Flow Guide ─────────────────────────────────────────────────────── -->
+  <div class="flow-guide ims-card mb-4">
+    <div class="flow-step" [class.active]="true">
+      <div class="fs-num">1</div>
+      <div class="fs-icon"><i class="bi bi-plus-circle"></i></div>
+      <div class="fs-label">Create</div>
+    </div>
+    <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+    <div class="flow-step">
+      <div class="fs-num">2</div>
+      <div class="fs-icon"><i class="bi bi-box-seam"></i></div>
+      <div class="fs-label">Add Products</div>
+    </div>
+    <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+    <div class="flow-step">
+      <div class="fs-num">3</div>
+      <div class="fs-icon"><i class="bi bi-send"></i></div>
+      <div class="fs-label">Submit for Review</div>
+    </div>
+    <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+    <div class="flow-step">
+      <div class="fs-num">4</div>
+      <div class="fs-icon"><i class="bi bi-person-check"></i></div>
+      <div class="fs-label">Manager Approves</div>
+    </div>
+    <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+    <div class="flow-step">
+      <div class="fs-num">5</div>
+      <div class="fs-icon"><i class="bi bi-check2-all"></i></div>
+      <div class="fs-label">Execute & Issue</div>
+    </div>
+  </div>
+
+  <!-- ── Tabs ────────────────────────────────────────────────────────────── -->
   <div class="ims-card mb-3">
-    <h6 class="mb-2 fw-700"><i class="bi bi-plus-circle me-2" style="color:var(--ims-primary)"></i>Create New Stock Issue</h6>
-    <div class="d-flex gap-2 align-items-end">
-      <div class="flex-1"><label class="ims-form-label">Note (Optional)</label><input class="ims-form-control" [(ngModel)]="noteText" placeholder="Purpose or note..."></div>
-      <button class="btn-ims-primary btn" (click)="createIssue()" [disabled]="createLoading">
-        <span *ngIf="!createLoading"><i class="bi bi-plus me-1"></i>Create Issue</span>
-        <span *ngIf="createLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
+    <div class="si-tabs">
+      <button class="si-tab" [class.active]="activeTab==='ALL'" (click)="activeTab='ALL'">
+        All <span class="tc">{{ issues.length }}</span>
+      </button>
+      <button class="si-tab draft" [class.active]="activeTab==='DRAFT'" (click)="activeTab='DRAFT'">
+        Draft <span class="tc">{{ countBy('DRAFT') }}</span>
+      </button>
+      <button class="si-tab pending" [class.active]="activeTab==='PENDING'" (click)="activeTab='PENDING'">
+        Submitted <span class="tc">{{ countBy('PENDING') }}</span>
+      </button>
+      <button class="si-tab approved" [class.active]="activeTab==='APPROVED'" (click)="activeTab='APPROVED'">
+        Approved <span class="tc">{{ countBy('APPROVED') }}</span>
+      </button>
+      <button class="si-tab issued" [class.active]="activeTab==='ISSUED'" (click)="activeTab='ISSUED'">
+        Issued <span class="tc">{{ countBy('ISSUED') }}</span>
+      </button>
+      <button class="si-tab rejected" [class.active]="activeTab==='REJECTED'" (click)="activeTab='REJECTED'">
+        Rejected <span class="tc">{{ countBy('REJECTED') }}</span>
       </button>
     </div>
   </div>
 
+  <!-- ── Loading ────────────────────────────────────────────────────────── -->
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
+  <!-- ── Table ──────────────────────────────────────────────────────────── -->
   <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
-    <div class="table-responsive">
+
+    <!-- Mobile Cards view -->
+    <div class="si-mobile-list d-block d-md-none">
+      <div *ngFor="let issue of filtered" class="si-mobile-card" (click)="openDetail(issue)">
+        <div class="smc-top">
+          <span class="si-num">{{ issue.issueNumber }}</span>
+          <span class="status-pill {{ getStatusClass(issue.status) }}">
+            <i class="bi {{ getStatusIcon(issue.status) }} me-1"></i>{{ issue.status }}
+          </span>
+        </div>
+        <div class="smc-bottom">
+          <span class="text-muted" style="font-size:.78rem">{{ issue.items.length }} items · {{ issue.createdAt | date:'dd MMM yy' }}</span>
+          <div class="smc-actions">
+            <button *ngIf="canExecute(issue)" class="btn btn-sm btn-success rounded-pill" style="font-size:.72rem" (click)="openDetail(issue); $event.stopPropagation()">Execute</button>
+            <button *ngIf="canSubmit(issue)" class="btn btn-sm btn-primary rounded-pill" style="font-size:.72rem" (click)="openDetail(issue); $event.stopPropagation()">Submit</button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="filtered.length === 0" class="empty-state py-4">
+        <div class="empty-icon"><i class="bi bi-clipboard-x"></i></div>
+        <h6>No issues in this category</h6>
+      </div>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="table-responsive d-none d-md-block">
       <table class="ims-table w-100">
-        <thead><tr><th>Issue Number</th><th>Items</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Issue #</th>
+            <th>Status</th>
+            <th>Items</th>
+            <th>Note</th>
+            <th>Created</th>
+            <th>Approved By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr *ngFor="let issue of issues">
-            <td><span class="issue-num">{{ issue.issueNumber }}</span></td>
-            <td><span class="badge-ims badge-sent">{{ issue.items.length }}</span></td>
-            <td><span class="badge-ims" [ngClass]="getStatusClass(issue.status)">{{ issue.status }}</span></td>
-            <td class="text-muted">{{ issue.createdAt | date:'dd MMM, yy' }}</td>
+          <tr *ngFor="let issue of filtered" class="si-row" (click)="openDetail(issue)">
+            <td><span class="si-num">{{ issue.issueNumber }}</span></td>
             <td>
+              <span class="status-pill {{ getStatusClass(issue.status) }}">
+                <i class="bi {{ getStatusIcon(issue.status) }} me-1"></i>{{ issue.status }}
+              </span>
+            </td>
+            <td>
+              <span class="badge-ims badge-sent">{{ issue.items.length }}</span>
+            </td>
+            <td class="text-muted" style="font-size:.82rem; max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
+              {{ issue.note || '—' }}
+            </td>
+            <td class="text-muted" style="font-size:.82rem">{{ issue.createdAt | date:'dd MMM yy, HH:mm' }}</td>
+            <td class="text-muted" style="font-size:.82rem">{{ issue.approvedByName || '—' }}</td>
+            <td (click)="$event.stopPropagation()">
               <div class="d-flex gap-1">
-                <button class="action-btn" (click)="viewDetail(issue)"><i class="bi bi-eye" style="color:var(--ims-info)"></i></button>
-                <button class="action-btn" *ngIf="issue.status === 'DRAFT'" (click)="submitIssue(issue)" title="Submit for Approval"><i class="bi bi-send" style="color:var(--ims-primary)"></i></button>
-                <button class="action-btn" *ngIf="issue.status === 'DRAFT'" (click)="cancelIssue(issue)" title="Cancel"><i class="bi bi-x-circle" style="color:var(--ims-danger)"></i></button>
+                <button class="action-btn" title="View Details" (click)="openDetail(issue)">
+                  <i class="bi bi-eye" style="color:var(--ims-info)"></i>
+                </button>
+                <button *ngIf="canSubmit(issue)" class="btn btn-xs btn-primary rounded-pill px-2 py-0" style="font-size:.72rem" (click)="openDetail(issue)">
+                  Submit
+                </button>
+                <button *ngIf="canExecute(issue)" class="btn btn-xs btn-success rounded-pill px-2 py-0" style="font-size:.72rem" (click)="openDetail(issue)">
+                  Execute
+                </button>
               </div>
             </td>
           </tr>
-          <tr *ngIf="issues.length === 0"><td colspan="5"><div class="empty-state"><div class="empty-icon"><i class="bi bi-arrow-left-right"></i></div><h5>No issues created yet</h5></div></td></tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-clipboard-x"></i></div>
+                <h5>No issues found</h5>
+                <p>Create a new stock issue to get started.</p>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- Detail Side Panel -->
-<div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
-  <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedIssue">
-    <div class="detail-header">
-      <div><h5 class="mb-1">{{ selectedIssue.issueNumber }}</h5><span class="badge-ims" [ngClass]="getStatusClass(selectedIssue.status)">{{ selectedIssue.status }}</span></div>
-      <button class="btn-close" (click)="showDetail=false"></button>
+<!-- ══════════════════════════════════════════════════════
+     CREATE MODAL (Bootstrap 5)
+════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="createModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-plus-circle me-2" style="color:var(--ims-primary)"></i>New Stock Issue</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="ims-form-label">Purpose / Note (Optional)</label>
+        <textarea class="ims-form-control" rows="3" [(ngModel)]="noteText" placeholder="What is this stock issue for? e.g. Floor restocking, Maintenance dept request..."></textarea>
+        <div class="create-hint mt-2">
+          <i class="bi bi-info-circle me-1"></i>
+          After creating, you can add products and then submit for manager approval.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ims-outline btn" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn-ims-primary btn" (click)="createIssue()" [disabled]="createLoading" data-bs-dismiss="modal">
+          <span *ngIf="!createLoading"><i class="bi bi-plus me-1"></i>Create Issue</span>
+          <span *ngIf="createLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     DETAIL SIDE PANEL
+════════════════════════════════════════════════════════ -->
+<div class="si-overlay" *ngIf="showDetail" (click)="closeDetail()">
+  <div class="si-panel" (click)="$event.stopPropagation()" *ngIf="selectedIssue">
+
+    <!-- Panel Header -->
+    <div class="sip-header">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="si-num">{{ selectedIssue.issueNumber }}</span>
+          <span class="status-pill {{ getStatusClass(selectedIssue.status) }}">
+            <i class="bi {{ getStatusIcon(selectedIssue.status) }} me-1"></i>{{ selectedIssue.status }}
+          </span>
+        </div>
+        <div class="text-muted" style="font-size:.75rem">{{ selectedIssue.createdAt | date:'dd MMM yyyy, HH:mm' }}</div>
+      </div>
+      <button class="panel-close" (click)="closeDetail()"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <div class="detail-body">
-      <div class="detail-row" *ngIf="selectedIssue.note"><span class="detail-label">Note</span><span>{{ selectedIssue.note }}</span></div>
-      <div class="detail-row" *ngIf="selectedIssue.rejectionReason"><span class="detail-label">Rejection</span><span style="color:var(--ims-danger)">{{ selectedIssue.rejectionReason }}</span></div>
+    <!-- Panel Body -->
+    <div class="sip-body">
 
-      <!-- Add Item (only DRAFT) -->
-      <ng-container *ngIf="selectedIssue.status === 'DRAFT'">
-        <div class="add-item-form">
-          <h6 class="mb-2 fw-700">Add Product</h6>
-          <select class="ims-form-control mb-2" [(ngModel)]="selectedProductId">
-            <option value="">Select product...</option>
-            <option *ngFor="let inv of inventory" [value]="inv.productId">{{ inv.productName }} (Avail: {{ inv.availableQuantity }})</option>
-          </select>
-          <div class="d-flex gap-2">
-            <input class="ims-form-control" type="number" [(ngModel)]="itemQty" min="1" placeholder="Qty" style="width:80px">
-            <button class="btn-ims-primary btn btn-sm" (click)="addItem(selectedIssue.id)" [disabled]="!selectedProductId || addItemLoading">
-              <i class="bi bi-plus me-1"></i>Add
-            </button>
+      <!-- Info Rows -->
+      <div class="info-grid">
+        <div class="info-row" *ngIf="selectedIssue.note">
+          <span class="ir-label">Note</span>
+          <span class="ir-value">{{ selectedIssue.note }}</span>
+        </div>
+        <div class="info-row">
+          <span class="ir-label">Warehouse</span>
+          <span class="ir-value">{{ selectedIssue.warehouseName }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedIssue.approvedByName">
+          <span class="ir-label">Approved By</span>
+          <span class="ir-value" style="color:var(--ims-success)"><i class="bi bi-check-circle me-1"></i>{{ selectedIssue.approvedByName }}</span>
+        </div>
+      </div>
+
+      <!-- Rejection Reason -->
+      <div class="rejection-box" *ngIf="selectedIssue.rejectionReason">
+        <div class="rb-title"><i class="bi bi-x-circle me-1"></i>Rejection Reason</div>
+        <div class="rb-text">{{ selectedIssue.rejectionReason }}</div>
+      </div>
+
+      <!-- ── ADD PRODUCT FORM (DRAFT only) ─────────────────────── -->
+      <ng-container *ngIf="canEdit(selectedIssue)">
+        <div class="add-product-section">
+          <h6 class="aps-title"><i class="bi bi-plus-circle me-1"></i>Add Product</h6>
+          <div class="aps-form">
+            <select class="ims-form-control aps-select" [(ngModel)]="selectedProductId">
+              <option value="">Select product from inventory...</option>
+              <option *ngFor="let inv of inventory" [value]="inv.productId">
+                {{ inv.productName }} — Available: {{ inv.availableQuantity }} 
+              </option>
+            </select>
+            <div class="aps-qty-row">
+              <div class="qty-input-wrap">
+                <label class="ims-form-label">Quantity</label>
+                <input class="ims-form-control" type="number" [(ngModel)]="itemQty" min="1"
+                  [max]="getSelectedInventory()?.availableQuantity ?? 9999" placeholder="Qty">
+                <div *ngIf="selectedProductId && getSelectedInventory() as inv" class="qty-hint">
+                  Max available: {{ inv.availableQuantity }}
+                </div>
+              </div>
+              <button class="btn-ims-primary btn add-btn" (click)="addItem()"
+                [disabled]="!selectedProductId || itemQty < 1 || addItemLoading">
+                <span *ngIf="!addItemLoading"><i class="bi bi-plus-lg"></i></span>
+                <span *ngIf="addItemLoading"><span class="spinner-border spinner-border-sm"></span></span>
+              </button>
+            </div>
           </div>
         </div>
       </ng-container>
 
-      <h6 class="mt-3 mb-2">Items</h6>
-      <div *ngFor="let it of selectedIssue.items" class="issue-item">
-        <div class="flex-1">
-          <div class="fw-600" style="font-size:.875rem">{{ it.productName }}</div>
-          <div class="text-muted" style="font-size:.75rem">{{ it.productSku }}</div>
+      <!-- ── ITEMS LIST ─────────────────────────────────────────── -->
+      <div class="items-section">
+        <div class="items-header">
+          <h6 class="mb-0">Products <span class="badge-ims badge-sent ms-1">{{ selectedIssue.items.length }}</span></h6>
         </div>
-        <span class="badge-ims badge-sent">Qty: {{ it.requestedQuantity }}</span>
-        <button class="action-btn" *ngIf="selectedIssue.status === 'DRAFT'" (click)="removeItem(selectedIssue.id, it.id)">
-          <i class="bi bi-trash" style="color:var(--ims-danger)"></i>
-        </button>
-      </div>
-      <div *ngIf="selectedIssue.items.length === 0" class="text-muted text-center py-3" style="font-size:.875rem">No items added yet</div>
 
-      <!-- Submit/Cancel -->
-      <div class="d-flex gap-2 mt-4" *ngIf="selectedIssue.status === 'DRAFT'">
-        <button class="btn-ims-primary btn flex-1" (click)="submitIssue(selectedIssue)" [disabled]="selectedIssue.items.length === 0">
-          <i class="bi bi-send me-1"></i>Submit for Approval
-        </button>
-        <button class="btn btn-outline-danger" style="border-radius:8px" (click)="cancelIssue(selectedIssue)">Cancel</button>
+        <div *ngIf="selectedIssue.items.length === 0" class="items-empty">
+          <i class="bi bi-inbox"></i>
+          <span>No products added yet</span>
+        </div>
+
+        <div class="item-row" *ngFor="let item of selectedIssue.items">
+          <div class="item-icon"><i class="bi bi-box-seam"></i></div>
+          <div class="item-info">
+            <div class="item-name">{{ item.productName }}</div>
+            <div class="item-meta">
+              <code>{{ item.sku }}</code>
+              <span class="text-muted">{{ item.categoryName }}</span>
+            </div>
+          </div>
+          <div class="item-qty">
+            <div class="iq-label">Requested</div>
+            <div class="iq-value">{{ item.quantityRequested }}</div>
+          </div>
+          <div class="item-qty" *ngIf="selectedIssue.status === 'ISSUED'">
+            <div class="iq-label">Issued</div>
+            <div class="iq-value text-success">{{ item.quantityIssued }}</div>
+          </div>
+          <button *ngIf="canEdit(selectedIssue)" class="item-remove" (click)="removeItem(item.id)"
+            title="Remove this product">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
       </div>
+
+      <!-- ── ACTION BUTTONS ─────────────────────────────────────── -->
+      <div class="sip-actions">
+
+        <!-- DRAFT: Submit + Cancel -->
+        <ng-container *ngIf="selectedIssue.status === 'DRAFT'">
+          <div class="action-hint" *ngIf="selectedIssue.items.length === 0">
+            <i class="bi bi-exclamation-circle me-1"></i>Add at least one product before submitting.
+          </div>
+          <button class="btn-ims-primary btn w-100"
+            [disabled]="selectedIssue.items.length === 0 || submitLoading"
+            (click)="showSubmitConfirm = true">
+            <i class="bi bi-send me-1"></i>Submit for Manager Approval
+          </button>
+          <button class="btn btn-outline-danger w-100" style="border-radius:8px" (click)="showCancelConfirm = true">
+            <i class="bi bi-x-circle me-1"></i>Cancel Issue
+          </button>
+        </ng-container>
+
+        <!-- PENDING: Info + Cancel -->
+        <ng-container *ngIf="selectedIssue.status === 'PENDING'">
+          <div class="status-info-box pending-box">
+            <i class="bi bi-hourglass-split me-2"></i>
+            <div>
+              <div class="sib-title">Awaiting Manager Approval</div>
+              <div class="sib-sub">Your manager will review and approve or reject this issue.</div>
+            </div>
+          </div>
+          <button class="btn btn-outline-danger w-100" style="border-radius:8px" (click)="showCancelConfirm = true">
+            <i class="bi bi-x-circle me-1"></i>Withdraw & Cancel
+          </button>
+        </ng-container>
+
+        <!-- APPROVED: Execute Stock Out -->
+        <ng-container *ngIf="selectedIssue.status === 'APPROVED'">
+          <div class="status-info-box approved-box">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>
+              <div class="sib-title">Approved by {{ selectedIssue.approvedByName }}</div>
+              <div class="sib-sub">Click "Execute Stock Out" to deduct inventory.</div>
+            </div>
+          </div>
+          <button class="btn w-100 execute-btn" (click)="showExecuteConfirm = true" [disabled]="executeLoading">
+            <i class="bi bi-check2-all me-1"></i>Execute Stock Out
+          </button>
+        </ng-container>
+
+        <!-- ISSUED: Done -->
+        <ng-container *ngIf="selectedIssue.status === 'ISSUED'">
+          <div class="status-info-box issued-box">
+            <i class="bi bi-check2-all me-2"></i>
+            <div>
+              <div class="sib-title">Stock Issued Successfully</div>
+              <div class="sib-sub">Inventory deducted on {{ selectedIssue.issuedAt | date:'dd MMM yyyy, HH:mm' }}</div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- REJECTED: Details -->
+        <ng-container *ngIf="selectedIssue.status === 'REJECTED'">
+          <div class="status-info-box rejected-box">
+            <i class="bi bi-x-circle-fill me-2"></i>
+            <div>
+              <div class="sib-title">Rejected by {{ selectedIssue.approvedByName }}</div>
+              <div class="sib-sub">{{ selectedIssue.rejectionReason }}</div>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     CONFIRM DIALOGS
+════════════════════════════════════════════════════════ -->
+
+<!-- Submit Confirm -->
+<div class="confirm-overlay" *ngIf="showSubmitConfirm">
+  <div class="confirm-box">
+    <div class="cb-icon" style="background:rgba(99,102,241,.12);color:var(--ims-primary)"><i class="bi bi-send"></i></div>
+    <h5>Submit for Approval?</h5>
+    <p>Once submitted, your manager will review <strong>{{ selectedIssue?.issueNumber }}</strong>. You won't be able to add or remove items.</p>
+    <div class="cb-actions">
+      <button class="btn-ims-outline btn" (click)="showSubmitConfirm=false">Go Back</button>
+      <button class="btn-ims-primary btn" (click)="submitForReview()" [disabled]="submitLoading">
+        <span *ngIf="!submitLoading">Submit</span>
+        <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Submitting...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Execute Confirm -->
+<div class="confirm-overlay" *ngIf="showExecuteConfirm">
+  <div class="confirm-box">
+    <div class="cb-icon" style="background:rgba(16,185,129,.12);color:var(--ims-success)"><i class="bi bi-check2-all"></i></div>
+    <h5>Execute Stock Out?</h5>
+    <p>This will permanently deduct <strong>{{ selectedIssue?.items?.length }} products</strong> from warehouse inventory. This action cannot be undone.</p>
+    <div class="cb-actions">
+      <button class="btn-ims-outline btn" (click)="showExecuteConfirm=false">Cancel</button>
+      <button class="btn btn-success" style="border-radius:8px" (click)="executeStockOut()" [disabled]="executeLoading">
+        <span *ngIf="!executeLoading"><i class="bi bi-check2-all me-1"></i>Execute Now</span>
+        <span *ngIf="executeLoading"><span class="spinner-border spinner-border-sm me-1"></span>Executing...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Confirm -->
+<div class="confirm-overlay" *ngIf="showCancelConfirm">
+  <div class="confirm-box">
+    <div class="cb-icon" style="background:rgba(239,68,68,.12);color:var(--ims-danger)"><i class="bi bi-x-circle"></i></div>
+    <h5>Cancel this Issue?</h5>
+    <p>Are you sure you want to cancel <strong>{{ selectedIssue?.issueNumber }}</strong>? This cannot be undone.</p>
+    <div class="cb-actions">
+      <button class="btn-ims-outline btn" (click)="showCancelConfirm=false">Go Back</button>
+      <button class="btn btn-danger" style="border-radius:8px" (click)="cancelIssue()" [disabled]="cancelLoading">Cancel Issue</button>
     </div>
   </div>
 </div>

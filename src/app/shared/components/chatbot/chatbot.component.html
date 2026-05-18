@@ -1,0 +1,62 @@
+<div class="chatbot-root">
+  <!-- Floating Button -->
+  <button class="chatbot-fab" (click)="toggle()" [class.open]="isOpen()" title="IMS Assistant">
+    <span class="fab-icon-open"><i class="bi bi-chat-dots-fill"></i></span>
+    <span class="fab-icon-close"><i class="bi bi-x-lg"></i></span>
+    <span class="fab-pulse"></span>
+  </button>
+
+  <!-- Chat Window -->
+  <div class="chatbot-window" *ngIf="isOpen()">
+
+    <!-- Header -->
+    <div class="cw-header">
+      <div class="cw-avatar"><i class="bi bi-robot"></i></div>
+      <div class="cw-header-info">
+        <div class="cw-title">IMS Assistant</div>
+        <div class="cw-status"><span class="online-dot"></span>Always online</div>
+      </div>
+      <button class="cw-close" (click)="toggle()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <!-- Messages -->
+    <div class="cw-messages" #messageList>
+      <div *ngFor="let msg of messages()" class="msg-wrap" [class.user]="msg.role === 'user'">
+        <div class="msg-avatar" *ngIf="msg.role === 'bot'"><i class="bi bi-robot"></i></div>
+        <div class="msg-bubble-wrap">
+          <div class="msg-bubble" [class.bot]="msg.role === 'bot'" [class.user]="msg.role === 'user'">
+            <div class="msg-text" style="white-space: pre-line">{{ msg.text }}</div>
+            <div class="msg-time">{{ msg.time }}</div>
+          </div>
+          <!-- Quick Action Chips -->
+          <div class="action-chips" *ngIf="msg.actions?.length">
+            <button *ngFor="let action of msg.actions" class="chip" (click)="onActionClick(action)">
+              <i class="bi {{ action.icon }} me-1"></i>{{ action.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="msg-wrap" *ngIf="isTyping()">
+        <div class="msg-avatar"><i class="bi bi-robot"></i></div>
+        <div class="typing-indicator">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="cw-input-area">
+      <textarea
+        class="cw-input"
+        [(ngModel)]="inputText"
+        (keydown)="onKeydown($event)"
+        placeholder="Ask anything about IMS..."
+        rows="1"></textarea>
+      <button class="cw-send" (click)="sendMessage()" [disabled]="!inputText.trim()">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
+</div>

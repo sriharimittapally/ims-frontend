@@ -1,59 +1,282 @@
 <div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between">
-    <div><h1 class="page-title">Stock Issues</h1><p class="page-subtitle">Review and approve stock issue requests from staff</p></div>
-    <div class="tab-group">
-      <button class="tab-btn" [class.active]="activeTab==='PENDING'" (click)="setTab('PENDING')">Pending Review</button>
-      <button class="tab-btn" [class.active]="activeTab==='ALL'"     (click)="setTab('ALL')">All Issues</button>
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Stock Issues</h1>
+      <p class="page-subtitle">Review and approve stock issue requests from your staff</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <div class="pending-counter" *ngIf="countByStatus('PENDING') > 0">
+        <i class="bi bi-bell-fill me-1"></i>{{ countByStatus('PENDING') }} awaiting review
+      </div>
     </div>
   </div>
 
+  <!-- ── Tabs ────────────────────────────────────────────────────────────── -->
+  <div class="ims-card mb-3">
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="si-tab" [class.active]="activeTab==='PENDING'" (click)="setTab('PENDING')">
+        <i class="bi bi-hourglass-split me-1"></i>
+        Pending Review
+        <span class="tc" *ngIf="countByStatus('PENDING') > 0">{{ countByStatus('PENDING') }}</span>
+      </button>
+      <button class="si-tab" [class.active]="activeTab==='ALL'" (click)="setTab('ALL')">
+        <i class="bi bi-list-ul me-1"></i>
+        All Issues
+        <span class="tc">{{ issues.length }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────────────────────── -->
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
-    <div class="table-responsive">
-      <table class="ims-table w-100">
-        <thead><tr><th>Issue Number</th><th>Created By</th><th>Items</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let issue of issues">
-            <td><span class="issue-num">{{ issue.issueNumber }}</span></td>
-            <td class="text-muted">{{ issue.createdBy }}</td>
-            <td><span class="badge-ims badge-sent">{{ issue.items.length }} items</span></td>
-            <td><span class="badge-ims" [ngClass]="getStatusClass(issue.status)">{{ issue.status }}</span></td>
-            <td class="text-muted">{{ issue.createdAt | date:'dd MMM, yy' }}</td>
-            <td>
-              <div class="d-flex gap-1">
-                <button class="action-btn" (click)="viewDetail(issue)"><i class="bi bi-eye" style="color:var(--ims-info)"></i></button>
-                <button class="action-btn" *ngIf="issue.status === 'PENDING_APPROVAL'" (click)="approve(issue)"><i class="bi bi-check-circle" style="color:var(--ims-success)"></i></button>
-                <button class="action-btn" *ngIf="issue.status === 'PENDING_APPROVAL'" (click)="reject(issue)"><i class="bi bi-x-circle" style="color:var(--ims-danger)"></i></button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="issues.length === 0"><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="bi bi-arrow-left-right"></i></div><h5>No stock issues</h5></div></td></tr>
-        </tbody>
-      </table>
+  <!-- ── Content ─────────────────────────────────────────────────────────── -->
+  <div *ngIf="!loading">
+
+    <!-- Empty pending state -->
+    <div *ngIf="activeTab === 'PENDING' && issues.length === 0" class="ims-card">
+      <div class="empty-state py-4">
+        <div class="empty-icon"><i class="bi bi-check2-circle"></i></div>
+        <h5>No Pending Issues</h5>
+        <p>All stock issues have been reviewed. Great job!</p>
+      </div>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="si-mobile-list d-block d-md-none" *ngIf="issues.length > 0">
+      <div *ngFor="let issue of issues" class="si-mobile-card" (click)="openDetail(issue)">
+        <div class="smc-top">
+          <span class="si-num">{{ issue.issueNumber }}</span>
+          <span class="status-pill {{ getStatusClass(issue.status) }}">
+            <i class="bi {{ getStatusIcon(issue.status) }} me-1"></i>{{ issue.status }}
+          </span>
+        </div>
+        <div class="smc-mid">{{ issue.issuedByName }} · {{ issue.items.length }} items</div>
+        <div class="smc-bottom">
+          <span class="text-muted" style="font-size:.75rem">{{ issue.createdAt | date:'dd MMM yy' }}</span>
+          <div class="d-flex gap-2" *ngIf="issue.status === 'PENDING'">
+            <button class="btn btn-sm btn-success rounded-pill" style="font-size:.72rem" (click)="openDetail(issue); $event.stopPropagation()">
+              <i class="bi bi-check-circle me-1"></i>Approve
+            </button>
+            <button class="btn btn-sm btn-outline-danger rounded-pill" style="font-size:.72rem" (click)="openDetail(issue); $event.stopPropagation()">Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop table -->
+    <div class="ims-card p-0 overflow-hidden d-none d-md-block" *ngIf="issues.length > 0">
+      <div class="table-responsive">
+        <table class="ims-table w-100">
+          <thead>
+            <tr>
+              <th>Issue #</th>
+              <th>Submitted By</th>
+              <th>Items</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Note</th>
+              <th style="text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let issue of issues" class="si-row" (click)="openDetail(issue)">
+              <td><span class="si-num">{{ issue.issueNumber }}</span></td>
+              <td>
+                <div class="staff-cell">
+                  <div class="staff-avatar">{{ issue.issuedByName[0] }}</div>
+                  <span>{{ issue.issuedByName }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge-ims badge-sent">{{ issue.items.length }} items</span>
+              </td>
+              <td>
+                <span class="status-pill {{ getStatusClass(issue.status) }}">
+                  <i class="bi {{ getStatusIcon(issue.status) }} me-1"></i>{{ issue.status }}
+                </span>
+              </td>
+              <td class="text-muted" style="font-size:.82rem">{{ issue.createdAt | date:'dd MMM yy, HH:mm' }}</td>
+              <td class="text-muted" style="font-size:.8rem; max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
+                {{ issue.note || '—' }}
+              </td>
+              <td (click)="$event.stopPropagation()" style="text-align:center">
+                <div class="d-flex gap-1 justify-content-center">
+                  <button class="action-btn" (click)="openDetail(issue)" title="View Details">
+                    <i class="bi bi-eye" style="color:var(--ims-info)"></i>
+                  </button>
+                  <!-- Manager can only approve/reject PENDING issues -->
+                  <ng-container *ngIf="issue.status === 'PENDING'">
+                    <button class="approve-quick-btn" title="Approve" (click)="openDetail(issue); showApproveConfirm=true; $event.stopPropagation()">
+                      <i class="bi bi-check-circle-fill"></i>
+                    </button>
+                    <button class="reject-quick-btn" title="Reject" (click)="openDetail(issue); showRejectForm=true; $event.stopPropagation()">
+                      <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                  </ng-container>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Detail Panel -->
-<div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
-  <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedIssue">
-    <div class="detail-header">
-      <div><h5 class="mb-0">{{ selectedIssue.issueNumber }}</h5><span class="badge-ims" [ngClass]="getStatusClass(selectedIssue.status)">{{ selectedIssue.status }}</span></div>
-      <button class="btn-close" (click)="showDetail=false"></button>
+<!-- ══════════════════════════════════════════════════════
+     DETAIL SIDE PANEL
+════════════════════════════════════════════════════════ -->
+<div class="si-overlay" *ngIf="showDetail" (click)="closeDetail()">
+  <div class="si-panel" (click)="$event.stopPropagation()" *ngIf="selectedIssue">
+
+    <div class="sip-header">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="si-num">{{ selectedIssue.issueNumber }}</span>
+          <span class="status-pill {{ getStatusClass(selectedIssue.status) }}">
+            <i class="bi {{ getStatusIcon(selectedIssue.status) }} me-1"></i>{{ selectedIssue.status }}
+          </span>
+        </div>
+        <div class="text-muted" style="font-size:.75rem">
+          Submitted by <strong>{{ selectedIssue.issuedByName }}</strong> · {{ selectedIssue.createdAt | date:'dd MMM yyyy, HH:mm' }}
+        </div>
+      </div>
+      <button class="panel-close" (click)="closeDetail()"><i class="bi bi-x-lg"></i></button>
     </div>
-    <div class="detail-body">
-      <div class="detail-row"><span class="detail-label">Created By</span><span>{{ selectedIssue.createdBy }}</span></div>
-      <div class="detail-row" *ngIf="selectedIssue.approvedBy"><span class="detail-label">Approved By</span><span>{{ selectedIssue.approvedBy }}</span></div>
-      <div class="detail-row" *ngIf="selectedIssue.note"><span class="detail-label">Note</span><span>{{ selectedIssue.note }}</span></div>
-      <div class="detail-row" *ngIf="selectedIssue.rejectionReason"><span class="detail-label">Rejection</span><span style="color:var(--ims-danger)">{{ selectedIssue.rejectionReason }}</span></div>
-      <h6 class="mt-3 mb-2">Items</h6>
-      <table class="ims-table w-100">
-        <thead><tr><th>Product</th><th>Requested</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let it of selectedIssue.items"><td>{{ it.productName }}<br><small class="text-muted">{{ it.productSku }}</small></td><td>{{ it.requestedQuantity }}</td></tr>
-        </tbody>
-      </table>
+
+    <div class="sip-body">
+
+      <!-- Info -->
+      <div class="info-grid">
+        <div class="info-row" *ngIf="selectedIssue.note">
+          <span class="ir-label">Note from Staff</span>
+          <span class="ir-value">{{ selectedIssue.note }}</span>
+        </div>
+        <div class="info-row">
+          <span class="ir-label">Warehouse</span>
+          <span class="ir-value">{{ selectedIssue.warehouseName }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedIssue.approvedByName">
+          <span class="ir-label">Reviewed By</span>
+          <span class="ir-value">{{ selectedIssue.approvedByName }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedIssue.approvedAt">
+          <span class="ir-label">Reviewed At</span>
+          <span class="ir-value">{{ selectedIssue.approvedAt | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+      </div>
+
+      <!-- Rejection reason -->
+      <div class="rejection-box" *ngIf="selectedIssue.rejectionReason">
+        <div class="rb-title"><i class="bi bi-x-circle me-1"></i>Rejection Reason</div>
+        <div class="rb-text">{{ selectedIssue.rejectionReason }}</div>
+      </div>
+
+      <!-- Items -->
+      <div class="items-section">
+        <div class="items-header">
+          <h6 class="mb-0 fw-700">Products Requested <span class="badge-ims badge-sent ms-1">{{ selectedIssue.items.length }}</span></h6>
+        </div>
+
+        <div class="item-row" *ngFor="let item of selectedIssue.items">
+          <div class="item-icon"><i class="bi bi-box-seam"></i></div>
+          <div class="item-info">
+            <div class="item-name">{{ item.productName }}</div>
+            <div class="item-meta">
+              <code>{{ item.sku }}</code>
+              <span class="text-muted">{{ item.categoryName }}</span>
+            </div>
+          </div>
+          <div class="item-qty">
+            <div class="iq-label">Requested</div>
+            <div class="iq-value">{{ item.quantityRequested }}</div>
+          </div>
+          <div class="item-qty" *ngIf="selectedIssue.status === 'ISSUED'">
+            <div class="iq-label">Issued</div>
+            <div class="iq-value text-success">{{ item.quantityIssued }}</div>
+          </div>
+        </div>
+
+        <div *ngIf="selectedIssue.items.length === 0" class="items-empty">
+          <i class="bi bi-inbox"></i><span>No items in this issue</span>
+        </div>
+      </div>
+
+      <!-- ── MANAGER ACTIONS (only for PENDING) ─────────────────── -->
+      <div class="sip-actions" *ngIf="selectedIssue.status === 'PENDING'">
+
+        <!-- Reject Form -->
+        <div *ngIf="showRejectForm" class="reject-form">
+          <label class="ims-form-label"><i class="bi bi-chat-left-dots me-1"></i>Reason for Rejection *</label>
+          <textarea class="ims-form-control" rows="3" [(ngModel)]="rejectReason"
+            placeholder="Explain why you are rejecting this stock issue so staff can understand and correct it..."></textarea>
+          <div class="d-flex gap-2 mt-2">
+            <button class="btn-ims-outline btn flex-1" (click)="showRejectForm=false; rejectReason=''">Cancel</button>
+            <button class="btn btn-danger flex-1" style="border-radius:8px" (click)="submitReject()" [disabled]="rejectLoading || !rejectReason.trim()">
+              <span *ngIf="!rejectLoading"><i class="bi bi-x-circle me-1"></i>Reject Issue</span>
+              <span *ngIf="rejectLoading"><span class="spinner-border spinner-border-sm me-1"></span>Rejecting...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Approve Confirm -->
+        <div *ngIf="showApproveConfirm" class="approve-confirm">
+          <div class="ac-icon"><i class="bi bi-check-circle-fill"></i></div>
+          <p><strong>Approve {{ selectedIssue.issueNumber }}?</strong><br>
+          <span class="text-muted" style="font-size:.82rem">Staff will then execute the stock out to deduct inventory.</span></p>
+          <div class="d-flex gap-2">
+            <button class="btn-ims-outline btn flex-1" (click)="showApproveConfirm=false">Cancel</button>
+            <button class="btn btn-success flex-1" style="border-radius:8px" (click)="approve()" [disabled]="approveLoading">
+              <span *ngIf="!approveLoading"><i class="bi bi-check-circle me-1"></i>Approve</span>
+              <span *ngIf="approveLoading"><span class="spinner-border spinner-border-sm me-1"></span>Approving...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action buttons (when no form open) -->
+        <div *ngIf="!showRejectForm && !showApproveConfirm" class="d-flex gap-2">
+          <button class="btn btn-success flex-1" style="border-radius:10px; padding:.65rem; font-weight:700" (click)="showApproveConfirm=true">
+            <i class="bi bi-check-circle me-1"></i>Approve Issue
+          </button>
+          <button class="btn btn-outline-danger flex-1" style="border-radius:10px; padding:.65rem; font-weight:600" (click)="showRejectForm=true">
+            <i class="bi bi-x-circle me-1"></i>Reject
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Status info for non-pending -->
+      <div class="sip-actions" *ngIf="selectedIssue.status !== 'PENDING'">
+        <div class="status-info-box"
+          [ngClass]="{
+            'approved-box': selectedIssue.status === 'APPROVED',
+            'issued-box':   selectedIssue.status === 'ISSUED',
+            'rejected-box': selectedIssue.status === 'REJECTED',
+            'cancelled-box':selectedIssue.status === 'CANCELLED'
+          }">
+          <i class="bi fs-4" [ngClass]="{
+            'bi-check-circle-fill': selectedIssue.status === 'APPROVED',
+            'bi-check2-all':        selectedIssue.status === 'ISSUED',
+            'bi-x-circle-fill':     selectedIssue.status === 'REJECTED',
+            'bi-slash-circle':      selectedIssue.status === 'CANCELLED'
+          }"></i>
+          <div>
+            <div class="sib-title">
+              {{ selectedIssue.status === 'APPROVED' ? 'Approved — awaiting staff execution' :
+                 selectedIssue.status === 'ISSUED' ? 'Stock successfully issued' :
+                 selectedIssue.status === 'REJECTED' ? 'Rejected by manager' :
+                 'Issue cancelled' }}
+            </div>
+            <div class="sib-sub" *ngIf="selectedIssue.issuedAt">
+              Completed: {{ selectedIssue.issuedAt | date:'dd MMM yyyy, HH:mm' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

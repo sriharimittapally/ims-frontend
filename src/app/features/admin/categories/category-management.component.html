@@ -41,8 +41,16 @@
               {{ c.productCount }}
             </span>
           </td>
-          <td><span class="badge-ims" [ngClass]="c.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ c.status
-              }}</span></td>
+          <td><!-- REPLACE any separate activate/deactivate buttons with: -->
+<label class="toggle-wrap" style="margin-top:.5rem">
+  <label class="toggle-switch">
+    <input type="checkbox" [checked]="c.status === 'ACTIVE'" (change)="toggle(c)">
+    <span class="ts-slider"></span>
+  </label>
+  <span class="toggle-label" [style.color]="c.status === 'ACTIVE' ? 'var(--ims-success)' : 'var(--ims-text-muted)'">
+    {{ c.status }}
+  </span>
+</label></td>
           <td>
             <div class="d-flex gap-1">
               <button class="action-btn" (click)="openEdit(c)"><i class="bi bi-pencil"

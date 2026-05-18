@@ -28,7 +28,3 @@ export interface ProductRequest {
   categoryId: number;
 }
 
-export interface SupplierLinkRequest {
-  purchasePrice: number;
-  leadTimeDays: boolean;
-}

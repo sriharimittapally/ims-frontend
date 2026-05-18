@@ -40,7 +40,16 @@
             <td>
               <span class="badge-ims badge-sent">{{ p.suppliers?.length ?? 0 }} linked</span>
             </td>
-            <td><span class="badge-ims" [ngClass]="p.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ p.status }}</span></td>
+            <td><!-- REPLACE any separate activate/deactivate buttons with: -->
+<label class="toggle-wrap" style="margin-top:.5rem">
+  <label class="toggle-switch">
+    <input type="checkbox" [checked]="p.status === 'ACTIVE'" (change)="toggle(p)">
+    <span class="ts-slider"></span>
+  </label>
+  <span class="toggle-label" [style.color]="p.status === 'ACTIVE' ? 'var(--ims-success)' : 'var(--ims-text-muted)'">
+    {{ p.status }}
+  </span>
+</label></td>
             <td>
               <div class="d-flex gap-1">
                 <button class="action-btn" (click)="openEdit(p)" title="Edit"><i class="bi bi-pencil" style="color:var(--ims-primary)"></i></button>

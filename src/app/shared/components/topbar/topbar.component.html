@@ -3,38 +3,16 @@
     <button class="toggle-btn" (click)="toggleSidebar.emit()" title="Toggle Sidebar">
       <i class="bi bi-list"></i>
     </button>
-    <h1 class="page-title-text">{{ pageTitle }}</h1>
+    <div class="breadcrumb-title">{{ pageTitle }}</div>
   </div>
 
   <div class="topbar-right">
     <!-- Theme Toggle -->
-    <button class="icon-btn" (click)="theme.toggle()" [title]="theme.isDark() ? 'Light Mode' : 'Dark Mode'">
+    <button class="icon-btn" (click)="theme.toggle()" [title]="theme.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
       <i class="bi" [class.bi-sun-fill]="theme.isDark()" [class.bi-moon-fill]="!theme.isDark()"></i>
     </button>
 
-    <!-- User Menu -->
-    <div class="user-menu" ngbDropdown placement="bottom-end">
-      <button class="user-btn" ngbDropdownToggle>
-        <div class="user-avatar-sm">
-          {{ (auth.currentUser()?.name ?? 'U')[0].toUpperCase() }}
-        </div>
-        <div class="user-details d-none d-md-block">
-          <div class="user-name-sm">{{ auth.currentUser()?.name }}</div>
-          <div class="user-email">{{ auth.currentUser()?.email }}</div>
-        </div>
-        <i class="bi bi-chevron-down chevron"></i>
-      </button>
-      <div ngbDropdownMenu class="ims-dropdown">
-        <div class="dropdown-header-info">
-          <div class="dh-name">{{ auth.currentUser()?.name }}</div>
-          <div class="dh-email">{{ auth.currentUser()?.email }}</div>
-          <span class="badge-ims badge-active mt-1">{{ auth.getRole()?.replace('ROLE_', '') }}</span>
-        </div>
-        <div class="dropdown-divider"></div>
-        <button ngbDropdownItem (click)="auth.logout()" class="dropdown-item-danger">
-          <i class="bi bi-box-arrow-left me-2"></i>Logout
-        </button>
-      </div>
-    </div>
+    <!-- Notification Bell -->
+    <app-notification-bell />
   </div>
 </header>

@@ -1,4 +1,4 @@
-import { Component, Input, computed, signal } from '@angular/core';
+import { Component, Input, computed, signal, Output, EventEmitter } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
@@ -8,6 +8,12 @@ interface NavItem {
   label: string;
   icon: string;
   route: string;
+  badge?: string;
+}
+
+interface NavSection {
+  label?: string;
+  items: NavItem[];
 }
 
 @Component({
@@ -19,6 +25,8 @@ interface NavItem {
 })
 export class SidebarComponent {
   @Input() collapsed = false;
+  @Input() mobileOpen = false;
+  @Output() mobileClose = new EventEmitter<void>();
 
   supplierApproved = signal(false);
 
@@ -31,68 +39,161 @@ export class SidebarComponent {
     }
   }
 
-  navItems = computed<NavItem[]>(() => {
+  closeMobile(): void { this.mobileClose.emit(); }
+
+  navSections = computed<NavSection[]>(() => {
     const role = this.auth.getRole();
+
     switch (role) {
-     case 'ADMIN': return [
-  { label: 'Dashboard',        icon: 'bi-speedometer2',     route: '/admin/dashboard' },
-  { label: 'Users',            icon: 'bi-people',           route: '/admin/users' },
-  { label: 'Warehouses',       icon: 'bi-building',         route: '/admin/warehouses' },
-  { label: 'Categories',       icon: 'bi-tags',             route: '/admin/categories' },
-  { label: 'Products',         icon: 'bi-box-seam',         route: '/admin/products' },
-  { label: 'Inventory',        icon: 'bi-archive',          route: '/admin/inventory' },
-  { label: 'Stock Movements',  icon: 'bi-arrow-left-right', route: '/admin/stock-movements' },
-  { label: 'Suppliers',        icon: 'bi-truck',            route: '/admin/suppliers' },
-  { label: 'Purchase Orders',  icon: 'bi-cart-check',       route: '/admin/purchase-orders' },
-  { label: 'Reports',          icon: 'bi-bar-chart-line',   route: '/admin/reports' }
-];
-     case 'MANAGER': return [
-  { label: 'Dashboard',        icon: 'bi-speedometer2',     route: '/manager/dashboard' },
-  { label: 'My Staff',         icon: 'bi-person-badge',     route: '/manager/staff' },
-  { label: 'Purchase Orders',  icon: 'bi-cart-check',       route: '/manager/purchase-orders' },
-  { label: 'Stock Issues',     icon: 'bi-clipboard-check',  route: '/manager/stock-issues' },
-  { label: 'Inventory',        icon: 'bi-archive',          route: '/manager/inventory' },
-  { label: 'Stock Movements',  icon: 'bi-arrow-left-right', route: '/manager/stock-movements' },
-  { label: 'Reports',          icon: 'bi-bar-chart-line',   route: '/manager/reports' }
-];
-      case 'STAFF': return [
-        { label: 'Dashboard',       icon: 'bi-speedometer2',     route: '/staff/dashboard' },
-        { label: 'Purchase Orders', icon: 'bi-cart-check',       route: '/staff/purchase-orders' },
-        { label: 'Stock Issues',    icon: 'bi-arrow-left-right', route: '/staff/stock-issues' },
-        { label: 'Inventory',       icon: 'bi-archive',          route: '/staff/inventory' },
-        { label: 'Reports',         icon: 'bi-bar-chart-line',   route: '/staff/reports' }
+      case 'ADMIN': return [
+        {
+          label: 'OVERVIEW',
+          items: [
+            { label: 'Dashboard', icon: 'bi-speedometer2', route: '/admin/dashboard' }
+          ]
+        },
+        {
+          label: 'MANAGEMENT',
+          items: [
+            { label: 'Users',        icon: 'bi-people',        route: '/admin/users' },
+            { label: 'Warehouses',   icon: 'bi-building',      route: '/admin/warehouses' },
+            { label: 'Categories',   icon: 'bi-tags',          route: '/admin/categories' },
+            { label: 'Products',     icon: 'bi-box-seam',      route: '/admin/products' }
+          ]
+        },
+        {
+          label: 'INVENTORY',
+          items: [
+            { label: 'Inventory',       icon: 'bi-archive',          route: '/admin/inventory' },
+            { label: 'Stock Movements', icon: 'bi-arrow-left-right', route: '/admin/stock-movements' }
+          ]
+        },
+        {
+          label: 'PROCUREMENT',
+          items: [
+            { label: 'Suppliers',       icon: 'bi-truck',     route: '/admin/suppliers' },
+            { label: 'Purchase Orders', icon: 'bi-cart-check', route: '/admin/purchase-orders' }
+          ]
+        },
+        {
+          label: 'INSIGHTS',
+          items: [
+            { label: 'Reports', icon: 'bi-bar-chart-line', route: '/admin/reports' }
+          ]
+        }
       ];
+
+      case 'MANAGER': return [
+        {
+          label: 'OVERVIEW',
+          items: [
+            { label: 'Dashboard', icon: 'bi-speedometer2', route: '/manager/dashboard' }
+          ]
+        },
+        {
+          label: 'MY WAREHOUSE',
+          items: [
+            { label: 'Inventory',       icon: 'bi-archive',          route: '/manager/inventory' },
+            { label: 'Stock Movements', icon: 'bi-arrow-left-right', route: '/manager/stock-movements' }
+          ]
+        },
+        {
+          label: 'OPERATIONS',
+          items: [
+            { label: 'Purchase Orders', icon: 'bi-cart-check',      route: '/manager/purchase-orders' },
+            { label: 'Stock Issues',    icon: 'bi-clipboard-check',  route: '/manager/stock-issues' }
+          ]
+        },
+        {
+          label: 'TEAM',
+          items: [
+            { label: 'My Staff', icon: 'bi-person-badge', route: '/manager/staff' }
+          ]
+        },
+        {
+          label: 'INSIGHTS',
+          items: [
+            { label: 'Reports', icon: 'bi-bar-chart-line', route: '/manager/reports' }
+          ]
+        }
+      ];
+
+      case 'STAFF': return [
+        {
+          label: 'OVERVIEW',
+          items: [
+            { label: 'Dashboard', icon: 'bi-speedometer2', route: '/staff/dashboard' }
+          ]
+        },
+        {
+          label: 'OPERATIONS',
+          items: [
+            { label: 'Stock Issues',    icon: 'bi-clipboard-check', route: '/staff/stock-issues' },
+            { label: 'Purchase Orders', icon: 'bi-cart-check',      route: '/staff/purchase-orders' }
+          ]
+        },
+        {
+          label: 'WAREHOUSE',
+          items: [
+            { label: 'Inventory', icon: 'bi-archive', route: '/staff/inventory' }
+          ]
+        },
+        {
+          label: 'INSIGHTS',
+          items: [
+            { label: 'Reports', icon: 'bi-bar-chart-line', route: '/staff/reports' }
+          ]
+        }
+      ];
+
       case 'SUPPLIER':
-        // Only show full nav when approved
         if (this.supplierApproved()) {
           return [
-            { label: 'Dashboard',       icon: 'bi-speedometer2',   route: '/supplier/dashboard' },
-            { label: 'My Profile',      icon: 'bi-person-circle',  route: '/supplier/profile' },
-            { label: 'My Products',     icon: 'bi-box-seam',       route: '/supplier/my-products' },
-            { label: 'Purchase Orders', icon: 'bi-cart-check',     route: '/supplier/purchase-orders' },
-            { label: 'Reports',         icon: 'bi-bar-chart-line', route: '/supplier/reports' }
+            {
+              label: 'OVERVIEW',
+              items: [
+                { label: 'Dashboard', icon: 'bi-speedometer2', route: '/supplier/dashboard' }
+              ]
+            },
+            {
+              label: 'MY BUSINESS',
+              items: [
+                { label: 'My Profile',      icon: 'bi-person-circle', route: '/supplier/profile' },
+                { label: 'My Products',     icon: 'bi-box-seam',      route: '/supplier/my-products' },
+                { label: 'Purchase Orders', icon: 'bi-cart-check',    route: '/supplier/purchase-orders' }
+              ]
+            },
+            {
+              label: 'INSIGHTS',
+              items: [
+                { label: 'Reports', icon: 'bi-bar-chart-line', route: '/supplier/reports' }
+              ]
+            }
           ];
         }
-        // Pending/rejected: only status page visible
-        return [
-          { label: 'Account Status', icon: 'bi-shield-check', route: '/supplier/status' }
-        ];
+        return [{
+          items: [{ label: 'Account Status', icon: 'bi-shield-check', route: '/supplier/status' }]
+        }];
+
       default: return [];
     }
   });
 
   getRoleLabel(): string {
-    const map: Record<string,string> = {
-      ADMIN:'Administrator', MANAGER:'Manager', STAFF:'Staff', SUPPLIER:'Supplier'
+    const m: Record<string, string> = {
+      ADMIN: 'Administrator', MANAGER: 'Manager', STAFF: 'Warehouse Staff', SUPPLIER: 'Supplier'
     };
-    return map[this.auth.getRole() ?? ''] ?? '';
+    return m[this.auth.getRole() ?? ''] ?? '';
   }
 
   getRoleColor(): string {
-    const map: Record<string,string> = {
-      ADMIN:'#ef4444', MANAGER:'#6366f1', STAFF:'#10b981', SUPPLIER:'#f59e0b'
+    const m: Record<string, string> = {
+      ADMIN: 'linear-gradient(135deg,#ef4444,#dc2626)',
+      MANAGER: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+      STAFF: 'linear-gradient(135deg,#10b981,#059669)',
+      SUPPLIER: 'linear-gradient(135deg,#f59e0b,#d97706)'
     };
-    return map[this.auth.getRole() ?? ''] ?? '#6366f1';
+    return m[this.auth.getRole() ?? ''] ?? 'linear-gradient(135deg,#6366f1,#8b5cf6)';
   }
 
   logout(): void { this.auth.logout(); }
