@@ -1,0 +1,198 @@
+// Stat cards
+.mgr-stat-card {
+  background: var(--ims-surface);
+  border: 1px solid var(--ims-border);
+  border-radius: var(--ims-radius);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  .msc-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .msc-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .msc-label {
+    font-size: 0.75rem;
+    color: var(--ims-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-weight: 600;
+    margin-top: 0.15rem;
+  }
+}
+
+// Manager table
+.fw-600 {
+  font-weight: 600;
+}
+.mgr-row {
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover td {
+    background: var(--ims-surface-hover);
+  }
+  &.row-expanded td {
+    background: rgba(99, 102, 241, 0.04);
+  }
+}
+.mgr-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.mgr-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.staff-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--ims-info);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.status-dot-text {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ims-text-muted);
+  }
+  &.active {
+    color: var(--ims-success);
+    .dot {
+      background: var(--ims-success);
+      box-shadow: 0 0 4px var(--ims-success);
+    }
+  }
+}
+
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 100px;
+  color: var(--ims-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  .bi-chevron-down {
+    transition: transform 0.2s;
+  }
+  &.expanded {
+    background: var(--ims-primary);
+    color: #fff;
+    .bi-chevron-down {
+      transform: rotate(180deg);
+    }
+  }
+  &:hover:not(.expanded) {
+    background: rgba(99, 102, 241, 0.15);
+  }
+}
+
+// Staff expansion
+.staff-expansion-row td {
+  padding: 0 !important;
+  background: rgba(99, 102, 241, 0.03) !important;
+}
+.staff-expansion {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+}
+.se-header {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ims-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.875rem;
+}
+.staff-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.staff-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--ims-surface);
+  border: 1px solid var(--ims-border);
+  border-radius: 10px;
+  min-width: 220px;
+  flex: 1;
+  max-width: 280px;
+  .sc-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .sc-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .sc-email {
+    font-size: 0.72rem;
+    color: var(--ims-text-muted);
+  }
+  .sc-status {
+    margin-left: auto;
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ims-text-muted);
+    }
+    &.active .dot {
+      background: var(--ims-success);
+      box-shadow: 0 0 4px var(--ims-success);
+    }
+  }
+}

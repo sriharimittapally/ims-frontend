@@ -18,19 +18,38 @@ export interface WarehouseBreakdown {
 
 export interface LowStockAlertReport {
   totalAlerts: number;
-  alerts: LowStockItem[];
+  alerts: LowStockAlertRow[];
 }
 
-export interface LowStockItem {
+export interface LowStockAlertRow {
   productId: number;
-  productName: string;
-  sku: string;
-  warehouseId: number;
-  warehouseName: string;
-  currentQuantity: number;
-  reorderLevel: number;
-}
 
+  sku: string;
+
+  productName: string;
+
+  categoryName: string;
+
+  warehouseId: number;
+
+  warehouseName: string;
+
+  currentStock: number;
+
+  reservedQuantity: number;
+
+  availableQuantity: number;
+
+  reorderLevel: number;
+
+  deficit: number;
+
+  hasPreferredSupplier: boolean;
+
+  preferredSupplierName?: string;
+
+  autoDraftExists: boolean;
+}
 export interface PurchaseOrderReport {
 
   totalPOs: number;

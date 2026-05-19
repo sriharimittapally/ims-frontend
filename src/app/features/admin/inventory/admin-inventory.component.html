@@ -1,15 +1,41 @@
 <div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between">
-    <div><h1 class="page-title">Inventory</h1><p class="page-subtitle">System-wide stock levels across all warehouses</p></div>
-    <button class="btn" [ngClass]="showLowStock ? 'btn-danger' : 'btn-outline-danger'" style="border-radius:8px; font-size:.875rem" (click)="toggleLowStock()">
-      <i class="bi bi-exclamation-triangle me-1"></i>{{ showLowStock ? 'All Stock' : 'Low Stock (' + lowStockCount + ')' }}
-    </button>
+
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Inventory</h1>
+      <p class="page-subtitle">{{ inventory.length }} inventory lines across all warehouses</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="inv-filter-btn" [class.active-danger]="showLowStockOnly" (click)="toggleLowStock()">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        <span *ngIf="!showLowStockOnly">Low Stock ({{ lowStockCount }})</span>
+        <span *ngIf="showLowStockOnly">Show All</span>
+      </button>
+    </div>
   </div>
 
+  <!-- ── Status Summary Chips ─────────────────────────────────────────── -->
+  <div class="inv-summary-row mb-3">
+    <div class="inv-chip safe">
+      <i class="bi bi-check-circle-fill me-1"></i>{{ okCount }} In Stock
+    </div>
+    <div class="inv-chip warning">
+      <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ lowStockCount }} Low Stock
+    </div>
+  </div>
+
+  <!-- ── Filters ────────────────────────────────────────────────────────── -->
   <div class="ims-card mb-3">
-    <div class="search-input-wrap">
-      <i class="bi bi-search search-icon"></i>
-      <input class="ims-form-control" (input)="onSearch($event)" placeholder="Search product or warehouse..." style="padding-left:2.25rem">
+    <div class="d-flex gap-3 flex-wrap">
+      <div class="search-input-wrap" style="flex:1; min-width:200px">
+        <i class="bi bi-search search-icon"></i>
+        <input class="ims-form-control" (input)="onSearch($event)"
+          placeholder="Search by product, SKU or warehouse..." style="padding-left:2.25rem">
+      </div>
+      <select class="ims-form-control" style="width:200px" [(ngModel)]="filterWarehouse" (change)="applyFilter()">
+        <option value="">All Warehouses</option>
+        <option *ngFor="let w of warehouses" [value]="w.id">{{ w.name }}</option>
+      </select>
     </div>
   </div>
 
@@ -18,24 +44,56 @@
   <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
     <div class="table-responsive">
       <table class="ims-table w-100">
-        <thead><tr><th>Product</th><th>Warehouse</th><th>Total Qty</th><th>Reserved</th><th>Available</th><th>Reorder Lvl</th><th>Status</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Warehouse</th>
+            <th style="text-align:right">Total Qty</th>
+            <th style="text-align:right">Reserved</th>
+            <th style="text-align:right">Available</th>
+            <th style="text-align:right">Reorder Lvl</th>
+            <th style="text-align:center">Status</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr *ngFor="let inv of filtered" [class.low-stock-row]="inv.isLowStock">
+          <!-- FIXED: use inv.lowStock (not inv.isLowStock) -->
+          <tr *ngFor="let inv of filtered" [class.low-stock-row]="inv.lowStock">
             <td>
-              <div class="fw-600">{{ inv.productName }}</div>
-              <div style="font-size:.75rem;font-family:monospace;color:var(--ims-text-muted)">{{ inv.sku }}</div>
+              <div class="inv-product-cell">
+                <div class="ipc-icon" [class.ipc-warning]="inv.lowStock">
+                  <i class="bi" [class.bi-box-seam]="!inv.lowStock" [class.bi-box-seam-fill]="inv.lowStock"></i>
+                </div>
+                <div>
+                  <div class="fw-600">{{ inv.productName }}</div>
+                  <code class="inv-sku">{{ inv.sku }}</code>
+                </div>
+              </div>
             </td>
-            <td class="text-muted">{{ inv.warehouseName }}</td>
-            <td class="fw-600">{{ inv.quantity | number }}</td>
-            <td class="text-muted">{{ inv.reservedQuantity | number }}</td>
-            <td><span class="fw-600" [style.color]="inv.isLowStock ? 'var(--ims-danger)' : 'var(--ims-success)'">{{ inv.availableQuantity | number }}</span></td>
-            <td class="text-muted">{{ inv.reorderLevel | number }}</td>
-            <td>
-              <span *ngIf="inv.isLowStock" class="badge-ims badge-inactive"><i class="bi bi-exclamation-triangle me-1"></i>Low Stock</span>
-              <span *ngIf="!inv.isLowStock" class="badge-ims badge-active">OK</span>
+            <td class="text-muted" style="font-size:.875rem">{{ inv.warehouseName }}</td>
+            <td style="text-align:right; font-weight:600">{{ inv.quantity | number }}</td>
+            <td style="text-align:right; color:var(--ims-text-muted)">{{ inv.reservedQuantity | number }}</td>
+            <td style="text-align:right">
+              <span class="available-qty" [class.low]="inv.lowStock">
+                {{ inv.availableQuantity | number }}
+              </span>
+            </td>
+            <td style="text-align:right; color:var(--ims-text-muted)">{{ inv.reorderLevel | number }}</td>
+            <td style="text-align:center">
+              <!-- FIXED: inv.lowStock not inv.isLowStock -->
+              <div class="inv-status-badge" [class.badge-low]="inv.lowStock" [class.badge-ok]="!inv.lowStock">
+                <i class="bi me-1" [class.bi-exclamation-triangle-fill]="inv.lowStock" [class.bi-check-circle-fill]="!inv.lowStock"></i>
+                {{ inv.lowStock ? 'Low Stock' : 'OK' }}
+              </div>
             </td>
           </tr>
-          <tr *ngIf="filtered.length === 0"><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="bi bi-archive"></i></div><h5>No inventory items found</h5></div></td></tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-archive"></i></div>
+                <h5>No inventory items found</h5>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

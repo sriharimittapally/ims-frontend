@@ -27,11 +27,11 @@ export class ManagerInventoryComponent implements OnInit {
 
   applyFilter(): void {
     let list = this.inventory;
-    if (this.showLowStock) list = list.filter(i => i.isLowStock);
+    if (this.showLowStock) list = list.filter(i => i.lowStock);
     if (this.searchText) { const q = this.searchText.toLowerCase(); list = list.filter(i => i.productName.toLowerCase().includes(q)); }
     this.filtered = list;
   }
 
   onSearch(e: Event): void { this.searchText = (e.target as HTMLInputElement).value; this.applyFilter(); }
-  get lowStockCount(): number { return this.inventory.filter(i => i.isLowStock).length; }
+  get lowStockCount(): number { return this.inventory.filter(i => i.lowStock).length; }
 }

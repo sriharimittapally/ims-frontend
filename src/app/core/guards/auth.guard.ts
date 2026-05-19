@@ -3,9 +3,10 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
-  const auth = inject(AuthService);
+  const auth   = inject(AuthService);
   const router = inject(Router);
   if (auth.isLoggedIn()) return true;
-  router.navigate(['/auth/login']);
+  // Redirect to landing page (login is modal on landing now)
+  router.navigate(['/']);
   return false;
 };

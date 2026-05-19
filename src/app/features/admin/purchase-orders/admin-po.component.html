@@ -46,21 +46,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let o of filtered">
+          <tr *ngFor="let o of filtered" class="po-clickable-row" (click)="viewDetail(o)">
             <td><span class="po-number">{{ o.poNumber }}</span></td>
             <td class="text-muted">{{ o.warehouseName }}</td>
             <td class="text-muted">{{ o.supplierName }}</td>
             <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
             <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
             <td class="text-muted">{{ o.createdAt | date:'dd MMM, yy' }}</td>
-            <td>
-              <div class="d-flex gap-1">
-                <button class="action-btn" (click)="viewDetail(o)" title="View Details"><i class="bi bi-eye"
-                    style="color:var(--ims-info)"></i></button>
-                <button class="action-btn" *ngIf="o.status === 'SENT' || o.status === 'ACCEPTED'" (click)="cancel(o)"
-                  title="Cancel"><i class="bi bi-x-circle" style="color:var(--ims-danger)"></i></button>
-              </div>
-            </td>
+           <!-- Replace the eye + cancel button td with: -->
+<td>
+  <div class="d-flex gap-1 align-items-center">
+    <button class="po-view-btn" (click)="viewDetail(o); $event.stopPropagation()">
+      <i class="bi bi-folder2-open me-1"></i>Open
+    </button>
+    <button class="po-cancel-btn" *ngIf="o.status === 'SENT' || o.status === 'ACCEPTED'"
+      (click)="cancel(o); $event.stopPropagation()" title="Cancel PO">
+      <i class="bi bi-x-circle"></i>
+    </button>
+  </div>
+</td>
           </tr>
           <tr *ngIf="filtered.length === 0">
             <td colspan="7">

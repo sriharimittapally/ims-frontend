@@ -26,6 +26,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   // Forms
   loginForm: FormGroup;
   registerForm: FormGroup;
+  loginError = '';
 
   // Counters
   counters = [
@@ -96,14 +97,30 @@ export class LandingComponent implements OnInit, OnDestroy {
   openRegister(): void { this.showModal = 'register'; this.registerForm.reset(); }
   closeModal():   void { this.showModal = null; }
 
-  submitLogin(): void {
-    if (this.loginForm.invalid) { this.loginForm.markAllAsTouched(); return; }
-    this.authLoading = true;
-    this.auth.login(this.loginForm.value).subscribe({
-      next: () => { this.authLoading = false; this.toastr.success('Welcome back!'); this.auth.redirectByRole(); },
-      error: () => { this.authLoading = false; }
-    });
-  }
+
+submitLogin(): void {
+  if (this.loginForm.invalid) { this.loginForm.markAllAsTouched(); return; }
+  this.authLoading = true;
+  this.loginError = '';
+  this.auth.login(this.loginForm.value).subscribe({
+    next: () => {
+      this.authLoading = false;
+      this.loginError = '';
+      this.toastr.success('Welcome back!');
+      this.auth.redirectByRole();
+    },
+    error: (err) => {
+      this.authLoading = false;
+      if (err.status === 401) {
+        this.loginError = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (err.status === 403) {
+        this.loginError = 'Your account has been deactivated. Please contact your administrator.';
+      } else {
+        this.loginError = 'Unable to connect to the server. Please try again.';
+      }
+    }
+  });
+}
 
   submitRegister(): void {
     if (this.registerForm.invalid) { this.registerForm.markAllAsTouched(); return; }

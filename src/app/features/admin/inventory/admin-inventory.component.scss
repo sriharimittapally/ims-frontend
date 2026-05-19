@@ -1,2 +1,133 @@
-.fw-600 { font-weight:600; }
-.low-stock-row td { background:rgba(239,68,68,.03); }
+.fw-600 {
+  font-weight: 600;
+}
+
+// Summary chips
+.inv-summary-row {
+  display: flex;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+.inv-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.875rem;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  &.safe {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: var(--ims-success);
+  }
+  &.warning {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: var(--ims-danger);
+  }
+}
+
+// Filter button
+.inv-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 1rem;
+  border: 1.5px solid var(--ims-border);
+  border-radius: 100px;
+  background: transparent;
+  color: var(--ims-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    border-color: var(--ims-danger);
+    color: var(--ims-danger);
+    background: rgba(239, 68, 68, 0.05);
+  }
+  &.active-danger {
+    background: var(--ims-danger);
+    color: #fff;
+    border-color: var(--ims-danger);
+  }
+}
+
+// Row highlight
+.low-stock-row {
+  background: rgba(239, 68, 68, 0.03) !important;
+  &:hover td {
+    background: rgba(239, 68, 68, 0.06) !important;
+  }
+}
+
+// Product cell
+.inv-product-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ipc-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--ims-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  &.ipc-warning {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--ims-danger);
+    animation: warningPulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes warningPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
+}
+
+.inv-sku {
+  font-size: 0.7rem;
+  background: var(--ims-bg-secondary);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  color: var(--ims-text-muted);
+}
+
+.available-qty {
+  font-weight: 700;
+  &.low {
+    color: var(--ims-danger);
+    font-size: 1rem;
+  }
+  &:not(.low) {
+    color: var(--ims-success);
+  }
+}
+
+.inv-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  &.badge-low {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--ims-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  &.badge-ok {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--ims-success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+}

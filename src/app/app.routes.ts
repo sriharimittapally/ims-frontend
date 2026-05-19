@@ -4,22 +4,18 @@ import { roleGuard } from './core/guards/role.guard';
 import { supplierApprovedGuard } from './core/guards/supplier-approved.guard';
 
 export const routes: Routes = [
-  // Landing page at root
+  // Landing page — handles login/register as modals
   {
     path: '',
     loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
 
-  {
-    path: 'auth',
-    loadComponent: () => import('./layouts/auth-layout/auth-layout.component').then(m => m.AuthLayoutComponent),
-    children: [
-      { path: 'login',    loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
-      { path: 'register', loadComponent: () => import('./features/auth/register-supplier/register-supplier.component').then(m => m.RegisterSupplierComponent) },
-      { path: '', redirectTo: 'login', pathMatch: 'full' }
-    ]
-  },
+  // Auth routes — redirect to landing (login/register moved to landing modals)
+  { path: 'auth/login',    redirectTo: '/', pathMatch: 'full' },
+  { path: 'auth/register', redirectTo: '/', pathMatch: 'full' },
+  { path: 'auth',          redirectTo: '/', pathMatch: 'full' },
 
+  // ── ADMIN ──────────────────────────────────────────────────────────────────
   {
     path: 'admin',
     loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
@@ -28,6 +24,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard',        loadComponent: () => import('./features/admin/dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent) },
       { path: 'users',            loadComponent: () => import('./features/admin/users/user-management.component').then(m => m.UserManagementComponent) },
+      { path: 'managers',         loadComponent: () => import('./features/admin/managers/admin-managers.component').then(m => m.AdminManagersComponent) },
       { path: 'warehouses',       loadComponent: () => import('./features/admin/warehouses/warehouse-management.component').then(m => m.WarehouseManagementComponent) },
       { path: 'categories',       loadComponent: () => import('./features/admin/categories/category-management.component').then(m => m.CategoryManagementComponent) },
       { path: 'products',         loadComponent: () => import('./features/admin/products/product-management.component').then(m => m.ProductManagementComponent) },
@@ -40,6 +37,7 @@ export const routes: Routes = [
     ]
   },
 
+  // ── MANAGER ─────────────────────────────────────────────────────────────────
   {
     path: 'manager',
     loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
@@ -57,6 +55,7 @@ export const routes: Routes = [
     ]
   },
 
+  // ── STAFF ────────────────────────────────────────────────────────────────────
   {
     path: 'staff',
     loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
@@ -72,6 +71,7 @@ export const routes: Routes = [
     ]
   },
 
+  // ── SUPPLIER ─────────────────────────────────────────────────────────────────
   {
     path: 'supplier',
     loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),

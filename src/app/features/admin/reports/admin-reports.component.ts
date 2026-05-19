@@ -5,6 +5,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartConfiguration } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
 import { ReportService } from '../../../core/services/report.service';
+import { LowStockAlertReport, PurchaseOrderReport } from '../../../core/models/report.model';
 
 Chart.register(...registerables);
 
@@ -23,8 +24,7 @@ export class AdminReportsComponent implements OnInit {
   inventorySummary: any = null;
 
   // Low Stock
-  lowStockAlerts: any = null;
-
+lowStockAlerts: LowStockAlertReport | null = null;
   // Stock Trend
   fromDate = this.daysAgo(30);
   toDate = this.today();
@@ -58,7 +58,7 @@ export class AdminReportsComponent implements OnInit {
   topBarData: ChartData<'bar'> = { labels: [], datasets: [] };
 
   // PO Report
-  poReport: any = null;
+  poReport: PurchaseOrderReport | null = null;
   poDonut: ChartData<'doughnut'> = { labels: [], datasets: [] };
   donutOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,

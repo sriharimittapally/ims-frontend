@@ -1,97 +1,115 @@
 <div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between">
+
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
     <div>
       <h1 class="page-title">Categories</h1>
-      <p class="page-subtitle">Manage product categories</p>
+      <p class="page-subtitle">{{ categories.length }} product categories in system</p>
     </div>
-    <button class="btn-ims-primary btn" (click)="openCreate()"><i class="bi bi-plus-circle me-1"></i> New
-      Category</button>
+    <button class="btn-ims-primary btn" (click)="openCreate()">
+      <i class="bi bi-plus-circle me-1"></i>New Category
+    </button>
   </div>
 
-  <div class="page-loader" *ngIf="loading">
-    <div class="spinner-border"></div>
+  <!-- Search -->
+  <div class="ims-card mb-3">
+    <div class="search-input-wrap">
+      <i class="bi bi-search search-icon"></i>
+      <input class="ims-form-control" (input)="onSearch($event)"
+        placeholder="Search categories by name or description..."
+        style="padding-left:2.25rem">
+    </div>
   </div>
+
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
   <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
-    <table class="ims-table w-100">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Description</th>
-          <th>Products</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let c of categories; let i = index">
-          <td class="text-muted">{{ i+1 }}</td>
-          <td>
-            <div class="d-flex align-items-center gap-2">
-              <div class="cat-icon gradient-primary"><i class="bi bi-tag-fill"></i></div>
-              <span class="fw-600">{{ c.name }}</span>
-            </div>
-          </td>
-         
-          <td class="text-muted" style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{
-            c.description }}</td>
-             <td>
-            <span class="fw-600">
-              {{ c.productCount }}
-            </span>
-          </td>
-          <td><!-- REPLACE any separate activate/deactivate buttons with: -->
-<label class="toggle-wrap" style="margin-top:.5rem">
-  <label class="toggle-switch">
-    <input type="checkbox" [checked]="c.status === 'ACTIVE'" (change)="toggle(c)">
-    <span class="ts-slider"></span>
-  </label>
-  <span class="toggle-label" [style.color]="c.status === 'ACTIVE' ? 'var(--ims-success)' : 'var(--ims-text-muted)'">
-    {{ c.status }}
-  </span>
-</label></td>
-          <td>
-            <div class="d-flex gap-1">
-              <button class="action-btn" (click)="openEdit(c)"><i class="bi bi-pencil"
-                  style="color:var(--ims-primary)"></i></button>
-              <button class="action-btn" (click)="toggle(c)"><i class="bi" [class.bi-slash-circle]="c.status==='ACTIVE'"
-                  [class.bi-check-circle]="c.status!=='ACTIVE'"
-                  [style.color]="c.status==='ACTIVE' ? 'var(--ims-danger)' : 'var(--ims-success)'"></i></button>
-            </div>
-          </td>
-        </tr>
-        <tr *ngIf="categories.length === 0">
-          <td colspan="6">
-            <div class="empty-state">
-              <div class="empty-icon"><i class="bi bi-tags"></i></div>
-              <h5>No categories yet</h5>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>Category Name</th>
+            <th>Description</th>
+            <th style="width:100px; text-align:center">Products</th>
+            <th style="width:90px; text-align:center">Status</th>
+            <th style="width:80px; text-align:center">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filtered; let i = index">
+            <td class="text-muted" style="font-size:.8rem">{{ i + 1 }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="cat-icon"><i class="bi bi-tag-fill"></i></div>
+                <span class="fw-600">{{ c.name }}</span>
+              </div>
+            </td>
+            <td class="text-muted" style="max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
+              {{ c.description }}
+            </td>
+            <td style="text-align:center">
+              <span class="badge-ims badge-sent fw-600">{{ c.productCount ?? 0 }}</span>
+            </td>
+            <td style="text-align:center">
+              <!-- Toggle only — no text, just green/grey -->
+              <label class="status-toggle" [title]="c.status === 'ACTIVE' ? 'Active — click to deactivate' : 'Inactive — click to activate'">
+                <input type="checkbox" [checked]="c.status === 'ACTIVE'" (change)="toggle(c)">
+                <span class="st-slider"></span>
+              </label>
+            </td>
+            <td style="text-align:center">
+              <button class="edit-icon-btn" (click)="openEdit(c)" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-tags"></i></div>
+                <h5>{{ searchText ? 'No categories match your search' : 'No categories yet' }}</h5>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h5 class="modal-title"><i class="bi bi-tag me-2"></i>{{ editMode ? 'Edit' : 'New' }} Category</h5><button
-        class="btn-close" (click)="showModal=false"></button>
+<!-- Create / Edit Modal -->
+<div class="ims-modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="ims-modal" (click)="$event.stopPropagation()">
+    <div class="ims-modal-header">
+      <h5>
+        <span class="modal-icon-badge"><i class="bi bi-tag-fill"></i></span>
+        {{ editMode ? 'Edit Category' : 'New Category' }}
+      </h5>
+      <button class="btn-close-modal" (click)="showModal=false"><i class="bi bi-x-lg"></i></button>
     </div>
-    <div class="modal-body">
+    <div class="ims-modal-body">
       <form [formGroup]="form">
-        <div class="mb-3"><label class="ims-form-label">Category Name</label><input class="ims-form-control"
-            formControlName="name" placeholder="e.g. Electronics"></div>
-        <div class="mb-3"><label class="ims-form-label">Description</label><textarea class="ims-form-control"
-            formControlName="description" rows="3" placeholder="Brief description..."></textarea></div>
+        <div class="modal-field">
+          <label class="ims-form-label">Category Name *</label>
+          <input class="ims-form-control" formControlName="name" placeholder="e.g. Electronics, Hardware..."
+            [class.field-error-border]="form.get('name')?.invalid && form.get('name')?.touched">
+          <div class="field-err-text" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">Name is required.</div>
+        </div>
+        <div class="modal-field">
+          <label class="ims-form-label">Description *</label>
+          <textarea class="ims-form-control" formControlName="description" rows="3"
+            placeholder="Brief description of this product category..."
+            [class.field-error-border]="form.get('description')?.invalid && form.get('description')?.touched"></textarea>
+          <div class="field-err-text" *ngIf="form.get('description')?.invalid && form.get('description')?.touched">Description is required.</div>
+        </div>
       </form>
     </div>
-    <div class="modal-footer">
+    <div class="ims-modal-footer">
       <button class="btn-ims-outline btn" (click)="showModal=false">Cancel</button>
-      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">{{ editMode ? 'Update' :
-        'Create' }}</button>
+      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">
+        <span *ngIf="!submitLoading"><i class="bi bi-check me-1"></i>{{ editMode ? 'Update' : 'Create' }}</span>
+        <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+      </button>
     </div>
   </div>
 </div>

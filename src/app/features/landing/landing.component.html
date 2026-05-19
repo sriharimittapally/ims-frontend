@@ -133,8 +133,10 @@
       <h2>Ready to Take Control?</h2>
       <p>Sign in to your account or register as a supplier to get started.</p>
       <div class="hero-btns">
-        <button class="btn-hero-primary" (click)="openLogin()"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</button>
-        <button class="btn-hero-outline" (click)="openRegister()"><i class="bi bi-truck me-2"></i>Register as Supplier</button>
+        <button class="btn-hero-primary" (click)="openLogin()"><i class="bi bi-box-arrow-in-right me-2"></i>Sign
+          In</button>
+        <button class="btn-hero-outline" (click)="openRegister()"><i class="bi bi-truck me-2"></i>Register as
+          Supplier</button>
       </div>
     </div>
   </section>
@@ -191,15 +193,18 @@
           <label class="ims-form-label">Password</label>
           <div class="am-input-wrap">
             <i class="bi bi-lock am-icon-field"></i>
-            <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control" formControlName="password" placeholder="••••••••"
-              [class.is-invalid]="lf['password'].invalid && lf['password'].touched">
+            <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control" formControlName="password"
+              placeholder="••••••••" [class.is-invalid]="lf['password'].invalid && lf['password'].touched">
             <button type="button" class="pw-toggle" (click)="showPassword = !showPassword">
               <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
             </button>
           </div>
           <div class="am-error" *ngIf="lf['password'].invalid && lf['password'].touched">Password is required.</div>
         </div>
-
+        <!-- Add this BEFORE the submit button in login form: -->
+        <div class="login-error-msg" *ngIf="loginError">
+          <i class="bi bi-exclamation-circle-fill me-2"></i>{{ loginError }}
+        </div>
         <button type="submit" class="am-btn-primary" [disabled]="authLoading">
           <span *ngIf="!authLoading"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</span>
           <span *ngIf="authLoading"><span class="spinner-border spinner-border-sm me-2"></span>Signing in...</span>
@@ -254,13 +259,14 @@
           <label class="ims-form-label">Password</label>
           <div class="am-input-wrap">
             <i class="bi bi-lock am-icon-field"></i>
-            <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control" formControlName="password" placeholder="Min. 8 characters"
-              [class.is-invalid]="rf['password'].invalid && rf['password'].touched">
+            <input [type]="showPassword ? 'text' : 'password'" class="ims-form-control" formControlName="password"
+              placeholder="Min. 8 characters" [class.is-invalid]="rf['password'].invalid && rf['password'].touched">
             <button type="button" class="pw-toggle" (click)="showPassword = !showPassword">
               <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
             </button>
           </div>
-          <div class="am-error" *ngIf="rf['password'].invalid && rf['password'].touched">Min 8 characters required.</div>
+          <div class="am-error" *ngIf="rf['password'].invalid && rf['password'].touched">Min 8 characters required.
+          </div>
         </div>
 
         <button type="submit" class="am-btn-warning" [disabled]="authLoading">

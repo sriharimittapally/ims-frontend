@@ -12,14 +12,14 @@
       <table class="ims-table w-100">
         <thead><tr><th>Product</th><th>SKU</th><th>Total Qty</th><th>Reserved</th><th>Available</th><th>Reorder Lvl</th><th>Status</th></tr></thead>
         <tbody>
-          <tr *ngFor="let inv of filtered" [style.background]="inv.isLowStock ? 'rgba(239,68,68,.03)' : ''">
+          <tr *ngFor="let inv of filtered" [style.background]="inv.lowStock ? 'rgba(239,68,68,.03)' : ''">
             <td class="fw-600">{{ inv.productName }}</td>
             <td><code style="font-size:.75rem; background:var(--ims-bg-secondary); padding:.1rem .4rem; border-radius:4px">{{ inv.sku }}</code></td>
             <td>{{ inv.quantity | number }}</td>
             <td class="text-muted">{{ inv.reservedQuantity | number }}</td>
-            <td><span [style.color]="inv.isLowStock ? 'var(--ims-danger)' : 'var(--ims-success)'" class="fw-600">{{ inv.availableQuantity | number }}</span></td>
+            <td><span [style.color]="inv.lowStock ? 'var(--ims-danger)' : 'var(--ims-success)'" class="fw-600">{{ inv.availableQuantity | number }}</span></td>
             <td class="text-muted">{{ inv.reorderLevel }}</td>
-            <td><span class="badge-ims" [ngClass]="inv.isLowStock ? 'badge-inactive' : 'badge-active'">{{ inv.isLowStock ? 'Low Stock' : 'OK' }}</span></td>
+            <td><span class="badge-ims" [ngClass]="inv.lowStock ? 'badge-inactive' : 'badge-active'">{{ inv.lowStock ? 'Low Stock' : 'OK' }}</span></td>
           </tr>
           <tr *ngIf="filtered.length === 0"><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="bi bi-archive"></i></div><h5>No items found</h5></div></td></tr>
         </tbody>

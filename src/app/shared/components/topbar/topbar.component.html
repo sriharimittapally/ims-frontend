@@ -3,12 +3,20 @@
     <button class="toggle-btn" (click)="toggleSidebar.emit()" title="Toggle Sidebar">
       <i class="bi bi-list"></i>
     </button>
-    <div class="breadcrumb-title">{{ pageTitle }}</div>
+
+    <!-- Portal name with role color indicator -->
+    <div class="portal-label">
+      <span class="portal-dot" [style.background]="getRoleColor()"></span>
+      <span class="portal-name">{{ getPortalName() }}</span>
+      <span class="page-sep d-none d-sm-inline">—</span>
+      <span class="page-sub d-none d-sm-inline">{{ pageTitle }}</span>
+    </div>
   </div>
 
   <div class="topbar-right">
     <!-- Theme Toggle -->
-    <button class="icon-btn" (click)="theme.toggle()" [title]="theme.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+    <button class="icon-btn" (click)="theme.toggle()"
+      [title]="theme.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
       <i class="bi" [class.bi-sun-fill]="theme.isDark()" [class.bi-moon-fill]="!theme.isDark()"></i>
     </button>
 

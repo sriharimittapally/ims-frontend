@@ -147,7 +147,7 @@ export class ManagerPoComponent implements OnInit {
     let list = this.supplierProducts;
     if (this.showOnlyLowStock) {
       const lowStockIds = new Set(
-        this.warehouseInventory.filter(i => i.isLowStock).map(i => i.productId)
+        this.warehouseInventory.filter(i => i.lowStock).map(i => i.productId)
       );
       list = list.filter(p => lowStockIds.has(p.id));
     }
@@ -181,7 +181,7 @@ export class ManagerPoComponent implements OnInit {
     const link = this.getSupplierLink(product);
     if (!link) return;
     const inv = this.getInventoryForProduct(product.id);
-    const suggestedQty = inv?.isLowStock ? product.reorderLevel * 2 : product.reorderLevel;
+    const suggestedQty = inv?.lowStock ? product.reorderLevel * 2 : product.reorderLevel;
     this.cart.push({
       product,
       quantity: Math.max(1, suggestedQty),
@@ -243,7 +243,7 @@ export class ManagerPoComponent implements OnInit {
   getLowStockCount(): number {
     return this.supplierProducts.filter(p => {
       const inv = this.getInventoryForProduct(p.id);
-      return inv?.isLowStock;
+      return inv?.lowStock;
     }).length;
   }
 

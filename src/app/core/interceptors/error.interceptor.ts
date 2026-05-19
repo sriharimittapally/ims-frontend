@@ -23,18 +23,25 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError(err => {
       // Use backend message when available and meaningful
+      const isLoginCall = req.url.includes('/auth/login');
       const backendMsg: string | undefined = err.error?.message;
 
       // For 401, force logout
-      if (err.status === 401) {
-        auth.logout();
-        toastr.warning(
-          'Your session has expired. Please sign in again.',
-          'Session Expired',
-          { timeOut: 4000 }
-        );
-        return throwError(() => err);
-      }
+     // For 401, force logout except login API
+if (err.status === 401) {
+
+  if (!isLoginCall) {
+    auth.logout();
+
+    toastr.warning(
+      'Your session has expired. Please sign in again.',
+      'Session Expired',
+      { timeOut: 4000 }
+    );
+  }
+
+  return throwError(() => err);
+}
 
       // Compose user-friendly message
       const friendly = FRIENDLY_MESSAGES[err.status];
@@ -42,6 +49,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Determine title from status
       const titles: Record<number, string> = {
+        
         400: 'Invalid Request',
         403: 'Access Denied',
         404: 'Not Found',

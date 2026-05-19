@@ -1,58 +1,142 @@
 <div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between">
-    <div><h1 class="page-title">Supplier Management</h1><p class="page-subtitle">Review, approve, and manage external suppliers</p></div>
-    <div class="d-flex gap-2">
-      <span class="badge-ims badge-pending fs-6 px-3 py-2">{{ countBy('PENDING') }} Pending</span>
+
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Supplier Management</h1>
+      <p class="page-subtitle">{{ suppliers.length }} registered suppliers · {{ countBy('PENDING') }} pending approval</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <div class="pending-alert-chip" *ngIf="countBy('PENDING') > 0">
+        <i class="bi bi-bell-fill me-1"></i>{{ countBy('PENDING') }} need review
+      </div>
     </div>
   </div>
 
-  <!-- Tabs -->
+  <!-- Tabs + Search -->
   <div class="ims-card mb-3">
-    <div class="tab-group">
-      <button class="tab-btn" [class.active]="activeTab==='ALL'"      (click)="setTab('ALL')">All ({{ suppliers.length }})</button>
-      <button class="tab-btn" [class.active]="activeTab==='PENDING'"  (click)="setTab('PENDING')">Pending ({{ countBy('PENDING') }})</button>
-      <button class="tab-btn" [class.active]="activeTab==='APPROVED'" (click)="setTab('APPROVED')">Approved ({{ countBy('APPROVED') }})</button>
-      <button class="tab-btn" [class.active]="activeTab==='REJECTED'" (click)="setTab('REJECTED')">Rejected ({{ countBy('REJECTED') }})</button>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="sup-tabs">
+        <button class="sup-tab" [class.active]="activeTab==='ALL'"      (click)="setTab('ALL')">All ({{ suppliers.length }})</button>
+        <button class="sup-tab pending"  [class.active]="activeTab==='PENDING'"  (click)="setTab('PENDING')">Pending ({{ countBy('PENDING') }})</button>
+        <button class="sup-tab approved" [class.active]="activeTab==='APPROVED'" (click)="setTab('APPROVED')">Approved ({{ countBy('APPROVED') }})</button>
+        <button class="sup-tab rejected" [class.active]="activeTab==='REJECTED'" (click)="setTab('REJECTED')">Rejected ({{ countBy('REJECTED') }})</button>
+      </div>
+      <div class="search-input-wrap" style="width:240px">
+        <i class="bi bi-search search-icon"></i>
+        <input class="ims-form-control" (input)="onSearch($event)" placeholder="Search suppliers..." style="padding-left:2.25rem">
+      </div>
     </div>
   </div>
 
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <div class="row g-3" *ngIf="!loading">
-    <div class="col-xl-4 col-md-6" *ngFor="let s of filtered">
-      <div class="supplier-card ims-card">
-        <div class="sup-header">
-          <div class="sup-avatar">{{ s.companyName[0].toUpperCase() }}</div>
-          <div class="sup-info">
-            <div class="sup-company">{{ s.companyName }}</div>
-            <div class="sup-contact"><i class="bi bi-person me-1"></i>{{ s.gstNumber }}</div>
-          </div>
-          <span class="badge-ims ms-auto"
-            [ngClass]="{'badge-active': s.approvalStatus==='APPROVED', 'badge-pending': s.approvalStatus==='PENDING', 'badge-inactive': s.approvalStatus==='REJECTED'}">
-            {{ s.approvalStatus }}
-          </span>
-        </div>
+  <!-- ── Supplier Table ──────────────────────────────────────────────────── -->
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Contact Person</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>GST Number</th>
+            <th>Categories</th>
+            <th style="text-align:center">Status</th>
+            <th style="width:180px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let s of filtered">
+            <!-- Supplier Row -->
+            <tr class="sup-row">
+              <td>
+                <div class="sup-company-cell">
+                  <div class="sup-avatar">{{ s.companyName[0].toUpperCase() }}</div>
+                  <div>
+                    <div class="fw-600">{{ s.companyName }}</div>
+                    <div class="text-muted" style="font-size:.75rem">{{ s.address | slice:0:30 }}...</div>
+                  </div>
+                </div>
+              </td>
+              <td class="fw-500" style="font-size:.875rem">{{ s.name }}</td>
+              <td class="text-muted" style="font-size:.82rem">{{ s.email }}</td>
+              <td class="text-muted" style="font-size:.82rem">{{ s.phone }}</td>
+              <td>
+                <code class="gst-code">{{ s.gstNumber }}</code>
+              </td>
+              <td>
+                <div class="cat-chips">
+                  <span *ngFor="let c of (s.categories || []) | slice:0:2" class="cat-chip">{{ c.name }}</span>
+                  <span *ngIf="(s.categories?.length ?? 0) > 2" class="cat-chip-more">+{{ (s.categories?.length ?? 0) - 2 }}</span>
+                </div>
+              </td>
+              <td style="text-align:center">
+                <span class="sup-status-badge"
+                  [class.approved]="s.approvalStatus==='APPROVED'"
+                  [class.pending]="s.approvalStatus==='PENDING'"
+                  [class.rejected]="s.approvalStatus==='REJECTED'">
+                  <i class="bi me-1"
+                    [class.bi-check-circle-fill]="s.approvalStatus==='APPROVED'"
+                    [class.bi-hourglass-split]="s.approvalStatus==='PENDING'"
+                    [class.bi-x-circle-fill]="s.approvalStatus==='REJECTED'"></i>
+                  {{ s.approvalStatus }}
+                </span>
+              </td>
+              <td style="text-align:center" (click)="$event.stopPropagation()">
+                <ng-container *ngIf="s.approvalStatus === 'PENDING'">
+                  <button class="sup-approve-btn" (click)="approve(s)" [disabled]="approveLoading === s.id">
+                    <span *ngIf="approveLoading !== s.id"><i class="bi bi-check-circle me-1"></i>Approve</span>
+                    <span *ngIf="approveLoading === s.id"><span class="spinner-border spinner-border-sm me-1"></span></span>
+                  </button>
+                  <button class="sup-reject-btn" (click)="openReject(s); rejectingId = s.id">
+                    <i class="bi bi-x-circle me-1"></i>Reject
+                  </button>
+                </ng-container>
+                <span *ngIf="s.approvalStatus !== 'PENDING'" class="text-muted" style="font-size:.78rem">—</span>
+              </td>
+            </tr>
 
-        <div class="sup-details">
-          <div class="sup-detail"><i class="bi bi-envelope me-2"></i>{{ s.email }}</div>
-          <div class="sup-detail"><i class="bi bi-telephone me-2"></i>{{ s.phone }}</div>
-          <div class="sup-detail"><i class="bi bi-geo-alt me-2"></i>{{ s.address }}</div>
-        </div>
+            <!-- Rejection Form Row -->
+            <tr *ngIf="rejectingId === s.id" class="reject-form-row">
+              <td colspan="8">
+                <div class="reject-inline-form">
+                  <label class="ims-form-label"><i class="bi bi-chat-left-text me-1"></i>Rejection Reason *</label>
+                  <div class="d-flex gap-2 align-items-start">
+                    <textarea class="ims-form-control flex-1" rows="2" [(ngModel)]="rejectReason"
+                      placeholder="Explain why you are rejecting this supplier..."></textarea>
+                    <div class="d-flex flex-column gap-1">
+                      <button class="btn btn-danger btn-sm" style="border-radius:8px; white-space:nowrap" (click)="submitReject(s)" [disabled]="rejectLoading">
+                        <span *ngIf="!rejectLoading">Confirm Reject</span>
+                        <span *ngIf="rejectLoading"><span class="spinner-border spinner-border-sm"></span></span>
+                      </button>
+                      <button class="btn-ims-outline btn btn-sm" (click)="rejectingId=null">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-        <div class="sup-actions" *ngIf="s.approvalStatus === 'PENDING'">
-          <button class="btn btn-sm btn-outline-success rounded-2" (click)="approve(s)"><i class="bi bi-check-circle me-1"></i>Approve</button>
-          <button class="btn btn-sm btn-outline-danger rounded-2"  (click)="reject(s)"><i class="bi bi-x-circle me-1"></i>Reject</button>
-        </div>
-        <div class="sup-rejection" *ngIf="s.approvalStatus === 'REJECTED' && s.rejectionReason">
-          <i class="bi bi-info-circle me-1" style="color:var(--ims-danger)"></i>
-          <span>{{ s.rejectionReason }}</span>
-        </div>
-    
-      </div>
-    </div>
+            <!-- Rejection reason display -->
+            <tr *ngIf="s.approvalStatus === 'REJECTED' && s.rejectionReason" class="rejection-reason-row">
+              <td colspan="8">
+                <div class="rejection-display">
+                  <i class="bi bi-info-circle me-1"></i>
+                  <strong>Rejection reason:</strong> {{ s.rejectionReason }}
+                </div>
+              </td>
+            </tr>
+          </ng-container>
 
-    <div class="col-12" *ngIf="filtered.length === 0">
-      <div class="empty-state"><div class="empty-icon"><i class="bi bi-truck"></i></div><h5>No suppliers in this category</h5></div>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="8">
+              <div class="empty-state"><div class="empty-icon"><i class="bi bi-truck"></i></div>
+                <h5>No suppliers in this view</h5>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

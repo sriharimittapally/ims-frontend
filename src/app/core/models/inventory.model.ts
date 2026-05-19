@@ -11,6 +11,6 @@ export interface InventoryResponse {
   reservedQuantity: number;
   availableQuantity: number;
   reorderLevel: number;
-  isLowStock: boolean;
+  lowStock: boolean;
   updatedAt: string;
 }

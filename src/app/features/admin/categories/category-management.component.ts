@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { CategoryService } from '../../../core/services/category.service';
 import { CategoryResponse } from '../../../core/models/category.model';
-import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-category-management',
@@ -16,45 +14,68 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 })
 export class CategoryManagementComponent implements OnInit {
   categories: CategoryResponse[] = [];
+  filtered: CategoryResponse[] = [];
   loading = true;
+  searchText = '';
+
   showModal = false;
   editMode = false;
   editId: number | null = null;
   submitLoading = false;
   form: FormGroup;
 
-  constructor(private svc: CategoryService, private modal: NgbModal, private toastr: ToastrService, private fb: FormBuilder) {
-    this.form = this.fb.group({ name: ['', Validators.required], description: ['', Validators.required] });
+  constructor(private svc: CategoryService, private toastr: ToastrService, private fb: FormBuilder) {
+    this.form = this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required]
+    });
   }
 
   ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading = true;
-    this.svc.getAll().subscribe({ next: res => { this.categories = res.data; this.loading = false; }, error: () => { this.loading = false; } });
+    this.svc.getAll().subscribe({
+      next: r => { this.categories = r.data; this.applyFilter(); this.loading = false; },
+      error: () => { this.loading = false; }
+    });
   }
+
+  applyFilter(): void {
+    if (!this.searchText) { this.filtered = this.categories; return; }
+    const q = this.searchText.toLowerCase();
+    this.filtered = this.categories.filter(c =>
+      c.name.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q)
+    );
+  }
+
+  onSearch(e: Event): void { this.searchText = (e.target as HTMLInputElement).value; this.applyFilter(); }
 
   openCreate(): void { this.editMode = false; this.editId = null; this.form.reset(); this.showModal = true; }
 
-  openEdit(c: CategoryResponse): void { this.editMode = true; this.editId = c.id; this.form.patchValue({ name: c.name, description: c.description }); this.showModal = true; }
+  openEdit(c: CategoryResponse): void {
+    this.editMode = true; this.editId = c.id;
+    this.form.patchValue({ name: c.name, description: c.description });
+    this.showModal = true;
+  }
 
   submit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.submitLoading = true;
     const obs = this.editMode ? this.svc.update(this.editId!, this.form.value) : this.svc.create(this.form.value);
-    obs.subscribe({ next: () => { this.toastr.success(this.editMode ? 'Category updated' : 'Category created'); this.showModal = false; this.submitLoading = false; this.load(); }, error: () => { this.submitLoading = false; } });
+    obs.subscribe({
+      next: () => {
+        this.toastr.success(this.editMode ? 'Category updated' : 'Category created');
+        this.showModal = false; this.submitLoading = false; this.load();
+      },
+      error: () => { this.submitLoading = false; }
+    });
   }
 
   toggle(c: CategoryResponse): void {
-    const action = c.status === 'ACTIVE' ? 'deactivate' : 'activate';
-    const ref = this.modal.open(ConfirmModalComponent);
-    ref.componentInstance.title = `${action} Category`;
-    ref.componentInstance.message = `${action} <strong>${c.name}</strong>?`;
-    ref.componentInstance.confirmClass = action === 'deactivate' ? 'danger' : 'success';
-    ref.componentInstance.confirmLabel = action.charAt(0).toUpperCase() + action.slice(1);
-    ref.result.then(() => {
-      const obs = c.status === 'ACTIVE' ? this.svc.deactivate(c.id) : this.svc.activate(c.id);
-      obs.subscribe({ next: () => { this.toastr.success(`Category ${action}d`); this.load(); } });
-    }).catch(() => {});
+    const obs = c.status === 'ACTIVE' ? this.svc.deactivate(c.id) : this.svc.activate(c.id);
+    obs.subscribe({
+      next: () => { this.toastr.success(`Category ${c.status === 'ACTIVE' ? 'deactivated' : 'activated'}`); this.load(); }
+    });
   }
 }

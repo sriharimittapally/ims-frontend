@@ -1,90 +1,205 @@
 <div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
     <div>
       <h1 class="page-title">Warehouses</h1>
-      <p class="page-subtitle">Manage warehouse locations and assignments</p>
+      <p class="page-subtitle">{{ warehouses.length }} warehouses · {{ activeCount }} active</p>
     </div>
     <button class="btn-ims-primary btn" (click)="openCreate()">
-      <i class="bi bi-plus-circle me-1"></i> New Warehouse
+      <i class="bi bi-plus-circle me-1"></i>New Warehouse
     </button>
+  </div>
+
+  <!-- ── Filters ────────────────────────────────────────────────────────── -->
+  <div class="ims-card mb-3">
+    <div class="d-flex gap-3 flex-wrap">
+      <div class="search-input-wrap" style="flex:1; min-width:200px">
+        <i class="bi bi-search search-icon"></i>
+        <input class="ims-form-control" (input)="onSearch($event)"
+          placeholder="Search by name or city..." style="padding-left:2.25rem">
+      </div>
+      <select class="ims-form-control" style="width:150px" [(ngModel)]="filterStatus" (change)="applyFilter()">
+        <option value="">All Status</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+      </select>
+    </div>
   </div>
 
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <div class="row g-3" *ngIf="!loading">
-    <div class="col-xl-4 col-md-6" *ngFor="let w of warehouses">
-      <div class="wh-card ims-card">
-        <div class="wh-card-header">
-          <div class="wh-icon gradient-primary"><i class="bi bi-building"></i></div>
-          <div>
-            <div class="wh-name">{{ w.name }}</div>
-            <div class="wh-location"><i class="bi bi-geo-alt me-1"></i>{{ w.city }}</div>
-          </div>
-          <span class="badge-ims ms-auto" [ngClass]="w.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ w.status }}</span>
-        </div>
-
-
-        <div class="wh-manager">
-          <i class="bi bi-person-badge me-2 text-muted"></i>
-          <span *ngIf="w.managerName" class="fw-600">{{ w.managerName }}</span>
-          <span *ngIf="!w.managerName" class="text-muted">No manager assigned</span>
-        </div>
-
-        <!-- Assign Manager -->
-        <div class="mt-2" *ngIf="managers.length">
-          <label class="ims-form-label">Assign Manager</label>
-          <div class="d-flex gap-2">
-            <select class="ims-form-control" #managerSel>
-              <option value="">Select manager...</option>
-              <option *ngFor="let m of managers" [value]="m.id">{{ m.name }}</option>
-            </select>
-            <button class="btn-ims-outline btn btn-sm" (click)="assignManager(w.id, +managerSel.value)">Assign</button>
-          </div>
-        </div>
-
-        <div class="wh-actions mt-3">
-          <button class="btn-ims-outline btn btn-sm" (click)="openEdit(w)"><i class="bi bi-pencil me-1"></i>Edit</button>
-          <button class="btn btn-sm" [ngClass]="w.status === 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'" (click)="toggle(w)" style="border-radius:8px">
-            {{ w.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-12" *ngIf="warehouses.length === 0">
-      <div class="empty-state"><div class="empty-icon"><i class="bi bi-building"></i></div><h5>No warehouses yet</h5></div>
+  <!-- ── Table ──────────────────────────────────────────────────────────── -->
+  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead>
+          <tr>
+            <th>Warehouse</th>
+            <th>City</th>
+            <th>Manager</th>
+            <th style="text-align:center">Status</th>
+            <th style="text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let w of filtered" class="wh-row">
+            <td>
+              <div class="wh-name-cell">
+                <div class="wh-icon-small"><i class="bi bi-building-fill"></i></div>
+                <div>
+                  <div class="fw-600">{{ w.name }}</div>
+                  <div class="text-muted" style="font-size:.75rem">{{ w.address }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-1">
+                <i class="bi bi-geo-alt text-muted" style="font-size:.875rem"></i>
+                <span style="font-size:.875rem">{{ w.city }}</span>
+              </div>
+            </td>
+            <td>
+              <span *ngIf="w.managerName" class="fw-600" style="font-size:.875rem">{{ w.managerName }}</span>
+              <span *ngIf="!w.managerName" class="badge-ims badge-pending" style="font-size:.7rem">
+                <i class="bi bi-exclamation-circle me-1"></i>Unassigned
+              </span>
+            </td>
+            <!-- <td style="text-align:center">
+              <span class="badge-ims badge-sent">{{ w.totalProducts ?? 0 }}</span>
+            </td> -->
+            <td style="text-align:center">
+              <label class="status-toggle" [title]="w.status">
+                <input type="checkbox" [checked]="w.status === 'ACTIVE'" (change)="toggle(w)">
+                <span class="st-slider"></span>
+              </label>
+            </td>
+            <td style="text-align:center">
+              <div class="d-flex gap-1 justify-content-center">
+                <button class="action-icon-btn primary" (click)="openDetail(w)" title="Manage / Assign Manager">
+                  <i class="bi bi-sliders"></i>
+                </button>
+                <button class="action-icon-btn" (click)="openEdit(w)" title="Edit Warehouse">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="6">
+              <div class="empty-state"><div class="empty-icon"><i class="bi bi-building"></i></div>
+                <h5>{{ searchText ? 'No warehouses match' : 'No warehouses yet' }}</h5>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h5 class="modal-title"><i class="bi bi-building me-2"></i>{{ editMode ? 'Edit' : 'New' }} Warehouse</h5>
-      <button class="btn-close" (click)="showModal=false"></button>
+<!-- ══ Create / Edit Modal ════════════════════════════════════════════════ -->
+<div class="ims-modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="ims-modal" (click)="$event.stopPropagation()">
+    <div class="ims-modal-header">
+      <h5>
+        <span class="modal-icon-badge wh-badge"><i class="bi bi-building-fill"></i></span>
+        {{ editMode ? 'Edit Warehouse' : 'New Warehouse' }}
+      </h5>
+      <button class="btn-close-modal" (click)="showModal=false"><i class="bi bi-x-lg"></i></button>
     </div>
-    <div class="modal-body">
+    <div class="ims-modal-body">
       <form [formGroup]="form">
-        <div class="mb-3">
-          <label class="ims-form-label">Warehouse Name</label>
-          <input class="ims-form-control" formControlName="name" placeholder="e.g. North Hub">
+        <div class="modal-field">
+          <label class="ims-form-label">Warehouse Name *</label>
+          <input class="ims-form-control" formControlName="name" placeholder="e.g. North Distribution Hub"
+            [class.field-error-border]="form.get('name')?.invalid && form.get('name')?.touched">
+          <div class="field-err-text" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">Name required.</div>
         </div>
-        <div class="mb-3">
-          <label class="ims-form-label">Address</label>
-          <input class="ims-form-control" formControlName="address" placeholder="e.g. 1-1 James Street">
+        <div class="modal-field">
+          <label class="ims-form-label">Street Address *</label>
+          <input class="ims-form-control" formControlName="address" placeholder="e.g. 123 Industrial Road, Sector 5"
+            [class.field-error-border]="form.get('address')?.invalid && form.get('address')?.touched">
+          <div class="field-err-text" *ngIf="form.get('address')?.invalid && form.get('address')?.touched">Address required.</div>
         </div>
-        <div class="mb-3">
-          <label class="ims-form-label">City</label>
-          <input class="ims-form-control" formControlName="city" placeholder="e.g. Bengaluru, Karnataka">
+        <div class="modal-field">
+          <label class="ims-form-label">City *</label>
+          <input class="ims-form-control" formControlName="city" placeholder="e.g. Bengaluru, Karnataka"
+            [class.field-error-border]="form.get('city')?.invalid && form.get('city')?.touched">
+          <div class="field-err-text" *ngIf="form.get('city')?.invalid && form.get('city')?.touched">City required.</div>
         </div>
       </form>
     </div>
-    <div class="modal-footer">
+    <div class="ims-modal-footer">
       <button class="btn-ims-outline btn" (click)="showModal=false">Cancel</button>
       <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">
-        {{ editMode ? 'Update' : 'Create' }}
+        <span *ngIf="!submitLoading"><i class="bi bi-check me-1"></i>{{ editMode ? 'Update' : 'Create' }}</span>
+        <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Warehouse Detail / Assign Panel ═══════════════════════════════════ -->
+<div class="wh-overlay" *ngIf="showDetail" (click)="showDetail=false">
+  <div class="wh-panel" (click)="$event.stopPropagation()" *ngIf="selectedWarehouse">
+    <div class="whp-header">
+      <div>
+        <div class="fw-700" style="font-size:1rem">{{ selectedWarehouse.name }}</div>
+        <div class="text-muted" style="font-size:.78rem">
+          <i class="bi bi-geo-alt me-1"></i>{{ selectedWarehouse.address }}, {{ selectedWarehouse.city }}
+        </div>
+      </div>
+      <button class="btn-close-modal" (click)="showDetail=false"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="whp-body">
+
+      <!-- Stats -->
+      <div class="whp-stats">
+        <!-- <div class="whps">
+          <div class="whps-val">{{ selectedWarehouse.totalProducts ?? 0 }}</div>
+          <div class="whps-lbl">Products</div>
+        </div>
+        <div class="whps">
+          <div class="whps-val">{{ selectedWarehouse.totalQuantity ?? 0 | number }}</div>
+          <div class="whps-lbl">Total Units</div>
+        </div> -->
+        <div class="whps">
+          <span class="badge-ims" [ngClass]="selectedWarehouse.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">
+            {{ selectedWarehouse.status }}
+          </span>
+          <div class="whps-lbl">Status</div>
+        </div>
+      </div>
+
+      <!-- Current Manager -->
+      <div class="whp-section">
+        <div class="whp-section-title">Current Manager</div>
+        <div *ngIf="selectedWarehouse.managerName" class="current-manager">
+          <div class="cm-avatar">{{ selectedWarehouse.managerName[0] }}</div>
+          <div>
+            <div class="fw-600">{{ selectedWarehouse.managerName }}</div>
+            <div class="text-muted" style="font-size:.75rem">Assigned Manager</div>
+          </div>
+        </div>
+        <div *ngIf="!selectedWarehouse.managerName" class="no-manager">
+          <i class="bi bi-person-x me-2"></i>No manager assigned
+        </div>
+      </div>
+
+      <!-- Assign Manager -->
+      <div class="whp-section">
+        <div class="whp-section-title">Assign / Change Manager</div>
+        <select class="ims-form-control mb-2" [(ngModel)]="selectedManagerId">
+          <option value="">Select a manager...</option>
+          <option *ngFor="let m of managers" [value]="m.id">{{ m.name }} ({{ m.email }})</option>
+        </select>
+        <button class="btn-ims-primary btn w-100" (click)="assignManager()" [disabled]="!selectedManagerId || assignLoading">
+          <span *ngIf="!assignLoading"><i class="bi bi-person-check me-1"></i>Assign Manager</span>
+          <span *ngIf="assignLoading"><span class="spinner-border spinner-border-sm me-1"></span>Assigning...</span>
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

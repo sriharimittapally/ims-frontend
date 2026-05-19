@@ -20,10 +20,10 @@ import { InventoryResponse } from '../../../core/models/inventory.model';
               <tr *ngFor="let inv of filtered">
                 <td class="fw-600">{{ inv.productName }}</td>
                 <td><code style="font-size:.75rem;background:var(--ims-bg-secondary);padding:.1rem .4rem;border-radius:4px">{{ inv.sku }}</code></td>
-                <td><span [style.color]="inv.isLowStock ? 'var(--ims-danger)' : 'var(--ims-success)'" class="fw-600">{{ inv.availableQuantity | number }}</span></td>
+                <td><span [style.color]="inv.lowStock ? 'var(--ims-danger)' : 'var(--ims-success)'" class="fw-600">{{ inv.availableQuantity | number }}</span></td>
                 <td class="text-muted">{{ inv.reservedQuantity }}</td>
                 <td class="text-muted">{{ inv.reorderLevel }}</td>
-                <td><span class="badge-ims" [ngClass]="inv.isLowStock ? 'badge-inactive' : 'badge-active'">{{ inv.isLowStock ? 'Low Stock' : 'OK' }}</span></td>
+                <td><span class="badge-ims" [ngClass]="inv.lowStock ? 'badge-inactive' : 'badge-active'">{{ inv.lowStock ? 'Low Stock' : 'OK' }}</span></td>
               </tr>
               <tr *ngIf="filtered.length === 0"><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="bi bi-archive"></i></div><h5>No inventory found</h5></div></td></tr>
             </tbody>

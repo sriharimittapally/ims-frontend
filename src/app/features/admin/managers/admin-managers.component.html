@@ -1,0 +1,155 @@
+<div class="animate-fade-in-up">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Manager Service</h1>
+      <p class="page-subtitle">View managers, their assigned warehouses, and staff</p>
+    </div>
+    <a routerLink="/admin/users" class="btn-ims-primary btn">
+      <i class="bi bi-person-plus me-1"></i>Create Manager
+    </a>
+  </div>
+
+  <!-- ── Stats Bar ──────────────────────────────────────────────────────── -->
+  <div class="row g-3 mb-4" *ngIf="!loading">
+    <div class="col-md-3 col-6">
+      <div class="mgr-stat-card">
+        <div class="msc-icon" style="background:rgba(99,102,241,.12); color:var(--ims-primary)"><i class="bi bi-person-badge"></i></div>
+        <div class="msc-value">{{ managerViews.length }}</div>
+        <div class="msc-label">Total Managers</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="mgr-stat-card">
+        <div class="msc-icon" style="background:rgba(16,185,129,.12); color:var(--ims-success)"><i class="bi bi-check-circle"></i></div>
+        <div class="msc-value">{{ activeManagers }}</div>
+        <div class="msc-label">Active</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="mgr-stat-card">
+        <div class="msc-icon" style="background:rgba(59,130,246,.12); color:var(--ims-info)"><i class="bi bi-people"></i></div>
+        <div class="msc-value">{{ totalStaff }}</div>
+        <div class="msc-label">Total Staff</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="mgr-stat-card">
+        <div class="msc-icon" style="background:rgba(245,158,11,.12); color:var(--ims-warning)"><i class="bi bi-exclamation-circle"></i></div>
+        <div class="msc-value">{{ unassigned }}</div>
+        <div class="msc-label">Unassigned</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Filters ────────────────────────────────────────────────────────── -->
+  <div class="ims-card mb-3">
+    <div class="d-flex gap-3 flex-wrap align-items-center">
+      <div class="search-input-wrap" style="flex:1; min-width:200px">
+        <i class="bi bi-search search-icon"></i>
+        <input class="ims-form-control" (input)="onSearch($event)" placeholder="Search by name, email or warehouse..."
+          style="padding-left:2.25rem">
+      </div>
+      <select class="ims-form-control" style="width:150px" [(ngModel)]="filterStatus" (change)="applyFilter()">
+        <option value="">All Status</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────────────────────── -->
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+
+  <!-- ── Manager Table ──────────────────────────────────────────────────── -->
+  <div *ngIf="!loading">
+    <div class="ims-card p-0 overflow-hidden">
+      <table class="ims-table w-100">
+        <thead>
+          <tr>
+            <th>Manager</th>
+            <th>Email</th>
+            <th>Warehouse</th>
+            <th>Location</th>
+            <th>Staff Count</th>
+            <th>Status</th>
+            <th>Staff</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let v of filteredViews">
+            <!-- Manager Row -->
+            <tr class="mgr-row" [class.row-expanded]="v.expanded">
+              <td>
+                <div class="mgr-cell">
+                  <div class="mgr-avatar">{{ v.manager.name[0].toUpperCase() }}</div>
+                  <div>
+                    <div class="fw-600">{{ v.manager.name }}</div>
+                    <div class="text-muted" style="font-size:.75rem">{{ v.manager.userCode }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-muted" style="font-size:.82rem">{{ v.manager.email }}</td>
+              <td>
+                <span *ngIf="v.warehouse" class="fw-600">{{ v.warehouse.name }}</span>
+                <span *ngIf="!v.warehouse" class="badge-ims badge-pending" style="font-size:.7rem">Unassigned</span>
+              </td>
+              <td class="text-muted" style="font-size:.82rem">{{ v.warehouse?.city || '—' }}</td>
+              <td>
+                <span class="staff-count-badge">{{ v.staff.length }}</span>
+              </td>
+              <td>
+                <span class="status-dot-text" [class.active]="v.manager.status === 'ACTIVE'">
+                  <span class="dot"></span>{{ v.manager.status }}
+                </span>
+              </td>
+              <td>
+                <button class="expand-btn" (click)="v.expanded = !v.expanded; $event.stopPropagation()"
+                  [class.expanded]="v.expanded" *ngIf="v.staff.length > 0">
+                  <i class="bi bi-chevron-down me-1"></i>
+                  View {{ v.staff.length }} Staff
+                </button>
+                <span class="text-muted" style="font-size:.78rem" *ngIf="v.staff.length === 0">No staff</span>
+              </td>
+            </tr>
+
+            <!-- Staff Expansion Row -->
+            <tr *ngIf="v.expanded" class="staff-expansion-row">
+              <td colspan="7">
+                <div class="staff-expansion">
+                  <div class="se-header">
+                    <i class="bi bi-people me-1"></i>
+                    Staff under {{ v.manager.name }} — {{ v.warehouse?.name || 'Unassigned Warehouse' }}
+                  </div>
+                  <div class="staff-grid">
+                    <div *ngFor="let s of v.staff" class="staff-chip">
+                      <div class="sc-avatar">{{ s.name[0] }}</div>
+                      <div>
+                        <div class="sc-name">{{ s.name }}</div>
+                        <div class="sc-email">{{ s.email }}</div>
+                      </div>
+                      <span class="sc-status" [class.active]="s.status === 'ACTIVE'">
+                        <span class="dot"></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="filteredViews.length === 0">
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-person-badge"></i></div>
+                <h5>No managers found</h5>
+                <p>Create managers from the Users section.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

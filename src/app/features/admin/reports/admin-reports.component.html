@@ -119,9 +119,9 @@
                 style="font-size:.75rem; background:var(--ims-bg-secondary); padding:.1rem .4rem; border-radius:4px">{{ a.sku }}</code>
             </td>
             <td class="text-muted">{{ a.warehouseName }}</td>
-            <td><span style="color:var(--ims-danger); font-weight:700">{{ a.currentQuantity }}</span></td>
+            <td><span style="color:var(--ims-danger); font-weight:700">{{ a.availableQuantity }}</span></td>
             <td class="text-muted">{{ a.reorderLevel }}</td>
-            <td><span class="badge-ims badge-inactive">-{{ a.reorderLevel - a.currentQuantity }}</span></td>
+            <td><span class="badge-ims badge-inactive">-{{ a.reorderLevel - a.availableQuantity }}</span></td>
           </tr>
           <tr *ngIf="lowStockAlerts.alerts?.length === 0">
             <td colspan="6">
@@ -194,12 +194,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let o of poReport.recentOrders">
-                <td><span class="po-num">{{ o.poNumber }}</span></td>
-                <td class="text-muted">{{ o.supplierName }}</td>
-                <td><span class="badge-ims badge-pending">{{ o.status }}</span></td>
-                <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
-                <td class="text-muted">{{ o.createdAt | date:'dd MMM yy' }}</td>
+              <tr *ngFor="let o of poReport.bySupplier | slice:0:8">
+                <td class="fw-600">{{ o.companyName || o.supplierName }}</td>
+                <td>{{ o.totalPOs }}</td>
+                <td><span class="badge-ims badge-active">{{ o.receivedPOs }}</span></td>
+                <td class="fw-600">₹{{ o.totalAmount | number:'1.0-0' }}</td>
               </tr>
             </tbody>
           </table>
