@@ -18,20 +18,20 @@
   <ng-container *ngIf="activeTab === 'stock' && !loading && warehouseStock">
     <div class="ims-card mb-3 d-flex align-items-center gap-3">
       <i class="bi bi-building" style="font-size:1.5rem; color:var(--ims-primary)"></i>
-      <div><div class="fw-700" style="font-size:1.1rem">{{ warehouseStock.warehouseName }}</div><div class="text-muted">{{ warehouseStock.items?.length }} inventory lines</div></div>
+      <div><div class="fw-700" style="font-size:1.1rem">{{ warehouseStock.warehouseName }}</div><div class="text-muted">{{ warehouseStock.products?.length }} inventory lines</div></div>
     </div>
     <div class="ims-card p-0 overflow-hidden">
       <table class="ims-table w-100">
         <thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Reserved</th><th>Available</th><th>Reorder Lvl</th><th>Status</th></tr></thead>
         <tbody>
-          <tr *ngFor="let item of warehouseStock.items">
+          <tr *ngFor="let item of warehouseStock.products">
             <td class="fw-600">{{ item.productName }}</td>
             <td><code style="font-size:.75rem;background:var(--ims-bg-secondary);padding:.1rem .4rem;border-radius:4px">{{ item.sku }}</code></td>
             <td>{{ item.quantity | number }}</td>
             <td class="text-muted">{{ item.reservedQuantity }}</td>
-            <td><span [style.color]="item.isLowStock ? 'var(--ims-danger)' : 'var(--ims-success)'" class="fw-600">{{ item.availableQuantity }}</span></td>
+            <td><span [style.color]="item.lowStock ? 'var(--ims-danger)' : 'var(--ims-success)'" class="fw-600">{{ item.availableQuantity }}</span></td>
             <td class="text-muted">{{ item.reorderLevel }}</td>
-            <td><span class="badge-ims" [ngClass]="item.isLowStock ? 'badge-inactive' : 'badge-active'">{{ item.isLowStock ? 'Low' : 'OK' }}</span></td>
+            <td><span class="badge-ims" [ngClass]="item.lowStock ? 'badge-inactive' : 'badge-active'">{{ item.lowStock ? 'Low' : 'OK' }}</span></td>
           </tr>
         </tbody>
       </table>
@@ -49,9 +49,9 @@
         <tbody>
           <tr *ngFor="let a of lowStock.alerts">
             <td class="fw-600">{{ a.productName }}<br><small class="text-muted">{{ a.sku }}</small></td>
-            <td style="color:var(--ims-danger);font-weight:700">{{ a.currentQuantity }}</td>
+            <td style="color:var(--ims-danger);font-weight:700">{{ a.availableQuantity }}</td>
             <td class="text-muted">{{ a.reorderLevel }}</td>
-            <td><span class="badge-ims badge-inactive">-{{ a.reorderLevel - a.currentQuantity }}</span></td>
+            <td><span class="badge-ims badge-inactive">-{{ a.reorderLevel - a.availableQuantity }}</span></td>
           </tr>
           <tr *ngIf="lowStock.alerts?.length === 0"><td colspan="4"><div class="empty-state"><div class="empty-icon"><i class="bi bi-check-circle"></i></div><h5>All stock healthy!</h5></div></td></tr>
         </tbody>
@@ -67,64 +67,130 @@
 
   <!-- PO -->
   <ng-container *ngIf="activeTab === 'po' && !loading && poReport">
-    <div class="row g-3 mb-3">
-      <div class="col-md-4"><div class="stat-card stat-primary"><div class="stat-value">{{ poReport.totalPOs }}</div><div class="stat-label">Total POs</div></div></div>
-      <div class="col-md-4"><div class="stat-card stat-success"><div class="stat-value">₹{{ poReport.totalAmount | number:'1.0-0' }}</div><div class="stat-label">Total Amount</div></div></div>
-    </div>
-    <div class="ims-card p-0 overflow-hidden">
-      <table class="ims-table w-100">
-        <thead><tr><th>PO Number</th><th>Supplier</th><th>Status</th><th>Amount</th><th>Date</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let o of poReport.recentOrders">
-            <td><span style="font-family:monospace;color:var(--ims-primary);font-weight:700">{{ o.poNumber }}</span></td>
-            <td class="text-muted">{{ o.supplierName }}</td>
-            <td><span class="badge-ims badge-pending">{{ o.status }}</span></td>
-            <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
-            <td class="text-muted">{{ o.createdAt | date:'dd MMM yy' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </ng-container>
 
-  <!-- Staff Activity -->
-  <ng-container *ngIf="activeTab === 'staff' && !loading && staffActivity">
+  <div class="row g-3 mb-3">
+
+    <div class="col-md-4">
+      <div class="stat-card stat-primary">
+        <div class="stat-value">{{ poReport.totalPOs }}</div>
+        <div class="stat-label">Total POs</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card stat-success">
+        <div class="stat-value">
+          ₹{{ poReport.totalSpend | number:'1.2-2' }}
+        </div>
+        <div class="stat-label">Total Spend</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="ims-card p-0 overflow-hidden">
+    <table class="ims-table w-100">
+
+      <thead>
+        <tr>
+          <th>Supplier</th>
+          <th>Company Name</th>
+          <th>Total POs</th>
+          <th>Received POs</th>
+          <th>Total Spent</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let o of poReport.bySupplier">
+
+          <td class="text-muted">
+            {{ o.supplierName }}
+          </td>
+
+          <td>
+            <span class="badge-ims badge-pending">
+              {{ o.companyName }}
+            </span>
+          </td>
+
+          <td class="fw-600">
+            {{ o.totalPOs }}
+          </td>
+
+          <td class="fw-600">
+            {{ o.receivedPOs }}
+          </td>
+
+          <td class="fw-600">
+            ₹{{ o.totalAmount | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        <tr *ngIf="poReport.bySupplier?.length === 0">
+          <td colspan="5">
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="bi bi-cart-x"></i>
+              </div>
+              <h5>No supplier purchase orders found</h5>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+  </div>
+
+</ng-container>
+<ng-container *ngIf="activeTab === 'staff' && !loading && staffActivity">
     <div class="ims-card mb-4"><h6 class="mb-3 fw-700">Staff Issue Activity</h6><div class="chart-container" style="height:280px"><canvas baseChart [data]="staffBarData" [options]="barOptions" type="bar"></canvas></div></div>
     <div class="ims-card p-0 overflow-hidden">
       <table class="ims-table w-100">
-        <thead><tr><th>Staff</th><th>Total Issues</th><th>Issued</th><th>Rejected</th><th>Cancelled</th></tr></thead>
+        <thead><tr><th>Staff</th><th>Total Issues</th><th>Pending</th><th>Issued</th><th>Rejected</th><th>Cancelled</th><th>Units Issued</th></tr></thead>
         <tbody>
-          <tr *ngFor="let s of staffActivity.staff">
-            <td class="fw-600">{{ s.staffName }}</td>
-            <td>{{ s.totalIssues }}</td>
-            <td style="color:var(--ims-success)">{{ s.issuedCount }}</td>
-            <td style="color:var(--ims-danger)">{{ s.rejectedCount }}</td>
-            <td class="text-muted">{{ s.cancelledCount }}</td>
+          <tr *ngFor="let s of staffActivity.staffActivity">
+            <td class="fw-600">{{ s.staffName }}<br><small class="text-muted">{{ s.userCode }}</small></td>
+            <td>{{ s.totalIssuesCreated }}</td>
+            <td>{{ s.issuesPending }}</td>
+            <td style="color:var(--ims-success)">{{ s.issuesIssued }}</td>
+            <td style="color:var(--ims-danger)">{{ s.issuesRejected }}</td>
+            <td class="text-muted">{{ s.issuesCancelled }}</td>
+            <td class="fw-600">{{ s.totalUnitsIssued }}</td>
           </tr>
+          <tr *ngIf="staffActivity.staffActivity?.length === 0"><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="bi bi-person-badge"></i></div><h5>No staff activity yet</h5></div></td></tr>
         </tbody>
       </table>
     </div>
   </ng-container>
 
-  <!-- Top Products -->
   <ng-container *ngIf="activeTab === 'top' && !loading && topProducts">
+    <div class="ims-card mb-3" *ngIf="topBarData">
+      <h6 class="fw-700 mb-3">Top Outflow Chart</h6>
+      <div class="chart-container" style="height:240px"><canvas baseChart [data]="topBarData" [options]="barOptions" type="bar"></canvas></div>
+    </div>
     <div class="row g-3">
       <div class="col-md-6">
         <div class="ims-card"><h6 class="fw-700 mb-3">Top Moving</h6>
-          <div *ngFor="let p of topProducts.topMoving; let i = index" class="product-rank-item">
+          <div *ngFor="let p of topProducts.topMovingProducts; let i = index" class="product-rank-item">
             <span class="rank-badge gradient-primary">{{ i+1 }}</span>
-            <div class="flex-1"><div class="fw-600" style="font-size:.875rem">{{ p.productName }}</div><div class="text-muted" style="font-size:.75rem">{{ p.sku }}</div></div>
-            <span class="badge-ims badge-active">{{ p.totalMovement }}</span>
+            <div class="flex-1"><div class="fw-600" style="font-size:.875rem">{{ p.productName }}</div><div class="text-muted" style="font-size:.75rem">{{ p.sku }} - {{ p.currentStock }} in stock</div></div>
+            <span class="badge-ims badge-active">{{ p.totalUnitsOut }} out</span>
           </div>
+          <div *ngIf="topProducts.topMovingProducts?.length === 0" class="empty-state py-3"><h6>No outbound movement yet</h6></div>
         </div>
       </div>
       <div class="col-md-6">
         <div class="ims-card"><h6 class="fw-700 mb-3">Slow Moving</h6>
-          <div *ngFor="let p of topProducts.slowMoving; let i = index" class="product-rank-item">
+          <div *ngFor="let p of topProducts.slowMovingProducts; let i = index" class="product-rank-item">
             <span class="rank-badge gradient-warning">{{ i+1 }}</span>
-            <div class="flex-1"><div class="fw-600" style="font-size:.875rem">{{ p.productName }}</div><div class="text-muted" style="font-size:.75rem">{{ p.sku }}</div></div>
-            <span class="badge-ims badge-pending">{{ p.totalMovement }}</span>
+            <div class="flex-1"><div class="fw-600" style="font-size:.875rem">{{ p.productName }}</div><div class="text-muted" style="font-size:.75rem">{{ p.sku }} - Rs. {{ p.stockValue | number:'1.0-0' }} value</div></div>
+            <span class="badge-ims badge-pending">{{ p.totalUnitsOut }} out</span>
           </div>
+          <div *ngIf="topProducts.slowMovingProducts?.length === 0" class="empty-state py-3"><h6>No inventory products found</h6></div>
         </div>
       </div>
     </div>

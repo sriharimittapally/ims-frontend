@@ -6,6 +6,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../../../core/services/user.service';
@@ -15,7 +16,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 @Component({
   selector: 'app-manager-staff',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './manager-staff.component.html',
   styleUrls: ['./manager-staff.component.scss'],
 })
@@ -24,6 +25,10 @@ export class ManagerStaffComponent implements OnInit {
   loading = true;
   showModal = false;
   submitLoading = false;
+  searchText = '';
+  statusFilter: 'ALL' | 'ACTIVE' | 'INACTIVE' = 'ALL';
+  selectedStaff: UserResponse | null = null;
+  showDetail = false;
   form: FormGroup;
 
   constructor(
@@ -35,7 +40,7 @@ export class ManagerStaffComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-       phone: ['', [Validators.required]],
+      phone: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
@@ -55,6 +60,42 @@ export class ManagerStaffComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  get filteredStaff(): UserResponse[] {
+    const q = this.searchText.trim().toLowerCase();
+    return this.staff
+      .filter(s => this.statusFilter === 'ALL' || s.status === this.statusFilter)
+      .filter(s => !q ||
+        s.name.toLowerCase().includes(q) ||
+        s.email.toLowerCase().includes(q) ||
+        s.phone?.toLowerCase().includes(q) ||
+        s.userCode?.toLowerCase().includes(q)
+      )
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  get activeCount(): number {
+    return this.staff.filter(s => s.status === 'ACTIVE').length;
+  }
+
+  get inactiveCount(): number {
+    return this.staff.filter(s => s.status !== 'ACTIVE').length;
+  }
+
+  openCreate(): void {
+    this.form.reset();
+    this.showModal = true;
+  }
+
+  openDetail(staff: UserResponse): void {
+    this.selectedStaff = staff;
+    this.showDetail = true;
+  }
+
+  closeDetail(): void {
+    this.selectedStaff = null;
+    this.showDetail = false;
   }
 
   submit(): void {
@@ -78,15 +119,8 @@ export class ManagerStaffComponent implements OnInit {
 
   toggle(s: UserResponse): void {
     const action = s.status === 'ACTIVE' ? 'deactivate' : 'activate';
-    const ref = this.modal.open(ConfirmModalComponent);
-    ref.componentInstance.title = `${action} Staff`;
-    ref.componentInstance.message = `${action} <strong>${s.name}</strong>?`;
-    ref.componentInstance.confirmClass =
-      action === 'deactivate' ? 'danger' : 'success';
-    ref.componentInstance.confirmLabel =
-      action.charAt(0).toUpperCase() + action.slice(1);
-    ref.result
-      .then(() => {
+   
+      
         const obs =
           s.status === 'ACTIVE'
             ? this.svc.deactivateStaff(s.id)
@@ -95,9 +129,11 @@ export class ManagerStaffComponent implements OnInit {
           next: () => {
             this.toastr.success(`Staff ${action}d`);
             this.load();
+            if (this.selectedStaff?.id === s.id) {
+              this.selectedStaff = { ...s, status: s.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' };
+            }
           },
         });
-      })
-      .catch(() => {});
-  }
+      }
+  
 }

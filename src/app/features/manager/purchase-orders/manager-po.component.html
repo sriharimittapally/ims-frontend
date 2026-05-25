@@ -1,34 +1,28 @@
 <div class="animate-fade-in-up">
-
-  <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
     <div>
       <h1 class="page-title">Purchase Orders</h1>
-      <p class="page-subtitle">Create and manage purchase orders for your warehouse</p>
+      <p class="page-subtitle">Search a low-stock product, compare suppliers, then create a purchase order.</p>
     </div>
     <button class="btn-ims-primary btn" (click)="openWizard()">
       <i class="bi bi-plus-circle me-1"></i>New Purchase Order
     </button>
   </div>
 
-  <!-- ── Auto-Draft Alert ──────────────────────────────────────────────── -->
   <div class="auto-draft-alert ims-card mb-3" *ngIf="autoDraftOrders.length > 0">
     <div class="ada-left">
-      <div class="ada-icon"><i class="bi bi-robot"></i></div>
+      <div class="ada-icon"><i class="bi bi-magic"></i></div>
       <div>
         <div class="ada-title">
-          <span class="auto-draft-badge"><i class="bi bi-magic me-1"></i>Auto-Generated</span>
-          {{ autoDraftOrders.length }} PO{{ autoDraftOrders.length > 1 ? 's' : '' }} created by system due to low stock
+          <span class="auto-draft-badge">Auto-draft</span>
+          {{ autoDraftOrders.length }} low-stock PO{{ autoDraftOrders.length > 1 ? 's' : '' }} waiting for review
         </div>
-        <div class="ada-sub">Review these auto-drafted POs and send them to suppliers when ready.</div>
+        <div class="ada-sub">These drafts were created from preferred suppliers after stock fell below reorder level.</div>
       </div>
     </div>
-    <button class="btn-ims-primary btn btn-sm" (click)="activeTab='DRAFT'">
-      Review Auto-Drafts →
-    </button>
+    <button class="btn-ims-primary btn btn-sm" (click)="activeTab='DRAFT'">Review drafts</button>
   </div>
 
-  <!-- ── Tabs ───────────────────────────────────────────────────────────── -->
   <div class="ims-card mb-3">
     <div class="po-tabs">
       <button *ngFor="let s of statuses" class="po-tab" [class.active]="activeTab===s" (click)="activeTab=s">
@@ -38,13 +32,9 @@
     </div>
   </div>
 
-  <!-- ── Loading ────────────────────────────────────────────────────────── -->
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <!-- ── Table ──────────────────────────────────────────────────────────── -->
   <div *ngIf="!loading">
-
-    <!-- Mobile Cards -->
     <div class="d-block d-md-none">
       <div *ngFor="let o of filtered" class="po-mobile-card" (click)="openDetail(o)">
         <div class="pmc-top">
@@ -56,13 +46,11 @@
         </div>
         <div class="pmc-info">
           <span class="text-muted">{{ o.companyName || o.supplierName }}</span>
-          <span class="fw-600">₹{{ o.totalAmount | number:'1.0-0' }}</span>
+          <span class="fw-600">Rs. {{ o.totalAmount | number:'1.0-0' }}</span>
         </div>
         <div class="pmc-footer">
           <span class="text-muted" style="font-size:.78rem">{{ o.createdAt | date:'dd MMM yy' }}</span>
-          <div class="d-flex gap-1" *ngIf="o.status === 'DRAFT'">
-            <button class="btn btn-sm btn-primary rounded-pill" style="font-size:.72rem" (click)="openDetail(o); $event.stopPropagation()">Send</button>
-          </div>
+          <button class="btn btn-sm btn-primary rounded-pill" style="font-size:.72rem" (click)="openDetail(o); $event.stopPropagation()">View</button>
         </div>
       </div>
       <div *ngIf="filtered.length === 0" class="ims-card">
@@ -70,7 +58,6 @@
       </div>
     </div>
 
-    <!-- Desktop Table -->
     <div class="ims-card p-0 overflow-hidden d-none d-md-block">
       <div class="table-responsive">
         <table class="ims-table w-100">
@@ -99,7 +86,7 @@
                   <div class="sc-code text-muted">{{ o.supplierUserCode }}</div>
                 </div>
               </td>
-              <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
+              <td class="fw-600">Rs. {{ o.totalAmount | number:'1.2-2' }}</td>
               <td><span class="badge-ims badge-sent">{{ o.items.length }}</span></td>
               <td>
                 <span class="badge-ims {{ getStatusClass(o.status) }}">
@@ -109,7 +96,7 @@
               <td class="text-muted" style="font-size:.82rem">
                 {{ o.createdAt | date:'dd MMM yy' }}
                 <div *ngIf="!o.createdByName" style="font-size:.7rem; color:var(--ims-warning)">
-                  <i class="bi bi-robot me-1"></i>System
+                  <i class="bi bi-magic me-1"></i>System
                 </div>
               </td>
               <td (click)="$event.stopPropagation()">
@@ -120,10 +107,7 @@
             </tr>
             <tr *ngIf="filtered.length === 0">
               <td colspan="7">
-                <div class="empty-state">
-                  <div class="empty-icon"><i class="bi bi-cart-check"></i></div>
-                  <h5>No orders in this status</h5>
-                </div>
+                <div class="empty-state"><div class="empty-icon"><i class="bi bi-cart-check"></i></div><h5>No orders in this status</h5></div>
               </td>
             </tr>
           </tbody>
@@ -133,39 +117,31 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     DETAIL SIDE PANEL
-════════════════════════════════════════════════════════ -->
 <div class="po-overlay" *ngIf="showDetail" (click)="closeDetail()">
   <div class="po-panel" (click)="$event.stopPropagation()" *ngIf="selectedOrder">
-
     <div class="pop-header">
       <div>
         <div class="d-flex align-items-center gap-2 mb-1">
           <span class="po-num">{{ selectedOrder.poNumber }}</span>
-          <span *ngIf="isAutoDraft(selectedOrder)" class="auto-draft-badge">Auto-Draft</span>
+          <span *ngIf="isAutoDraft(selectedOrder)" class="auto-draft-badge">Auto-draft</span>
           <span class="badge-ims {{ getStatusClass(selectedOrder.status) }}">
             <i class="bi {{ getStatusIcon(selectedOrder.status) }} me-1"></i>{{ selectedOrder.status }}
           </span>
         </div>
         <div class="text-muted" style="font-size:.75rem">
           <span *ngIf="selectedOrder.createdByName">Created by <strong>{{ selectedOrder.createdByName }}</strong></span>
-          <span *ngIf="!selectedOrder.createdByName"><i class="bi bi-robot me-1"></i>System Auto-Draft</span>
-          · {{ selectedOrder.createdAt | date:'dd MMM yyyy, HH:mm' }}
+          <span *ngIf="!selectedOrder.createdByName"><i class="bi bi-magic me-1"></i>System auto-draft</span>
+          - {{ selectedOrder.createdAt | date:'dd MMM yyyy, HH:mm' }}
         </div>
       </div>
       <button class="panel-close" (click)="closeDetail()"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <div class="pop-body">
-
-      <!-- Auto-draft explanation -->
       <div class="auto-draft-info" *ngIf="isAutoDraft(selectedOrder)">
-        <i class="bi bi-info-circle me-2"></i>
-        {{ selectedOrder.note }}
+        <i class="bi bi-info-circle me-2"></i>{{ selectedOrder.note || 'Created automatically from a low-stock product and its preferred supplier.' }}
       </div>
 
-      <!-- Supplier Info -->
       <div class="supplier-info-card">
         <div class="sic-avatar">{{ (selectedOrder.companyName || selectedOrder.supplierName)[0] }}</div>
         <div>
@@ -174,31 +150,17 @@
         </div>
         <div class="sic-amount ms-auto">
           <div style="font-size:.7rem; color:var(--ims-text-muted); text-align:right">Total</div>
-          <div class="fw-600" style="font-size:1.1rem">₹{{ selectedOrder.totalAmount | number:'1.2-2' }}</div>
+          <div class="fw-600" style="font-size:1.1rem">Rs. {{ selectedOrder.totalAmount | number:'1.2-2' }}</div>
         </div>
       </div>
 
-      <!-- Timeline -->
       <div class="po-timeline" *ngIf="selectedOrder.sentAt || selectedOrder.acceptedAt || selectedOrder.shippedAt || selectedOrder.receivedAt">
-        <div class="ptl-item" *ngIf="selectedOrder.sentAt">
-          <div class="ptl-dot sent"></div>
-          <div><div class="ptl-label">Sent</div><div class="ptl-time">{{ selectedOrder.sentAt | date:'dd MMM yy, HH:mm' }}</div></div>
-        </div>
-        <div class="ptl-item" *ngIf="selectedOrder.acceptedAt">
-          <div class="ptl-dot accepted"></div>
-          <div><div class="ptl-label">Accepted by Supplier</div><div class="ptl-time">{{ selectedOrder.acceptedAt | date:'dd MMM yy, HH:mm' }}</div></div>
-        </div>
-        <div class="ptl-item" *ngIf="selectedOrder.shippedAt">
-          <div class="ptl-dot shipped"></div>
-          <div><div class="ptl-label">Shipped</div><div class="ptl-time">{{ selectedOrder.shippedAt | date:'dd MMM yy, HH:mm' }}</div></div>
-        </div>
-        <div class="ptl-item" *ngIf="selectedOrder.receivedAt">
-          <div class="ptl-dot received"></div>
-          <div><div class="ptl-label">Received in Warehouse</div><div class="ptl-time">{{ selectedOrder.receivedAt | date:'dd MMM yy, HH:mm' }}</div></div>
-        </div>
+        <div class="ptl-item" *ngIf="selectedOrder.sentAt"><div class="ptl-dot sent"></div><div><div class="ptl-label">Sent</div><div class="ptl-time">{{ selectedOrder.sentAt | date:'dd MMM yy, HH:mm' }}</div></div></div>
+        <div class="ptl-item" *ngIf="selectedOrder.acceptedAt"><div class="ptl-dot accepted"></div><div><div class="ptl-label">Accepted</div><div class="ptl-time">{{ selectedOrder.acceptedAt | date:'dd MMM yy, HH:mm' }}</div></div></div>
+        <div class="ptl-item" *ngIf="selectedOrder.shippedAt"><div class="ptl-dot shipped"></div><div><div class="ptl-label">Shipped</div><div class="ptl-time">{{ selectedOrder.shippedAt | date:'dd MMM yy, HH:mm' }}</div></div></div>
+        <div class="ptl-item" *ngIf="selectedOrder.receivedAt"><div class="ptl-dot received"></div><div><div class="ptl-label">Received</div><div class="ptl-time">{{ selectedOrder.receivedAt | date:'dd MMM yy, HH:mm' }}</div></div></div>
       </div>
 
-      <!-- Items -->
       <div class="items-section">
         <h6 class="fw-700 mb-2">Order Items</h6>
         <div class="item-row" *ngFor="let item of selectedOrder.items">
@@ -209,93 +171,60 @@
           </div>
           <div class="ir-qty">{{ item.quantity }} units</div>
           <div class="ir-price">
-            <div style="font-size:.7rem; color:var(--ims-text-muted)">₹{{ item.purchasePrice | number:'1.2-2' }} / unit</div>
-            <div class="fw-600">₹{{ item.lineTotal | number:'1.2-2' }}</div>
+            <div style="font-size:.7rem; color:var(--ims-text-muted)">Rs. {{ item.purchasePrice | number:'1.2-2' }} / unit</div>
+            <div class="fw-600">Rs. {{ item.lineTotal | number:'1.2-2' }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Actions -->
       <div class="pop-actions">
         <ng-container *ngIf="selectedOrder.status === 'DRAFT'">
-          <div class="action-info">
-            <i class="bi bi-info-circle me-1"></i>
-            This order is in DRAFT. Send it to the supplier when ready.
-          </div>
+          <div class="action-info"><i class="bi bi-info-circle me-1"></i>Send this draft when pricing, quantity, and supplier look right.</div>
           <button class="btn w-100 send-btn" (click)="sendPO()" [disabled]="actionLoading">
             <span *ngIf="!actionLoading"><i class="bi bi-send me-1"></i>Send to {{ selectedOrder.companyName || selectedOrder.supplierName }}</span>
             <span *ngIf="actionLoading"><span class="spinner-border spinner-border-sm me-1"></span>Sending...</span>
           </button>
-          <button class="btn btn-outline-danger w-100" style="border-radius:10px" (click)="cancelPO()" [disabled]="actionLoading">
-            Cancel PO
-          </button>
+          <button class="btn btn-outline-danger w-100" style="border-radius:10px" (click)="cancelPO()" [disabled]="actionLoading">Cancel PO</button>
         </ng-container>
 
         <ng-container *ngIf="selectedOrder.status === 'SENT'">
-          <div class="status-box sent-box">
-            <i class="bi bi-send-fill me-2"></i>
-            <div>
-              <div class="sb-title">Sent to Supplier</div>
-              <div class="sb-sub">Awaiting supplier acceptance.</div>
-            </div>
-          </div>
-          <button class="btn btn-outline-danger w-100" style="border-radius:10px" (click)="cancelPO()" [disabled]="actionLoading">
-            Cancel PO
-          </button>
+          <div class="status-box sent-box"><i class="bi bi-send-fill me-2"></i><div><div class="sb-title">Sent to Supplier</div><div class="sb-sub">Awaiting supplier acceptance.</div></div></div>
+          <button class="btn btn-outline-danger w-100" style="border-radius:10px" (click)="cancelPO()" [disabled]="actionLoading">Cancel PO</button>
         </ng-container>
 
-        <div class="status-box" *ngIf="selectedOrder.status === 'ACCEPTED'"
-          style="background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.2); color:var(--ims-success)">
-          <i class="bi bi-check-circle-fill me-2"></i>
-          <div><div class="sb-title">Accepted by Supplier</div><div class="sb-sub">Order will be shipped soon.</div></div>
+        <div class="status-box" *ngIf="selectedOrder.status === 'ACCEPTED'" style="background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.2); color:var(--ims-success)">
+          <i class="bi bi-check-circle-fill me-2"></i><div><div class="sb-title">Accepted by Supplier</div><div class="sb-sub">Order will be shipped soon.</div></div>
         </div>
-
-        <div class="status-box" *ngIf="selectedOrder.status === 'SHIPPED'"
-          style="background:rgba(139,92,246,.08); border-color:rgba(139,92,246,.2); color:var(--ims-secondary)">
-          <i class="bi bi-truck me-2"></i>
-          <div><div class="sb-title">Order Shipped</div><div class="sb-sub">Staff can receive this PO in Purchase Orders.</div></div>
+        <div class="status-box" *ngIf="selectedOrder.status === 'SHIPPED'" style="background:rgba(139,92,246,.08); border-color:rgba(139,92,246,.2); color:var(--ims-secondary)">
+          <i class="bi bi-truck me-2"></i><div><div class="sb-title">Order Shipped</div><div class="sb-sub">Staff can receive this PO.</div></div>
         </div>
-
-        <div class="status-box" *ngIf="selectedOrder.status === 'RECEIVED'"
-          style="background:rgba(6,182,212,.08); border-color:rgba(6,182,212,.2); color:var(--ims-accent)">
-          <i class="bi bi-inbox-fill me-2"></i>
-          <div><div class="sb-title">Received in Warehouse</div><div class="sb-sub">Inventory has been updated.</div></div>
+        <div class="status-box" *ngIf="selectedOrder.status === 'RECEIVED'" style="background:rgba(6,182,212,.08); border-color:rgba(6,182,212,.2); color:var(--ims-accent)">
+          <i class="bi bi-inbox-fill me-2"></i><div><div class="sb-title">Received in Warehouse</div><div class="sb-sub">Inventory has been updated.</div></div>
         </div>
-
         <div class="status-box rejected-box" *ngIf="selectedOrder.status === 'REJECTED'">
-          <i class="bi bi-x-circle-fill me-2"></i>
-          <div><div class="sb-title">Rejected by Supplier</div><div class="sb-sub">{{ selectedOrder.rejectionReason }}</div></div>
+          <i class="bi bi-x-circle-fill me-2"></i><div><div class="sb-title">Rejected by Supplier</div><div class="sb-sub">{{ selectedOrder.rejectionReason }}</div></div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     CREATE PO WIZARD OVERLAY
-════════════════════════════════════════════════════════ -->
 <div class="ims-modal-overlay" *ngIf="showWizard" (click)="closeWizard()">
   <div class="ims-modal ims-modal-xl" (click)="$event.stopPropagation()">
-
     <div class="ims-modal-header">
       <div>
         <h5><i class="bi bi-cart-plus me-2"></i>Create Purchase Order</h5>
-        <!-- Wizard Steps -->
         <div class="wizard-steps mt-2">
           <div class="wizard-step" [class.active]="wizardStep===1" [class.done]="wizardStep > 1">
-            <div class="ws-num">{{ wizardStep > 1 ? '✓' : '1' }}</div>
-            <span class="ws-label">Select Supplier</span>
+            <div class="ws-num">{{ wizardStep > 1 ? 'OK' : '1' }}</div><span class="ws-label">Pick Product</span>
           </div>
           <div class="wizard-connector" [class.done]="wizardStep > 1"></div>
           <div class="wizard-step" [class.active]="wizardStep===2" [class.done]="wizardStep > 2">
-            <div class="ws-num">{{ wizardStep > 2 ? '✓' : '2' }}</div>
-            <span class="ws-label">Add Products</span>
+            <div class="ws-num">{{ wizardStep > 2 ? 'OK' : '2' }}</div><span class="ws-label">Choose Supplier</span>
           </div>
           <div class="wizard-connector" [class.done]="wizardStep > 2"></div>
           <div class="wizard-step" [class.active]="wizardStep===3">
-            <div class="ws-num">3</div>
-            <span class="ws-label">Review & Create</span>
+            <div class="ws-num">3</div><span class="ws-label">Review</span>
           </div>
         </div>
       </div>
@@ -303,195 +232,219 @@
     </div>
 
     <div class="ims-modal-body">
-
-      <!-- ════ STEP 1: SUPPLIER ════ -->
       <ng-container *ngIf="wizardStep === 1">
         <div class="step-intro">
-          <i class="bi bi-truck si-icon"></i>
+          <i class="bi bi-search si-icon"></i>
           <div>
-            <h6 class="mb-0">Select a Supplier</h6>
-            <p class="text-muted mb-0" style="font-size:.82rem">Choose which approved supplier you want to order from.</p>
-          </div>
-        </div>
-
-        <input class="ims-form-control mb-3" [(ngModel)]="supplierSearch" placeholder="Search supplier by name or company...">
-
-        <div class="supplier-grid">
-          <div *ngFor="let s of filteredSuppliers" class="supplier-card"
-            [class.selected]="selectedSupplier?.id === s.id"
-            (click)="selectSupplier(s)">
-            <div class="sc-avatar" [style.background]="'linear-gradient(135deg,#f59e0b,#d97706)'">
-              {{ s.companyName[0] }}
-            </div>
-            <div class="sc-body">
-              <div class="sc-company">{{ s.companyName }}</div>
-              <div class="sc-contact">{{ s.name }}</div>
-            </div>
-            <i class="bi bi-check-circle-fill sc-check" *ngIf="selectedSupplier?.id === s.id"></i>
-          </div>
-
-          <div *ngIf="filteredSuppliers.length === 0" class="empty-state">
-            <div class="empty-icon"><i class="bi bi-truck"></i></div>
-            <h6>No approved suppliers found</h6>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- ════ STEP 2: PRODUCTS ════ -->
-      <ng-container *ngIf="wizardStep === 2">
-        <div class="step-intro">
-          <i class="bi bi-box-seam si-icon"></i>
-          <div>
-            <h6 class="mb-0">Select Products from {{ selectedSupplier?.companyName }}</h6>
-            <p class="text-muted mb-0" style="font-size:.82rem">
-              {{ supplierProducts.length }} products available from this supplier.
-              <span *ngIf="getLowStockCount() > 0" style="color:var(--ims-warning)">
-                {{ getLowStockCount() }} are low stock.
-              </span>
-            </p>
+            <h6 class="mb-0">Search Product First</h6>
+            <p class="text-muted mb-0" style="font-size:.82rem">{{ getLowStockCount() }} linked products are currently low stock.</p>
           </div>
         </div>
 
         <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
-          <input class="ims-form-control" style="flex:1; min-width:180px" [(ngModel)]="productSearch" placeholder="Search products...">
+          <input class="ims-form-control" style="flex:1; min-width:220px" [(ngModel)]="productSearch" placeholder="Search product or SKU...">
           <label class="toggle-wrap ms-auto" style="flex-shrink:0">
             <label class="toggle-switch">
               <input type="checkbox" [(ngModel)]="showOnlyLowStock">
               <span class="ts-slider"></span>
             </label>
-            <span class="toggle-label" style="color:var(--ims-warning)">
-              <i class="bi bi-exclamation-triangle me-1"></i>Low Stock Only
-            </span>
+            <span class="toggle-label" style="color:var(--ims-warning)">Low Stock Only</span>
           </label>
         </div>
 
-        <!-- Product Grid -->
-        <div class="product-select-grid">
+        <div class="product-select-grid product-result-list">
           <div *ngFor="let p of displayedProducts" class="product-select-card"
             [class.selected]="isInCart(p.id)"
             [class.low-stock]="getInventoryForProduct(p.id)?.lowStock"
-            (click)="isInCart(p.id) ? removeFromCart(p.id) : addToCart(p)">
+            [class.no-supplier]="!canOrderProduct(p)"
+            (click)="canOrderProduct(p) ? (isInCart(p.id) ? removeFromCart(p.id) : addToCart(p)) : null">
 
-            <i class="bi bi-check-circle-fill psc-check" *ngIf="isInCart(p.id)"></i>
-
-            <div *ngIf="getInventoryForProduct(p.id)?.lowStock" class="low-stock-tag">
-              <i class="bi bi-exclamation-triangle me-1"></i>Low Stock
+            <div class="product-row-icon">
+              <i class="bi bi-box-seam"></i>
             </div>
-
-            <div class="psc-name" style="margin-top:.25rem">{{ p.productName }}</div>
-            <div class="psc-sku">{{ p.sku }}</div>
-
-            <div class="psc-stock">
-              Avail: <strong>{{ getInventoryForProduct(p.id)?.availableQuantity ?? '?' }}</strong>
-              · Reorder: {{ p.reorderLevel }}
+            <div class="product-row-main">
+              <div class="product-row-top">
+                <div>
+                  <div class="psc-name">{{ p.productName }}</div>
+                  <div class="psc-sku">{{ p.sku }} · {{ p.category.name }}</div>
+                </div>
+                <div class="product-row-tags">
+                  <span *ngIf="getInventoryForProduct(p.id)?.lowStock" class="low-stock-tag"><i class="bi bi-exclamation-triangle me-1"></i>Low Stock</span>
+                  <span *ngIf="!canOrderProduct(p)" class="no-supplier-tag"><i class="bi bi-link-45deg me-1"></i>No supplier link</span>
+                </div>
+              </div>
+              <div class="product-row-bottom">
+                <span class="psc-stock">
+                  Available <strong>{{ getInventoryForProduct(p.id)?.availableQuantity ?? 0 }}</strong>
+                  · Reorder {{ p.reorderLevel }}
+                </span>
+                <span class="psc-price" *ngIf="bestSupplierLink(p) as link">
+                  Best {{ link.companyName }} · Rs. {{ link.purchasePrice | number:'1.2-2' }} · {{ link.leadTimeDays || 0 }} days
+                </span>
+                <span class="psc-price muted" *ngIf="!bestSupplierLink(p)">
+                  Link an approved supplier before ordering this product.
+                </span>
+              </div>
             </div>
-
-            <div class="psc-price" *ngIf="getSupplierLink(p) as link">
-              ₹{{ link.purchasePrice | number:'1.2-2' }} / {{ p.unit }}
+            <div class="product-row-select">
+              <i class="bi" [ngClass]="isInCart(p.id) ? 'bi-check-circle-fill' : 'bi-circle'"></i>
             </div>
           </div>
 
           <div *ngIf="displayedProducts.length === 0" class="empty-state" style="grid-column:1/-1">
             <div class="empty-icon"><i class="bi bi-box-seam"></i></div>
-            <h6>No products match</h6>
-          </div>
-        </div>
-
-        <!-- Cart Summary -->
-        <div class="cart-summary" *ngIf="cart.length > 0">
-          <div class="cs-header"><i class="bi bi-cart-fill me-1"></i>{{ cart.length }} product{{ cart.length > 1 ? 's' : '' }} selected</div>
-          <div class="cs-items">
-            <div *ngFor="let item of cart" class="cs-item">
-              <span class="cs-name">{{ item.product.productName }}</span>
-              <div class="cs-qty-wrap">
-                <button class="cs-qty-btn" (click)="updateCartQty(item.product.id, item.quantity - 1)">−</button>
-                <input class="cs-qty-input" type="number" [value]="item.quantity" min="1"
-                  (change)="updateCartQty(item.product.id, +$any($event.target).value)">
-                <button class="cs-qty-btn" (click)="updateCartQty(item.product.id, item.quantity + 1)">+</button>
-              </div>
-              <span class="cs-price">₹{{ item.lineTotal | number:'1.0-0' }}</span>
-              <button class="cs-remove" (click)="removeFromCart(item.product.id)"><i class="bi bi-x"></i></button>
-            </div>
-          </div>
-          <div class="cs-total">
-            <span>Estimated Total</span>
-            <span class="fw-600">₹{{ cartTotal | number:'1.2-2' }}</span>
+            <h6>{{ showOnlyLowStock || productSearch ? 'No products match' : 'Search to find products' }}</h6>
+            <p>{{ showOnlyLowStock ? 'Try another product name or check supplier links.' : 'Turn on Low Stock Only or search by product, SKU, or category.' }}</p>
           </div>
         </div>
       </ng-container>
 
-      <!-- ════ STEP 3: REVIEW ════ -->
+      <ng-container *ngIf="wizardStep === 2">
+        <div class="step-intro">
+          <i class="bi bi-truck si-icon"></i>
+          <div>
+            <h6 class="mb-0">Choose Supplier and Quantity</h6>
+            <p class="text-muted mb-0" style="font-size:.82rem">Default supplier is preferred first, then shortest lead time, then lowest price.</p>
+          </div>
+        </div>
+
+        <div class="supplier-choice-list">
+          <div class="supplier-choice-card" *ngFor="let item of cart">
+            <div class="scc-product">
+              <div class="scc-icon"><i class="bi bi-box-seam"></i></div>
+              <div>
+                <strong>{{ item.product.productName }}</strong>
+                <small>{{ item.product.sku }} - Available {{ getInventoryForProduct(item.product.id)?.availableQuantity ?? 0 }}</small>
+              </div>
+            </div>
+            <div class="scc-controls">
+              <div class="supplier-picker">
+                <div class="supplier-picker-top">
+                  <label class="ims-form-label mb-0">Supplier</label>
+                  <div class="supplier-sort-tabs">
+                    <button type="button" [class.active]="supplierSort === 'recommended'" (click)="supplierSort = 'recommended'">
+                      <i class="bi bi-stars"></i> Recommended
+                    </button>
+                    <button type="button" [class.active]="supplierSort === 'fastest'" (click)="supplierSort = 'fastest'">
+                      <i class="bi bi-lightning-charge"></i> Fastest
+                    </button>
+                    <button type="button" [class.active]="supplierSort === 'cheapest'" (click)="supplierSort = 'cheapest'">
+                      <i class="bi bi-cash-coin"></i> Cheapest
+                    </button>
+                  </div>
+                </div>
+
+                <div class="supplier-search-wrap">
+                  <i class="bi bi-search"></i>
+                  <input class="ims-form-control" [(ngModel)]="supplierSearch" placeholder="Search supplier by name...">
+                </div>
+
+                <div class="supplier-option-list">
+                  <button
+                    type="button"
+                    class="supplier-option-card"
+                    *ngFor="let link of filteredSupplierOptions(item.product)"
+                    [class.selected]="item.supplierLink.id === link.id"
+                    (click)="selectCartSupplier(item, link)">
+                    <div class="soc-main">
+                      <div class="soc-avatar">{{ (link.companyName || link.supplierName)[0] }}</div>
+                      <div class="soc-info">
+                        <div class="soc-name">
+                          {{ link.companyName || link.supplierName }}
+                          <span *ngIf="link.isPreferred" class="soc-chip preferred">Preferred</span>
+                          <span class="soc-chip">{{ supplierMatchReason(link) }}</span>
+                        </div>
+                        <div class="soc-meta">
+                          <span><i class="bi bi-clock"></i>{{ link.leadTimeDays || 0 }} days</span>
+                          <span><i class="bi bi-currency-rupee"></i>{{ link.purchasePrice | number:'1.2-2' }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <i class="bi bi-check-circle-fill soc-check" *ngIf="item.supplierLink.id === link.id"></i>
+                  </button>
+
+                  <div class="supplier-option-empty" *ngIf="filteredSupplierOptions(item.product).length === 0">
+                    <i class="bi bi-search"></i>No suppliers match this search.
+                  </div>
+                </div>
+              </div>
+              <div class="quantity-panel">
+                <label class="ims-form-label">Quantity</label>
+                <div class="qty-stepper">
+                  <button type="button" (click)="decreaseQty(item)" [disabled]="item.quantity <= 1"><i class="bi bi-dash"></i></button>
+                  <input type="number" min="1" [ngModel]="item.quantity" (ngModelChange)="updateCartQty(item.product.id, $event)">
+                  <button type="button" (click)="increaseQty(item)"><i class="bi bi-plus"></i></button>
+                </div>
+                <div class="qty-helper">
+                  Reorder {{ item.product.reorderLevel }} · Available {{ getInventoryForProduct(item.product.id)?.availableQuantity ?? 0 }}
+                </div>
+              </div>
+              <div class="scc-total">
+                <span>Total</span>
+                <strong>Rs. {{ item.lineTotal | number:'1.2-2' }}</strong>
+              </div>
+              <button class="cs-remove big" (click)="removeFromCart(item.product.id)"><i class="bi bi-x-lg"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="batch-summary" *ngIf="groupedCart.length > 1">
+          <i class="bi bi-info-circle me-2"></i>
+          Only one product can be selected for a purchase order.
+        </div>
+      </ng-container>
+
       <ng-container *ngIf="wizardStep === 3">
         <div class="step-intro">
           <i class="bi bi-clipboard-check si-icon"></i>
           <div>
-            <h6 class="mb-0">Review & Confirm</h6>
-            <p class="text-muted mb-0" style="font-size:.82rem">Check the details before creating this purchase order.</p>
+            <h6 class="mb-0">Review and Create</h6>
+            <p class="text-muted mb-0" style="font-size:.82rem">1 PO will be drafted.</p>
           </div>
         </div>
 
-        <!-- Supplier recap -->
-        <div class="review-card mb-3">
-          <div class="rc-label">Supplier</div>
-          <div class="d-flex align-items-center gap-2 mt-1">
-            <div class="sc-avatar-sm">{{ (selectedSupplier?.companyName ?? '?')[0] }}</div>
-            <div>
-              <div class="fw-600">{{ selectedSupplier?.companyName }}</div>
-              <div class="text-muted" style="font-size:.78rem">{{ selectedSupplier?.name }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Items table -->
-        <div class="review-card mb-3">
-          <div class="rc-label">Order Items ({{ cart.length }})</div>
+        <div class="review-card mb-3" *ngFor="let group of groupedCart">
+          <div class="rc-label">{{ group.supplierName }}</div>
           <table class="ims-table w-100 mt-2">
             <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
             <tbody>
-              <tr *ngFor="let item of cart">
-                <td>
-                  <div class="fw-600">{{ item.product.productName }}</div>
-                  <code style="font-size:.72rem">{{ item.product.sku }}</code>
-                </td>
+              <tr *ngFor="let item of group.items">
+                <td><div class="fw-600">{{ item.product.productName }}</div><code style="font-size:.72rem">{{ item.product.sku }}</code></td>
                 <td>{{ item.quantity }} {{ item.product.unit }}</td>
-                <td>₹{{ item.supplierLink.purchasePrice | number:'1.2-2' }}</td>
-                <td class="fw-600">₹{{ item.lineTotal | number:'1.2-2' }}</td>
+                <td>Rs. {{ item.supplierLink.purchasePrice | number:'1.2-2' }}</td>
+                <td class="fw-600">Rs. {{ item.lineTotal | number:'1.2-2' }}</td>
               </tr>
             </tbody>
           </table>
-          <div class="review-total">
-            <span>Estimated Order Total</span>
-            <span class="fw-600" style="font-size:1.1rem">₹{{ cartTotal | number:'1.2-2' }}</span>
-          </div>
+          <div class="review-total"><span>Supplier Total</span><span class="fw-600">Rs. {{ group.total | number:'1.2-2' }}</span></div>
         </div>
 
-        <!-- Note -->
-        <div class="mb-2">
+        <div class="review-grand-total">
+          <span>Estimated Total</span>
+          <strong>Rs. {{ cartTotal | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="mt-3">
           <label class="ims-form-label">Internal Note (Optional)</label>
-          <textarea class="ims-form-control" rows="2" [(ngModel)]="poNote" placeholder="e.g. Urgent order — floor restocking needed by Friday..."></textarea>
+          <textarea class="ims-form-control" rows="2" [(ngModel)]="poNote" placeholder="e.g. Urgent restock for floor demand"></textarea>
         </div>
       </ng-container>
-
     </div>
 
     <div class="ims-modal-footer">
-      <!-- Back / Cancel -->
       <button class="btn-ims-outline btn" (click)="wizardStep === 1 ? closeWizard() : wizardStep = wizardStep === 2 ? 1 : 2">
-        {{ wizardStep === 1 ? 'Cancel' : '← Back' }}
+        {{ wizardStep === 1 ? 'Cancel' : 'Back' }}
       </button>
-
-      <!-- Next / Create -->
-      <button *ngIf="wizardStep === 1" class="btn-ims-primary btn" (click)="goToStep2()" [disabled]="!selectedSupplier">
-        Next: Add Products →
+      <button *ngIf="wizardStep === 1" class="btn-ims-primary btn" (click)="goToStep2()" [disabled]="cart.length === 0">
+        Choose Supplier
       </button>
       <button *ngIf="wizardStep === 2" class="btn-ims-primary btn" (click)="goToStep3()" [disabled]="cart.length === 0">
-        Next: Review ({{ cart.length }}) →
+        Review PO
       </button>
       <button *ngIf="wizardStep === 3" class="btn-ims-primary btn" (click)="submitPO()" [disabled]="submitLoading">
-        <span *ngIf="!submitLoading"><i class="bi bi-check-circle me-1"></i>Create Purchase Order</span>
+        <span *ngIf="!submitLoading"><i class="bi bi-check-circle me-1"></i>Create PO</span>
         <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
       </button>
     </div>
-
   </div>
 </div>

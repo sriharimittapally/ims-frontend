@@ -151,13 +151,13 @@ export interface TopProductsReport {
 
   scope: string;
 
-  topMovingProducts: ProductMovement[];
+  topMovingProducts: ProductRow[];
 
-  slowMovingProducts: ProductMovement[];
+  slowMovingProducts: ProductRow[];
 
 }
 
-export interface ProductMovement {
+export interface ProductRow {
 
   productId: number;
 
@@ -176,20 +176,63 @@ export interface ProductMovement {
 }
 
 export interface WarehouseStockReport {
+
   warehouseId: number;
+
   warehouseName: string;
-  items: WarehouseStockItem[];
+
+  warehouseCity: string;
+
+  managerName: string;
+
+  totalProducts: number;
+
+  totalUnits: number;
+
+  lowStockItems: number;
+
+  outOfStockItems: number;
+
+  inventoryValue: number;
+
+  totalStockIn30Days: number;
+
+  totalStockOut30Days: number;
+
+  products: ProductStockRow[];
+
 }
 
-export interface WarehouseStockItem {
+export interface ProductStockRow {
+
   productId: number;
-  productName: string;
+
   sku: string;
+
+  productName: string;
+
+  categoryName: string;
+
+  unit: string;
+
   quantity: number;
+
   reservedQuantity: number;
+
   availableQuantity: number;
+
   reorderLevel: number;
-  isLowStock: boolean;
+
+  lowStock: boolean;
+
+  outOfStock: boolean;
+
+  sellingPrice: number;
+
+  stockValue: number;
+
+  preferredSupplierName?: string;
+
 }
 
 export interface StaffActivityReport {

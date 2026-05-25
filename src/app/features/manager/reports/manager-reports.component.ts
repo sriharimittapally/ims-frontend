@@ -5,6 +5,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartConfiguration } from 'chart.js';
 import { Chart, registerables } from 'chart.js';
 import { ReportService } from '../../../core/services/report.service';
+import { LowStockAlertReport, PurchaseOrderReport, StaffActivity, StaffActivityReport, TopProductsReport, WarehouseStockReport } from '../../../core/models/report.model';
 
 Chart.register(...registerables);
 
@@ -19,12 +20,12 @@ export class ManagerReportsComponent implements OnInit {
   activeTab = 'stock';
   loading = false;
 
-  warehouseStock: any = null;
-  lowStock: any = null;
-  poReport: any = null;
-  staffActivity: any = null;
-  topProducts: any = null;
-  topBarData:any =null;
+  warehouseStock: WarehouseStockReport | null = null;
+  lowStock:  LowStockAlertReport | null= null;
+  poReport: PurchaseOrderReport |null = null;
+  staffActivity: StaffActivityReport |null = null;
+  topProducts: TopProductsReport| null = null;
+  topBarData: any = null;
 
   fromDate = this.daysAgo(30);
   toDate = this.today();
@@ -197,25 +198,33 @@ export class ManagerReportsComponent implements OnInit {
     });
   }
   loadTop(): void {
-  this.loading = true;
-  this.svc.managerTopProducts().subscribe({
-    next: r => {
-      this.topProducts = r.data;
-      const top = (r.data.topMovingProducts ?? []).slice(0, 8);
-      this.topBarData = {
-        labels: top.map(p => p.productName.length > 18 ? p.productName.slice(0, 18) + '…' : p.productName),
-        datasets: [{
-          label: 'Units Out',
-          data: top.map(p => p.totalUnitsOut),
-          backgroundColor: 'rgba(6,182,212,0.75)',
-          borderRadius: 6
-        }]
-      };
-      this.loading = false;
-    },
-    error: () => { this.loading = false; }
-  });
-}
+    this.loading = true;
+    this.svc.managerTopProducts().subscribe({
+      next: (r) => {
+        this.topProducts = r.data;
+        const top = (r.data.topMovingProducts ?? []).slice(0, 8);
+        this.topBarData = {
+          labels: top.map((p) =>
+            p.productName.length > 18
+              ? p.productName.slice(0, 18) + '…'
+              : p.productName,
+          ),
+          datasets: [
+            {
+              label: 'Units Out',
+              data: top.map((p) => p.totalUnitsOut),
+              backgroundColor: 'rgba(6,182,212,0.75)',
+              borderRadius: 6,
+            },
+          ],
+        };
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
 
   private today(): string {
     return new Date().toISOString().split('T')[0];

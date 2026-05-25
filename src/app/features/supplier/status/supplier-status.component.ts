@@ -36,8 +36,8 @@ export class SupplierStatusComponent implements OnInit {
   form: FormGroup;
 
   // GST pattern from backend
-  readonly GST_PATTERN =
-    /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  readonly GST_PATTERN ="";
+   // /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
   constructor(
     private supSvc: SupplierService,

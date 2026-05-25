@@ -1,48 +1,95 @@
 <div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+  <div
+    class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3"
+  >
     <div>
       <h1 class="page-title">Manager Dashboard</h1>
-      <p class="page-subtitle" *ngIf="dashboard">{{ dashboard.warehouseName }} — your warehouse at a glance</p>
+      <p class="page-subtitle" *ngIf="dashboard">
+        {{ dashboard.warehouseName }} — your warehouse at a glance
+      </p>
     </div>
-    <a routerLink="/manager/reports" class="btn-ims-primary btn"><i class="bi bi-bar-chart-line me-1"></i>Reports</a>
+    <a routerLink="/manager/reports" class="btn-ims-primary btn"
+      ><i class="bi bi-bar-chart-line me-1"></i>Reports</a
+    >
   </div>
 
-  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
+  <div class="page-loader" *ngIf="loading">
+    <div class="spinner-border"></div>
+  </div>
 
   <ng-container *ngIf="!loading && dashboard">
-
     <!-- ── Stats Row ─────────────────────────────────────────────────────── -->
     <div class="row g-3 mb-4">
       <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Products"        [value]="dashboard.totalProducts"         icon="bi-box-seam-fill"         color="primary" />
+        <app-stats-card
+          label="Products"
+          [value]="dashboard.totalProducts"
+          icon="bi-box-seam-fill"
+          color="primary"
+        />
       </div>
       <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Inventory Lines" [value]="dashboard.totalInventoryItems"   icon="bi-archive-fill"          color="info" />
+        <app-stats-card
+          label="Inventory Lines"
+          [value]="dashboard.totalInventoryItems"
+          icon="bi-archive-fill"
+          color="info"
+        />
       </div>
       <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Staff"           [value]="dashboard.totalStaff"            icon="bi-people-fill"           color="secondary" />
+        <app-stats-card
+          label="Staff"
+          [value]="dashboard.totalStaff"
+          icon="bi-people-fill"
+          color="secondary"
+        />
       </div>
       <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Low Stock"       [value]="dashboard.lowStockAlerts"        icon="bi-exclamation-triangle"  color="danger" />
+        <app-stats-card
+          label="Low Stock"
+          [value]="dashboard.lowStockAlerts"
+          icon="bi-exclamation-triangle"
+          color="danger"
+        />
       </div>
       <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Pending Issues"  [value]="dashboard.pendingIssues"         icon="bi-clipboard-check"       color="warning" />
+        <app-stats-card
+          label="Pending Issues"
+          [value]="dashboard.pendingIssues"
+          icon="bi-clipboard-check"
+          color="warning"
+        />
       </div>
       <div class="col-xl-2 col-md-4 col-6">
-        <app-stats-card label="Pending POs"     [value]="dashboard.pendingPurchaseOrders" icon="bi-cart-check-fill"       color="success" />
+        <app-stats-card
+          label="Pending POs"
+          [value]="dashboard.pendingPurchaseOrders"
+          icon="bi-cart-check-fill"
+          color="success"
+        />
       </div>
     </div>
 
     <!-- ── Inventory Value Banner ─────────────────────────────────────────── -->
     <div class="wh-value-banner ims-card mb-4">
       <div class="wvb-left">
-        <div class="wvb-label"><i class="bi bi-building me-1"></i>{{ dashboard.warehouseName }}</div>
-        <div class="wvb-value">₹{{ dashboard.warehouseInventoryValue | number:'1.2-2' }}</div>
-        <div class="text-muted" style="font-size:.8rem">Total warehouse inventory value</div>
+        <div class="wvb-label">
+          <i class="bi bi-building me-1"></i>{{ dashboard.warehouseName }}
+        </div>
+        <div class="wvb-value">
+          ₹{{ dashboard.warehouseInventoryValue | number: "1.2-2" }}
+        </div>
+        <div class="text-muted" style="font-size: 0.8rem">
+          Total warehouse inventory value
+        </div>
       </div>
       <div class="wvb-actions">
-        <a routerLink="/manager/inventory"        class="wvb-btn"><i class="bi bi-archive me-1"></i>View Inventory</a>
-        <a routerLink="/manager/stock-movements"  class="wvb-btn"><i class="bi bi-arrow-left-right me-1"></i>Movements</a>
+        <a routerLink="/manager/inventory" class="wvb-btn"
+          ><i class="bi bi-archive me-1"></i>View Inventory</a
+        >
+        <a routerLink="/manager/stock-movements" class="wvb-btn"
+          ><i class="bi bi-arrow-left-right me-1"></i>Movements</a
+        >
       </div>
     </div>
 
@@ -53,12 +100,17 @@
           <div class="mb-3">
             <h6 class="fw-700 mb-0">Warehouse Stock Trend</h6>
             <small class="text-muted" *ngIf="trendReport">
-              Total In: <strong>{{ trendReport.totalIn | number }}</strong> · 
+              Total In: <strong>{{ trendReport.totalIn | number }}</strong> ·
               Total Out: <strong>{{ trendReport.totalOut | number }}</strong>
             </small>
           </div>
-          <div class="chart-container" style="height: 250px;">
-            <canvas baseChart [data]="trendData" [options]="trendOptions" type="line"></canvas>
+          <div class="chart-container" style="height: 250px">
+            <canvas
+              baseChart
+              [data]="trendData"
+              [options]="trendOptions"
+              type="line"
+            ></canvas>
           </div>
         </div>
       </div>
@@ -66,8 +118,33 @@
       <div class="col-lg-4">
         <div class="ims-card h-100">
           <h6 class="fw-700 mb-3">Stock Issue Status</h6>
-          <div class="chart-container" style="height: 220px;">
-            <canvas baseChart [data]="issueData" [options]="donutOptions" type="doughnut"></canvas>
+
+          <div
+            class="chart-container d-flex align-items-center justify-content-center"
+            style="height: 220px"
+          >
+            <canvas
+              *ngIf="issueTotal > 0"
+              baseChart
+              [data]="issueData"
+              [options]="donutOptions"
+              type="doughnut"
+            >
+            </canvas>
+
+            <div *ngIf="issueTotal === 0" class="compact-empty text-center">
+              <i
+                class="bi bi-clipboard-check"
+                style="font-size: 2rem; color: var(--ims-text-muted)"
+              ></i>
+
+              <div
+                class="mt-2"
+                style="font-size: 0.9rem; color: var(--ims-text-muted)"
+              >
+                No stock issues yet
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -75,15 +152,30 @@
 
     <!-- ── Quick Actions ──────────────────────────────────────────────────── -->
     <div class="ims-card">
-      <h6 class="fw-700 mb-3"><i class="bi bi-lightning-fill me-1" style="color:var(--ims-warning)"></i>Quick Actions</h6>
+      <h6 class="fw-700 mb-3">
+        <i
+          class="bi bi-lightning-fill me-1"
+          style="color: var(--ims-warning)"
+        ></i
+        >Quick Actions
+      </h6>
       <div class="d-flex flex-wrap gap-2">
-        <a routerLink="/manager/purchase-orders"  class="qa-btn"><i class="bi bi-plus-circle me-1"></i>Create PO</a>
-        <a routerLink="/manager/stock-issues"     class="qa-btn"><i class="bi bi-check2-all me-1"></i>Review Issues</a>
-        <a routerLink="/manager/staff"            class="qa-btn"><i class="bi bi-person-plus me-1"></i>Add Staff</a>
-        <a routerLink="/manager/stock-movements"  class="qa-btn"><i class="bi bi-arrow-left-right me-1"></i>Stock Log</a>
-        <a routerLink="/manager/reports"          class="qa-btn"><i class="bi bi-bar-chart-line me-1"></i>Reports</a>
+        <a routerLink="/manager/purchase-orders" class="qa-btn"
+          ><i class="bi bi-plus-circle me-1"></i>Create PO</a
+        >
+        <a routerLink="/manager/stock-issues" class="qa-btn"
+          ><i class="bi bi-check2-all me-1"></i>Review Issues</a
+        >
+        <a routerLink="/manager/staff" class="qa-btn"
+          ><i class="bi bi-person-plus me-1"></i>Add Staff</a
+        >
+        <a routerLink="/manager/stock-movements" class="qa-btn"
+          ><i class="bi bi-arrow-left-right me-1"></i>Stock Log</a
+        >
+        <a routerLink="/manager/reports" class="qa-btn"
+          ><i class="bi bi-bar-chart-line me-1"></i>Reports</a
+        >
       </div>
     </div>
-
   </ng-container>
 </div>

@@ -1,43 +1,147 @@
 <div class="animate-fade-in-up">
-  <div class="page-header d-flex align-items-center justify-content-between">
-    <div><h1 class="page-title">My Staff</h1><p class="page-subtitle">Manage staff members in your warehouse</p></div>
-    <button class="btn-ims-primary btn" (click)="showModal=true; form.reset()"><i class="bi bi-person-plus me-1"></i> Add Staff</button>
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">My Staff</h1>
+      <p class="page-subtitle">Manage staff access, contact details, and warehouse status.</p>
+    </div>
+    <button class="btn-ims-primary btn" (click)="openCreate()"><i class="bi bi-person-plus me-1"></i>Add Staff</button>
+  </div>
+
+  <div class="staff-summary-grid mb-3" *ngIf="!loading">
+    <div class="staff-summary-card"><span>{{ staff.length }}</span><small>Total staff</small></div>
+    <div class="staff-summary-card active"><span>{{ activeCount }}</span><small>Active</small></div>
+    <div class="staff-summary-card inactive"><span>{{ inactiveCount }}</span><small>Inactive</small></div>
+  </div>
+
+  <div class="ims-card mb-3">
+    <div class="staff-toolbar">
+      <div class="search-input-wrap staff-search">
+        <i class="bi bi-search search-icon"></i>
+        <input class="ims-form-control" [(ngModel)]="searchText" placeholder="Search by name, email, phone, or code...">
+      </div>
+      <div class="staff-filter">
+        <button class="filter-pill" [class.active]="statusFilter==='ALL'" (click)="statusFilter='ALL'">All</button>
+        <button class="filter-pill" [class.active]="statusFilter==='ACTIVE'" (click)="statusFilter='ACTIVE'">Active</button>
+        <button class="filter-pill" [class.active]="statusFilter==='INACTIVE'" (click)="statusFilter='INACTIVE'">Inactive</button>
+      </div>
+    </div>
   </div>
 
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <div class="row g-3" *ngIf="!loading">
-    <div class="col-xl-3 col-md-4 col-sm-6" *ngFor="let s of staff">
-      <div class="staff-card ims-card">
+  <div class="ims-card p-0 overflow-hidden d-none d-md-block" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="ims-table w-100">
+        <thead><tr><th>Staff</th><th>Contact</th><th>User Code</th><th>Status</th><th>Created</th><th style="text-align:center">Active</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let s of filteredStaff" class="staff-row" (click)="openDetail(s)">
+            <td>
+              <div class="staff-person">
+                <div class="staff-avatar">{{ s.name[0].toUpperCase() }}</div>
+                <div><strong>{{ s.name }}</strong><small>{{ s.role }}</small></div>
+              </div>
+            </td>
+            <td><div>{{ s.email }}</div><small class="text-muted">{{ s.phone }}</small></td>
+            <td><code>{{ s.userCode }}</code></td>
+            <td><span class="badge-ims" [ngClass]="s.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ s.status }}</span></td>
+            <td class="text-muted">{{ s.createdAt | date:'dd MMM yy' }}</td>
+            <td style="text-align:center" (click)="$event.stopPropagation()">
+              <label class="status-toggle" title="Toggle staff status">
+                <input type="checkbox" [checked]="s.status === 'ACTIVE'" (change)="toggle(s)">
+                <span class="st-slider"></span>
+              </label>
+            </td>
+            <td (click)="$event.stopPropagation()"><button class="btn-view" (click)="openDetail(s)"><i class="bi bi-eye me-1"></i>View</button></td>
+          </tr>
+          <tr *ngIf="filteredStaff.length === 0"><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="bi bi-people"></i></div><h5>No staff found</h5><p>Try another search or status filter.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="staff-card-grid d-md-none" *ngIf="!loading">
+    <div class="staff-card ims-card" *ngFor="let s of filteredStaff" (click)="openDetail(s)">
+      <div class="staff-card-top">
         <div class="staff-avatar">{{ s.name[0].toUpperCase() }}</div>
-        <div class="staff-name">{{ s.name }}</div>
-        <div class="staff-email">{{ s.email }}</div>
-        <span class="badge-ims mt-2" [ngClass]="s.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ s.status }}</span>
-        <div class="staff-actions mt-3">
-          <button class="btn btn-sm" [ngClass]="s.status === 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'" style="border-radius:8px;width:100%" (click)="toggle(s)">
-            {{ s.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
-          </button>
-        </div>
+        <span class="badge-ims" [ngClass]="s.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ s.status }}</span>
+      </div>
+      <div class="staff-name">{{ s.name }}</div>
+      <div class="staff-email">{{ s.email }}</div>
+      <div class="staff-actions mt-3" (click)="$event.stopPropagation()">
+        <button class="btn btn-sm" [ngClass]="s.status === 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'" style="border-radius:8px;width:100%" (click)="toggle(s)">
+          {{ s.status === 'ACTIVE' ? 'Deactivate' : 'Activate' }}
+        </button>
       </div>
     </div>
-    <div class="col-12" *ngIf="staff.length === 0"><div class="empty-state"><div class="empty-icon"><i class="bi bi-people"></i></div><h5>No staff yet</h5><p>Create your first staff member.</p></div></div>
+    <div class="col-12" *ngIf="filteredStaff.length === 0"><div class="empty-state"><div class="empty-icon"><i class="bi bi-people"></i></div><h5>No staff found</h5></div></div>
   </div>
 </div>
 
-<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Add Staff</h5><button class="btn-close" (click)="showModal=false"></button></div>
-    <div class="modal-body">
-      <form [formGroup]="form">
-        <div class="mb-3"><label class="ims-form-label">Full Name</label><input class="ims-form-control" formControlName="name" placeholder="Staff name"></div>
-        <div class="mb-3"><label class="ims-form-label">Email</label><input class="ims-form-control" type="email" formControlName="email" placeholder="staff@company.com"></div>
-        <div class="mb-3"><label class="ims-form-label">Mobile</label><input class="ims-form-control" type="text" formControlName="phone" placeholder="9090909090"></div>
-        <div class="mb-3"><label class="ims-form-label">Password</label><input class="ims-form-control" type="password" formControlName="password" placeholder="Min. 6 chars"></div>
+<div class="po-overlay" *ngIf="showDetail" (click)="closeDetail()">
+  <div class="staff-panel" (click)="$event.stopPropagation()" *ngIf="selectedStaff">
+    <div class="staff-panel-header">
+      <div class="staff-person">
+        <div class="staff-avatar lg">{{ selectedStaff.name[0].toUpperCase() }}</div>
+        <div>
+          <h5>{{ selectedStaff.name }}</h5>
+          <span class="badge-ims" [ngClass]="selectedStaff.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'">{{ selectedStaff.status }}</span>
+        </div>
+      </div>
+      <button class="panel-close" (click)="closeDetail()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="staff-panel-body">
+      <div class="detail-list">
+        <div><span>Email</span><strong>{{ selectedStaff.email }}</strong></div>
+        <div><span>Phone</span><strong>{{ selectedStaff.phone }}</strong></div>
+        <div><span>User Code</span><strong>{{ selectedStaff.userCode }}</strong></div>
+        <div><span>Warehouse</span><strong>{{ selectedStaff.warehouseName || 'Assigned warehouse' }}</strong></div>
+        <div><span>Created</span><strong>{{ selectedStaff.createdAt | date:'dd MMM yyyy, HH:mm' }}</strong></div>
+      </div>
+      <div class="staff-panel-action">
+        <label class="toggle-wrap">
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="selectedStaff.status === 'ACTIVE'" (change)="toggle(selectedStaff)">
+            <span class="ts-slider"></span>
+          </label>
+          <span class="toggle-label">{{ selectedStaff.status === 'ACTIVE' ? 'Active staff account' : 'Inactive staff account' }}</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ims-modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="ims-modal ims-modal-lg" (click)="$event.stopPropagation()">
+    <div class="ims-modal-header">
+      <h5><i class="bi bi-person-plus me-2"></i>Add Staff Member</h5>
+      <button class="btn-close-modal" (click)="showModal=false"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="ims-modal-body">
+      <form [formGroup]="form" class="staff-form-grid">
+        <div>
+          <label class="ims-form-label">Full Name</label>
+          <input class="ims-form-control" formControlName="name" placeholder="Staff name">
+        </div>
+        <div>
+          <label class="ims-form-label">Mobile</label>
+          <input class="ims-form-control" type="text" formControlName="phone" placeholder="9090909090">
+        </div>
+        <div class="wide">
+          <label class="ims-form-label">Email</label>
+          <input class="ims-form-control" type="email" formControlName="email" placeholder="staff@company.com">
+        </div>
+        <div class="wide">
+          <label class="ims-form-label">Temporary Password</label>
+          <input class="ims-form-control" type="password" formControlName="password" placeholder="Minimum 6 characters">
+        </div>
       </form>
     </div>
-    <div class="modal-footer">
+    <div class="ims-modal-footer">
       <button class="btn-ims-outline btn" (click)="showModal=false">Cancel</button>
-      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">Create Staff</button>
+      <button class="btn-ims-primary btn" (click)="submit()" [disabled]="submitLoading">
+        <span *ngIf="!submitLoading">Create Staff</span>
+        <span *ngIf="submitLoading"><span class="spinner-border spinner-border-sm me-1"></span>Creating...</span>
+      </button>
     </div>
   </div>
 </div>
