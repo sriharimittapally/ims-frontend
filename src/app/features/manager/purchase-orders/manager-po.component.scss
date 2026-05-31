@@ -73,6 +73,38 @@
     color: #fff;
     border-color: var(--ims-primary);
   }
+  &.po-tab-all.active {
+    background: var(--ims-primary);
+    border-color: var(--ims-primary);
+  }
+  &.po-tab-draft.active {
+    background: #64748b;
+    border-color: #64748b;
+  }
+  &.po-tab-sent.active {
+    background: var(--ims-info);
+    border-color: var(--ims-info);
+  }
+  &.po-tab-accepted.active {
+    background: var(--ims-success);
+    border-color: var(--ims-success);
+  }
+  &.po-tab-shipped.active {
+    background: var(--ims-secondary);
+    border-color: var(--ims-secondary);
+  }
+  &.po-tab-received.active {
+    background: var(--ims-accent);
+    border-color: var(--ims-accent);
+  }
+  &.po-tab-cancelled.active {
+    background: #94a3b8;
+    border-color: #94a3b8;
+  }
+  &.po-tab-rejected.active {
+    background: var(--ims-danger);
+    border-color: var(--ims-danger);
+  }
 }
 .auto-dot {
   position: absolute;

@@ -25,7 +25,7 @@
 
   <div class="ims-card mb-3">
     <div class="po-tabs">
-      <button *ngFor="let s of statuses" class="po-tab" [class.active]="activeTab===s" (click)="activeTab=s">
+      <button *ngFor="let s of statuses" class="po-tab" [ngClass]="getTabClass(s)" [class.active]="activeTab===s" (click)="activeTab=s">
         {{ s === 'ALL' ? 'All (' + orders.length + ')' : s + (countBy(s) > 0 ? ' (' + countBy(s) + ')' : '') }}
         <span *ngIf="s === 'DRAFT' && autoDraftOrders.length > 0" class="auto-dot" title="Includes auto-drafted POs"></span>
       </button>

@@ -1,58 +1,221 @@
-<div class="animate-fade-in-up">
-  <div class="page-header"><h1 class="page-title">My Reports</h1><p class="page-subtitle" *ngIf="issueHistory">{{ issueHistory.staffName }} · {{ issueHistory.warehouseName }}</p></div>
+<div class="animate-fade-in-up rpt-page">
 
+  <!-- ── Page Header ──────────────────────────────────────────────────────── -->
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div>
+      <h1 class="page-title">My Reports</h1>
+      <p class="page-subtitle" *ngIf="issueHistory">
+        <i class="bi bi-person-circle me-1"></i>{{ issueHistory.staffName }}
+        &nbsp;·&nbsp;
+        <i class="bi bi-geo-alt me-1"></i>{{ issueHistory.warehouseName }}
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Tab Nav ──────────────────────────────────────────────────────────── -->
   <div class="ims-card mb-4">
-    <div class="d-flex gap-2">
-      <button class="rt" [class.active]="activeTab==='history'" (click)="setTab('history')"><i class="bi bi-list-check me-1"></i>My Issue History</button>
-      <button class="rt" [class.active]="activeTab==='trend'"   (click)="setTab('trend')">  <i class="bi bi-graph-up me-1"></i>Warehouse Trend</button>
+    <div class="rpt-tabs">
+      <button class="rpt-tab" [class.active]="activeTab==='history'" (click)="setTab('history')">
+        <i class="bi bi-list-check"></i>
+        <span>My Issue History</span>
+      </button>
+      <button class="rpt-tab" [class.active]="activeTab==='trend'" (click)="setTab('trend')">
+        <i class="bi bi-graph-up-arrow"></i>
+        <span>Warehouse Trend</span>
+      </button>
     </div>
   </div>
 
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <!-- ── Issue History ──────────────────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════
+       TAB: Issue History
+  ════════════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab==='history' && !loading && issueHistory">
-    <div class="row g-3 mb-4">
-      <div class="col-md-2 col-4"><div class="stat-card stat-primary"><div class="stat-value">{{ issueHistory.totalIssues }}</div><div class="stat-label">Total</div></div></div>
-      <div class="col-md-2 col-4"><div class="stat-card stat-warning"><div class="stat-value">{{ issueHistory.pendingIssues }}</div><div class="stat-label">Pending</div></div></div>
-      <div class="col-md-2 col-4"><div class="stat-card stat-info"><div class="stat-value">{{ issueHistory.approvedIssues }}</div><div class="stat-label">Approved</div></div></div>
-      <div class="col-md-2 col-4"><div class="stat-card stat-success"><div class="stat-value">{{ issueHistory.issuedIssues }}</div><div class="stat-label">Issued</div></div></div>
-      <div class="col-md-2 col-4"><div class="stat-card stat-danger"><div class="stat-value">{{ issueHistory.rejectedIssues }}</div><div class="stat-label">Rejected</div></div></div>
-      <div class="col-md-2 col-4"><div class="stat-card stat-secondary"><div class="stat-value">{{ issueHistory.totalUnitsIssued | number }}</div><div class="stat-label">Units Issued</div></div></div>
+
+    <!-- ── KPI Cards ──────────────────────────────────────────────────────── -->
+    <div class="kpi-grid mb-4">
+
+      <div class="kpi-card kpi-total">
+        <div class="kpi-icon-wrap"><i class="bi bi-clipboard-data"></i></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ issueHistory.totalIssues }}</div>
+          <div class="kpi-label">Total Issues</div>
+        </div>
+        <div class="kpi-bg-icon"><i class="bi bi-clipboard-data"></i></div>
+      </div>
+
+      <div class="kpi-card kpi-issued">
+        <div class="kpi-icon-wrap"><i class="bi bi-check2-all"></i></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ issueHistory.issuedIssues }}</div>
+          <div class="kpi-label">Issued</div>
+          <div class="kpi-sub">{{ issueHistory.totalUnitsIssued | number }} units</div>
+        </div>
+        <div class="kpi-bg-icon"><i class="bi bi-check2-all"></i></div>
+      </div>
+
+      <div class="kpi-card kpi-pending">
+        <div class="kpi-icon-wrap"><i class="bi bi-hourglass-split"></i></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ issueHistory.pendingIssues }}</div>
+          <div class="kpi-label">Pending</div>
+        </div>
+        <div class="kpi-bg-icon"><i class="bi bi-hourglass-split"></i></div>
+      </div>
+
+      <div class="kpi-card kpi-approved">
+        <div class="kpi-icon-wrap"><i class="bi bi-check-circle"></i></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ issueHistory.approvedIssues }}</div>
+          <div class="kpi-label">Approved</div>
+          <div class="kpi-sub">awaiting execute</div>
+        </div>
+        <div class="kpi-bg-icon"><i class="bi bi-check-circle"></i></div>
+      </div>
+
+      <div class="kpi-card kpi-rejected">
+        <div class="kpi-icon-wrap"><i class="bi bi-x-circle"></i></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ issueHistory.rejectedIssues }}</div>
+          <div class="kpi-label">Rejected</div>
+        </div>
+        <div class="kpi-bg-icon"><i class="bi bi-x-circle"></i></div>
+      </div>
+
+      <div class="kpi-card kpi-rate">
+        <div class="kpi-icon-wrap"><i class="bi bi-graph-up"></i></div>
+        <div class="kpi-content">
+          <div class="kpi-value">{{ approvalRate }}<span class="kpi-pct">%</span></div>
+          <div class="kpi-label">Approval Rate</div>
+        </div>
+        <div class="kpi-bg-icon"><i class="bi bi-graph-up"></i></div>
+      </div>
+
     </div>
 
+    <!-- ── Chart + Table Row ──────────────────────────────────────────────── -->
     <div class="row g-3">
-      <div class="col-lg-4">
-        <div class="ims-card h-100"><h6 class="fw-700 mb-3">Issue Status Distribution</h6><div class="chart-container" style="height:220px"><canvas baseChart [data]="issueDonutData" [options]="donutOpts" type="doughnut"></canvas></div></div>
+
+      <!-- Donut -->
+      <div class="col-xl-4 col-lg-5">
+        <div class="ims-card h-100">
+          <div class="rpt-card-header">
+            <h6 class="rpt-section-title"><i class="bi bi-pie-chart me-2"></i>Status Distribution</h6>
+          </div>
+          <div class="chart-wrap" style="height:220px">
+            <canvas baseChart [data]="issueDonutData" [options]="donutOpts" type="doughnut"></canvas>
+          </div>
+          <!-- Summary legend pills -->
+          <div class="donut-legend">
+            <div class="dl-item dl-pending"><span class="dl-dot"></span>Pending: {{ issueHistory.pendingIssues }}</div>
+            <div class="dl-item dl-issued"><span class="dl-dot"></span>Issued: {{ issueHistory.issuedIssues }}</div>
+            <div class="dl-item dl-rejected"><span class="dl-dot"></span>Rejected: {{ issueHistory.rejectedIssues }}</div>
+          </div>
+        </div>
       </div>
-      <div class="col-lg-8">
-        <div class="ims-card p-0 overflow-hidden">
-          <div class="p-3"><h6 class="fw-700 mb-0">Issue History ({{ issueHistory.issues.length }} records)</h6></div>
+
+      <!-- Issue Table -->
+      <div class="col-xl-8 col-lg-7">
+        <div class="ims-card p-0 overflow-hidden h-100">
+          <div class="rpt-table-toolbar">
+            <h6 class="rpt-section-title mb-0">
+              <i class="bi bi-list-check me-2"></i>
+              Issue History
+              <span class="badge-ims badge-sent ms-1">{{ issueHistory.issues.length }}</span>
+            </h6>
+            <div class="rpt-table-controls">
+              <div class="search-input-wrap rpt-search">
+                <i class="bi bi-search search-icon"></i>
+                <input class="ims-form-control" type="text" [(ngModel)]="historySearch"
+                  placeholder="Search issues...">
+              </div>
+              <select class="ims-form-control rpt-sort" [(ngModel)]="historySortKey">
+                <option value="date_desc">Newest first</option>
+                <option value="date_asc">Oldest first</option>
+                <option value="units_desc">Units ↓</option>
+                <option value="status">By Status</option>
+              </select>
+            </div>
+          </div>
+
           <div class="table-responsive">
             <table class="ims-table w-100">
-              <thead><tr><th>Issue Number</th><th>Status</th><th>Items</th><th>Units</th><th>Created</th><th>Issued</th><th>Note</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Issue #</th>
+                  <th>Status</th>
+                  <th>Items</th>
+                  <th>Units</th>
+                  <th>Created</th>
+                  <th>Issued</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr *ngFor="let i of issueHistory.issues">
-                  <td><span style="font-family:monospace; color:var(--ims-secondary); font-weight:700; font-size:.85rem">{{ i.issueNumber }}</span></td>
-                  <td><span class="badge-ims" [ngClass]="getStatusClass(i.status)">{{ i.status }}</span></td>
-                  <td class="text-muted">{{ i.itemCount }}</td>
-                  <td class="fw-600">{{ i.totalUnits }}</td>
+                <tr *ngFor="let i of filteredIssues" class="rpt-row">
+                  <td><span class="rpt-issue-num">{{ i.issueNumber }}</span></td>
+                  <td>
+                    <span class="rpt-status-pill" [ngClass]="getStatusClass(i.status)">
+                      <i class="bi {{ getStatusIcon(i.status) }} me-1"></i>{{ i.status }}
+                    </span>
+                  </td>
+                  <td class="text-center text-muted fw-600">{{ i.itemCount }}</td>
+                  <td class="fw-700" style="color:var(--ims-secondary)">{{ i.totalUnits }}</td>
                   <td class="text-muted" style="font-size:.8rem">{{ i.createdAt | date:'dd MMM yy' }}</td>
                   <td class="text-muted" style="font-size:.8rem">{{ i.issuedAt ? (i.issuedAt | date:'dd MMM yy') : '—' }}</td>
-                  <td class="text-muted" style="font-size:.78rem; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ i.note || '—' }}</td>
+                  <td class="text-muted" style="font-size:.78rem; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
+                    {{ i.note || '—' }}
+                  </td>
                 </tr>
-                <tr *ngIf="issueHistory.issues.length === 0"><td colspan="7"><div class="empty-state"><div class="empty-icon"><i class="bi bi-list-check"></i></div><h5>No history yet</h5></div></td></tr>
+                <tr *ngIf="filteredIssues.length === 0">
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <div class="empty-icon"><i class="bi bi-list-check"></i></div>
+                      <h5>{{ historySearch ? 'No matching issues' : 'No history yet' }}</h5>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
     </div>
+
   </ng-container>
 
-  <!-- ── Warehouse Trend ────────────────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════
+       TAB: Warehouse Trend
+  ════════════════════════════════════════════════════ -->
   <ng-container *ngIf="activeTab==='trend' && !loading">
-    <div class="ims-card mb-3"><div class="d-flex gap-3 flex-wrap align-items-end"><div><label class="ims-form-label">From</label><input type="date" class="ims-form-control" [(ngModel)]="fromDate" style="width:160px"></div><div><label class="ims-form-label">To</label><input type="date" class="ims-form-control" [(ngModel)]="toDate" style="width:160px"></div><button class="btn-ims-primary btn" (click)="loadTrend()">Apply</button></div></div>
-    <div class="ims-card"><h6 class="fw-700 mb-3">Warehouse Stock Movement</h6><div class="chart-container" style="height:300px"><canvas baseChart [data]="trendData" [options]="barOpts" type="bar"></canvas></div></div>
+
+    <div class="ims-card mb-3">
+      <div class="d-flex gap-3 flex-wrap align-items-end">
+        <div>
+          <label class="ims-form-label">From</label>
+          <input type="date" class="ims-form-control" [(ngModel)]="fromDate" style="width:160px">
+        </div>
+        <div>
+          <label class="ims-form-label">To</label>
+          <input type="date" class="ims-form-control" [(ngModel)]="toDate" style="width:160px">
+        </div>
+        <button class="btn-ims-primary btn" (click)="loadTrend()">
+          <i class="bi bi-bar-chart-fill me-1"></i>Apply
+        </button>
+      </div>
+    </div>
+
+    <div class="ims-card">
+      <div class="rpt-card-header mb-3">
+        <h6 class="rpt-section-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Warehouse Stock Movement</h6>
+        <span class="rpt-date-range">{{ fromDate | date:'dd MMM yy' }} — {{ toDate | date:'dd MMM yy' }}</span>
+      </div>
+      <div style="height:320px">
+        <canvas baseChart [data]="trendData" [options]="barOpts" type="bar"></canvas>
+      </div>
+    </div>
+
   </ng-container>
+
 </div>

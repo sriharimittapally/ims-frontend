@@ -29,15 +29,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       // For 401, force logout
      // For 401, force logout except login API
 if (err.status === 401) {
-
   if (!isLoginCall) {
-    auth.logout();
-
     toastr.warning(
       'Your session has expired. Please sign in again.',
       'Session Expired',
       { timeOut: 4000 }
     );
+
+    setTimeout(() => auth.logout(), 0);
   }
 
   return throwError(() => err);

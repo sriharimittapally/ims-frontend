@@ -96,6 +96,10 @@ export class ManagerPoComponent implements OnInit {
 
   countBy(s: string): number { return this.orders.filter(o => o.status === s).length; }
 
+  getTabClass(status: string): string {
+    return `po-tab-${status.toLowerCase()}`;
+  }
+
   openWizard(): void {
     this.showWizard = true;
     this.wizardStep = 1;

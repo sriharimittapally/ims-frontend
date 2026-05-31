@@ -31,6 +31,8 @@ export class StaffStockIssuesComponent implements OnInit {
   selectedProductId = '';
   itemQty = 1;
   addItemLoading = false;
+  productPickerOpen = false;
+  productSearchTerm = '';
 
   // Action loading states
   submitLoading = false;
@@ -63,7 +65,11 @@ export class StaffStockIssuesComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.svc.getMyIssues().subscribe({
-      next: r => { this.issues = r.data; this.loading = false; },
+      next: r => {
+        this.issues = this.sortIssues(r.data);
+        this.syncSelectedIssue();
+        this.loading = false;
+      },
       error: () => { this.loading = false; }
     });
   }
@@ -86,8 +92,9 @@ export class StaffStockIssuesComponent implements OnInit {
         this.toastr.success('Stock issue created! Add products then submit for manager review.', 'SI Created');
         this.createLoading = false;
         this.noteText = '';
-        this.load();
+        this.upsertIssue(r.data);
         this.openDetail(r.data);
+        this.load();
       },
       error: () => { this.createLoading = false; }
     });
@@ -97,11 +104,22 @@ export class StaffStockIssuesComponent implements OnInit {
 
   addItem(): void {
     if (!this.selectedProductId || this.itemQty < 1 || !this.selectedIssue) return;
+    const selectedInventory = this.getSelectedInventory();
+    const totalRequested = this.getRequestedQuantityForSelectedProduct() + this.itemQty;
+    if (selectedInventory && totalRequested > selectedInventory.availableQuantity) {
+      this.toastr.warning(
+        `Quantity can't be greater than available stock (${selectedInventory.availableQuantity}).`,
+        'Invalid Quantity'
+      );
+      return;
+    }
     this.addItemLoading = true;
     this.svc.addItem(this.selectedIssue.id, +this.selectedProductId, this.itemQty).subscribe({
       next: r => {
-        this.selectedIssue = r.data;
+        this.applyIssueUpdate(r.data);
         this.selectedProductId = '';
+        this.productSearchTerm = '';
+        this.productPickerOpen = false;
         this.itemQty = 1;
         this.addItemLoading = false;
         this.load();
@@ -115,7 +133,7 @@ export class StaffStockIssuesComponent implements OnInit {
     if (!this.selectedIssue) return;
     this.svc.removeItem(this.selectedIssue.id, itemId).subscribe({
       next: r => {
-        this.selectedIssue = r.data;
+        this.applyIssueUpdate(r.data);
         this.load();
         this.toastr.info('Product removed from issue.');
       }
@@ -133,7 +151,7 @@ export class StaffStockIssuesComponent implements OnInit {
     this.showSubmitConfirm = false;
     this.svc.submitForReview(this.selectedIssue.id).subscribe({
       next: r => {
-        this.selectedIssue = r.data;
+        this.applyIssueUpdate(r.data);
         this.submitLoading = false;
         this.load();
         this.toastr.success('Stock issue submitted to manager for approval!', 'Submitted');
@@ -156,7 +174,7 @@ export class StaffStockIssuesComponent implements OnInit {
     this.showExecuteConfirm = false;
     this.svc.issueStock(this.selectedIssue.id).subscribe({
       next: r => {
-        this.selectedIssue = r.data;
+        this.applyIssueUpdate(r.data);
         this.executeLoading = false;
         this.load();
         this.toastr.success('Stock issued successfully! Inventory has been updated.', 'Stock Issued');
@@ -194,16 +212,76 @@ export class StaffStockIssuesComponent implements OnInit {
     this.selectedIssue = issue;
     this.showDetail = true;
     this.selectedProductId = '';
+    this.productSearchTerm = '';
+    this.productPickerOpen = false;
     this.itemQty = 1;
   }
 
   closeDetail(): void {
     this.showDetail = false;
     this.selectedIssue = null;
+    this.productPickerOpen = false;
   }
 
   getSelectedInventory(): InventoryResponse | undefined {
     return this.inventory.find(i => i.productId === +this.selectedProductId);
+  }
+
+  getRequestedQuantityForSelectedProduct(): number {
+    if (!this.selectedIssue || !this.selectedProductId) return 0;
+    const existing = this.selectedIssue.items.find(i => i.productId === +this.selectedProductId);
+    return existing?.quantityRequested ?? 0;
+  }
+
+  getRemainingAvailableForSelectedProduct(): number {
+    const selectedInventory = this.getSelectedInventory();
+    if (!selectedInventory) return 9999;
+    return Math.max(0, selectedInventory.availableQuantity - this.getRequestedQuantityForSelectedProduct());
+  }
+
+  get filteredInventory(): InventoryResponse[] {
+    const term = this.productSearchTerm.trim().toLowerCase();
+    if (!term) return this.inventory;
+    return this.inventory.filter(inv =>
+      inv.productName.toLowerCase().includes(term) ||
+      inv.sku.toLowerCase().includes(term) ||
+      inv.categoryName.toLowerCase().includes(term)
+    );
+  }
+
+  toggleProductPicker(): void {
+    this.productPickerOpen = !this.productPickerOpen;
+  }
+
+  selectProduct(inv: InventoryResponse): void {
+    this.selectedProductId = inv.productId.toString();
+    this.productSearchTerm = '';
+    this.productPickerOpen = false;
+  }
+
+  private applyIssueUpdate(issue: StockIssueResponse): void {
+    this.selectedIssue = issue;
+    this.upsertIssue(issue);
+  }
+
+  private upsertIssue(issue: StockIssueResponse): void {
+    const exists = this.issues.some(i => i.id === issue.id);
+    this.issues = this.sortIssues(exists
+      ? this.issues.map(i => i.id === issue.id ? issue : i)
+      : [issue, ...this.issues]
+    );
+  }
+
+  private syncSelectedIssue(): void {
+    if (!this.selectedIssue) return;
+    const fresh = this.issues.find(i => i.id === this.selectedIssue?.id);
+    if (fresh) this.selectedIssue = fresh;
+  }
+
+  private sortIssues(issues: StockIssueResponse[]): StockIssueResponse[] {
+    return [...issues].sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   // ── STATUS HELPERS ────────────────────────────────────────────────────────

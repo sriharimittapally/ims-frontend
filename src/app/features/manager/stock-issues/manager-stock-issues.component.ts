@@ -18,6 +18,8 @@ export class ManagerStockIssuesComponent implements OnInit {
   filtered: StockIssueResponse[] = [];
   loading = true;
   activeTab: 'PENDING' | 'ALL' = 'PENDING';
+  searchText = '';
+  statusFilter = '';
 
   selectedIssue: StockIssueResponse | null = null;
   showDetail = false;
@@ -41,21 +43,31 @@ export class ManagerStockIssuesComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    // PENDING: staff-submitted issues awaiting manager review
-    // ALL: everything in this warehouse
-    const obs = this.activeTab === 'PENDING'
-      ? this.svc.getPendingForWarehouse()
-      : this.svc.getAllForWarehouse();
-
-    obs.subscribe({
+    this.svc.getAllForWarehouse().subscribe({
       next: r => { this.issues = r.data; this.filtered = r.data; this.loading = false; },
       error: () => { this.loading = false; }
     });
   }
 
-  setTab(tab: 'PENDING' | 'ALL'): void { this.activeTab = tab; this.load(); }
+  setTab(tab: 'PENDING' | 'ALL'): void {
+    this.activeTab = tab;
+    if (tab === 'PENDING') this.statusFilter = '';
+  }
 
   countByStatus(s: string): number { return this.issues.filter(i => i.status === s).length; }
+
+  get visibleIssues(): StockIssueResponse[] {
+    const q = this.searchText.trim().toLowerCase();
+    return this.issues
+      .filter(i => this.activeTab !== 'PENDING' || i.status === 'PENDING')
+      .filter(i => !this.statusFilter || i.status === this.statusFilter)
+      .filter(i => !q ||
+        i.issueNumber.toLowerCase().includes(q) ||
+        i.issuedByName.toLowerCase().includes(q) ||
+        i.items.some(item => item.productName.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q))
+      )
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
 
   // ── APPROVE ───────────────────────────────────────────────────────────────
 

@@ -47,7 +47,7 @@
   <!-- ── Tabs ────────────────────────────────────────────────────────────── -->
   <div class="ims-card mb-3">
     <div class="si-tabs">
-      <button class="si-tab" [class.active]="activeTab==='ALL'" (click)="activeTab='ALL'">
+      <button class="si-tab all" [class.active]="activeTab==='ALL'" (click)="activeTab='ALL'">
         All <span class="tc">{{ issues.length }}</span>
       </button>
       <button class="si-tab draft" [class.active]="activeTab==='DRAFT'" (click)="activeTab='DRAFT'">
@@ -233,27 +233,74 @@
       <!-- ── ADD PRODUCT FORM (DRAFT only) ─────────────────────── -->
       <ng-container *ngIf="canEdit(selectedIssue)">
         <div class="add-product-section">
-          <h6 class="aps-title"><i class="bi bi-plus-circle me-1"></i>Add Product</h6>
+          
           <div class="aps-form">
-            <select class="ims-form-control aps-select" [(ngModel)]="selectedProductId">
-              <option value="">Select product from inventory...</option>
-              <option *ngFor="let inv of inventory" [value]="inv.productId">
-                {{ inv.productName }} — Available: {{ inv.availableQuantity }} 
-              </option>
-            </select>
-            <div class="aps-qty-row">
-              <div class="qty-input-wrap">
-                <label class="ims-form-label">Quantity</label>
-                <input class="ims-form-control" type="number" [(ngModel)]="itemQty" min="1"
-                  [max]="getSelectedInventory()?.availableQuantity ?? 9999" placeholder="Qty">
-                <div *ngIf="selectedProductId && getSelectedInventory() as inv" class="qty-hint">
-                  Max available: {{ inv.availableQuantity }}
+            <label class="aps-field-label">Product</label>
+            <div class="product-picker" [class.open]="productPickerOpen">
+              <button type="button" class="product-trigger" (click)="toggleProductPicker()">
+                <span class="pt-icon"><i class="bi bi-box-seam"></i></span>
+                <span class="pt-copy" *ngIf="getSelectedInventory() as inv; else productPlaceholder">
+                  <span class="pt-name">{{ inv.productName }}</span>
+                  <span class="pt-meta">{{ inv.sku }} - {{ inv.categoryName }}</span>
+                </span>
+                <ng-template #productPlaceholder>
+                  <span class="pt-copy muted">
+                    <span class="pt-name">Select product from inventory</span>                  </span>
+                </ng-template>
+                <span class="pt-stock" *ngIf="getSelectedInventory() as inv">{{ inv.availableQuantity }} available</span>
+                <i class="bi bi-chevron-down pt-caret"></i>
+              </button>
+
+              <div class="product-menu" *ngIf="productPickerOpen" (click)="$event.stopPropagation()">
+                <div class="product-search">
+                  <i class="bi bi-search"></i>
+                  <input type="text" [(ngModel)]="productSearchTerm" placeholder="Search products...">
+                </div>
+                <div class="product-options">
+                  <button type="button" class="product-option"
+                    *ngFor="let inv of filteredInventory"
+                    [class.active]="selectedProductId === inv.productId.toString()"
+                    (click)="selectProduct(inv)">
+                    <span class="po-icon"><i class="bi bi-box"></i></span>
+                    <span class="po-main">
+                      <span class="po-name">{{ inv.productName }}</span>
+                      <span class="po-meta">{{ inv.sku }} - {{ inv.categoryName }}</span>
+                    </span>
+                    <span class="po-stock">{{ inv.availableQuantity }}</span>
+                  </button>
+                  <div class="product-empty" *ngIf="filteredInventory.length === 0">
+                    <i class="bi bi-search"></i>
+                    <span>No matching products</span>
+                  </div>
                 </div>
               </div>
-              <button class="btn-ims-primary btn add-btn" (click)="addItem()"
+              <i class="bi bi-box-seam select-leading-icon"></i>
+              <select class="ims-form-control aps-select" [(ngModel)]="selectedProductId">
+                <option value="">Select product from inventory...</option>
+                <option *ngFor="let inv of inventory" [value]="inv.productId">
+                  {{ inv.productName }} — Available: {{ inv.availableQuantity }}
+                </option>
+              </select>
+              <i class="bi bi-chevron-down select-caret"></i>
+            </div>
+            <div class="selected-product-strip" *ngIf="selectedProductId && getSelectedInventory() as inv">
+              <span class="sps-name">{{ inv.productName }}</span>
+              <span class="sps-stock">{{ inv.availableQuantity }} available</span>
+            </div>
+
+            <div class="aps-action-row">
+              <div class="qty-input-wrap">
+                <label class="aps-field-label">Quantity</label>
+                <input class="ims-form-control" type="number" [(ngModel)]="itemQty" min="1"
+                  [max]="getRemainingAvailableForSelectedProduct()" placeholder="Qty">
+                <div *ngIf="selectedProductId && getSelectedInventory() as inv" class="qty-hint">
+                  Remaining available: {{ getRemainingAvailableForSelectedProduct() }}
+                </div>
+              </div>
+              <button class="add-product-btn" (click)="addItem()"
                 [disabled]="!selectedProductId || itemQty < 1 || addItemLoading">
-                <span *ngIf="!addItemLoading"><i class="bi bi-plus-lg"></i></span>
-                <span *ngIf="addItemLoading"><span class="spinner-border spinner-border-sm"></span></span>
+                <span *ngIf="!addItemLoading"><i class="bi bi-plus-lg"></i>Add</span>
+                <span *ngIf="addItemLoading"><span class="spinner-border spinner-border-sm me-2"></span>Adding</span>
               </button>
             </div>
           </div>

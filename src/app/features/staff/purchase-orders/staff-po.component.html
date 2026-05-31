@@ -1,59 +1,266 @@
-<div class="animate-fade-in-up">
-  <div class="page-header">
-    <h1 class="page-title">Purchase Orders</h1>
-    <p class="page-subtitle">Orders in SHIPPED status ready to be received into inventory</p>
+<div class="animate-fade-in-up po-page">
+
+  <!-- ── Page Header ──────────────────────────────────────────────────────── -->
+  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Purchase Orders</h1>
+      <p class="page-subtitle">Receive incoming shipments and view receipt history</p>
+    </div>
+    <!-- Summary chips -->
+    <div class="po-summary-chips" *ngIf="!loading">
+      <div class="po-chip chip-pending">
+        <i class="bi bi-truck me-1"></i>
+        <strong>{{ pendingOrders.length }}</strong> to receive
+        <span class="chip-amt">₹{{ totalPendingValue | number:'1.0-0' }}</span>
+      </div>
+      <div class="po-chip chip-received">
+        <i class="bi bi-inbox-fill me-1"></i>
+        <strong>{{ receivedOrders.length }}</strong> received
+        <span class="chip-amt">₹{{ totalReceivedValue | number:'1.0-0' }}</span>
+      </div>
+    </div>
   </div>
 
+  <!-- ── Tabs + Search + Sort ─────────────────────────────────────────────── -->
+  <div class="ims-card mb-3">
+    <div class="po-toolbar">
+      <!-- Tab pills -->
+      <div class="po-tabs">
+        <button class="po-tab" [class.active]="activeTab==='pending'" (click)="activeTab='pending'">
+          <i class="bi bi-truck me-1"></i>
+          Awaiting Receipt
+          <span class="po-tab-count">{{ pendingOrders.length }}</span>
+        </button>
+        <button class="po-tab" [class.active]="activeTab==='history'" (click)="activeTab='history'">
+          <i class="bi bi-clock-history me-1"></i>
+          Received History
+          <span class="po-tab-count">{{ receivedOrders.length }}</span>
+        </button>
+      </div>
+
+      <!-- Search + Sort -->
+      <div class="po-controls">
+        <div class="search-input-wrap po-search">
+          <i class="bi bi-search search-icon"></i>
+          <input class="ims-form-control" type="text" [(ngModel)]="searchQuery"
+            placeholder="Search PO # or supplier...">
+          <button class="po-search-clear" *ngIf="searchQuery" (click)="searchQuery=''">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <select class="ims-form-control po-sort" [(ngModel)]="sortKey">
+          <option value="date_desc">Newest first</option>
+          <option value="date_asc">Oldest first</option>
+          <option value="amount_desc">Amount ↓ High→Low</option>
+          <option value="amount_asc">Amount ↑ Low→High</option>
+          <option value="supplier_az">Supplier A → Z</option>
+          <option value="supplier_za">Supplier Z → A</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="po-result-meta" *ngIf="searchQuery">
+      <i class="bi bi-funnel me-1"></i>
+      {{ activeOrders.length }} result{{ activeOrders.length !== 1 ? 's' : '' }} for "<strong>{{ searchQuery }}</strong>"
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────────────────── -->
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
-    <div class="table-responsive">
-      <table class="ims-table w-100">
-        <thead><tr><th>PO Number</th><th>Supplier</th><th>Amount</th><th>Items</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let o of orders">
-            <td><span class="po-number">{{ o.poNumber }}</span></td>
-            <td class="text-muted">{{ o.supplierName }}</td>
-            <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
-            <td><span class="badge-ims badge-sent">{{ o.items.length }} items</span></td>
-            <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
-            <td>
-              <div class="d-flex gap-1">
-                <button class="action-btn" (click)="viewDetail(o)"><i class="bi bi-eye" style="color:var(--ims-info)"></i></button>
-                <button class="btn btn-sm btn-success" style="border-radius:8px; font-size:.78rem" *ngIf="o.status === 'SHIPPED'" (click)="receive(o)">
-                  <i class="bi bi-inbox-fill me-1"></i>Receive
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="orders.length === 0"><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="bi bi-cart-check"></i></div><h5>No orders to receive</h5><p>Orders that are shipped will appear here.</p></div></td></tr>
-        </tbody>
-      </table>
+  <!-- ── PO Cards Grid ────────────────────────────────────────────────────── -->
+  <div class="po-grid" *ngIf="!loading">
+
+    <div class="po-card" *ngFor="let o of activeOrders" (click)="openDetail(o)"
+         [class.po-card--receive]="o.status === 'SHIPPED'"
+         [class.po-card--received]="o.status === 'RECEIVED'">
+
+      <!-- Card top stripe -->
+      <div class="po-card-stripe" [ngClass]="o.status === 'SHIPPED' ? 'stripe-pending' : 'stripe-received'"></div>
+
+      <div class="po-card-body">
+        <div class="po-card-head">
+          <span class="po-num">{{ o.poNumber }}</span>
+          <span class="po-status-pill" [ngClass]="getStatusClass(o.status)">
+            <i class="bi {{ getStatusIcon(o.status) }} me-1"></i>{{ o.status }}
+          </span>
+        </div>
+
+        <div class="po-supplier">
+          <i class="bi bi-building me-1"></i>
+          {{ o.companyName || o.supplierName }}
+        </div>
+
+        <div class="po-card-meta">
+          <div class="po-meta-item">
+            <span class="pmi-label">Items</span>
+            <span class="pmi-val">{{ o.items.length }}</span>
+          </div>
+          <div class="po-meta-item">
+            <span class="pmi-label">Value</span>
+            <span class="pmi-val pmi-amount">₹{{ o.totalAmount | number:'1.0-0' }}</span>
+          </div>
+          <div class="po-meta-item">
+            <span class="pmi-label">{{ o.status === 'RECEIVED' ? 'Received' : 'Shipped' }}</span>
+            <span class="pmi-val pmi-date">{{ (o.status === 'RECEIVED' ? o.receivedAt : o.shippedAt) || o.createdAt | date:'dd MMM yy' }}</span>
+          </div>
+        </div>
+
+        <!-- Receive CTA on pending cards -->
+        <button *ngIf="o.status === 'SHIPPED'"
+          class="po-receive-btn"
+          (click)="openDetail(o); $event.stopPropagation()">
+          <i class="bi bi-inbox-fill me-1"></i> Receive Stock
+        </button>
+
+        <div *ngIf="o.status === 'RECEIVED'" class="po-received-tag">
+          <i class="bi bi-check-circle-fill me-1"></i> Received {{ o.receivedAt | date:'dd MMM yy, HH:mm' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="po-empty" *ngIf="activeOrders.length === 0">
+      <div class="empty-icon">
+        <i class="bi {{ activeTab === 'pending' ? 'bi-truck' : 'bi-clock-history' }}"></i>
+      </div>
+      <h5>{{ activeTab === 'pending' ? 'No orders awaiting receipt' : 'No received orders yet' }}</h5>
+      <p *ngIf="searchQuery">Try clearing your search filter.</p>
+      <p *ngIf="!searchQuery && activeTab === 'pending'">Shipped POs from your suppliers will appear here.</p>
     </div>
   </div>
 </div>
 
-<!-- Detail Panel -->
-<div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
-  <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedOrder">
-    <div class="detail-header">
-      <div><h5 class="mb-0">{{ selectedOrder.poNumber }}</h5><span class="badge-ims" [ngClass]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span></div>
-      <button class="btn-close" (click)="showDetail=false"></button>
+<!-- ══════════════════════════════════════════════════════
+     DETAIL SIDE PANEL
+════════════════════════════════════════════════════════ -->
+<div class="po-overlay" *ngIf="showDetail" (click)="closeDetail()">
+  <div class="po-panel" (click)="$event.stopPropagation()" *ngIf="selectedOrder">
+
+    <!-- Panel Header -->
+    <div class="pop-header">
+      <div class="pop-header-left">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="po-num">{{ selectedOrder.poNumber }}</span>
+          <span class="po-status-pill" [ngClass]="getStatusClass(selectedOrder.status)">
+            <i class="bi {{ getStatusIcon(selectedOrder.status) }} me-1"></i>{{ selectedOrder.status }}
+          </span>
+        </div>
+        <div class="pop-supplier-name">{{ selectedOrder.companyName || selectedOrder.supplierName }}</div>
+      </div>
+      <button class="panel-close" (click)="closeDetail()"><i class="bi bi-x-lg"></i></button>
     </div>
-    <div class="detail-body">
-      <div class="detail-row"><span class="detail-label">Supplier</span><span>{{ selectedOrder.supplierName }}</span></div>
-      <div class="detail-row"><span class="detail-label">Warehouse</span><span>{{ selectedOrder.warehouseName }}</span></div>
-      <h6 class="mt-3 mb-2">Items to Receive</h6>
-      <table class="ims-table w-100">
-        <thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let it of selectedOrder.items">
-            <td>{{ it.productName }}<br><small class="text-muted">{{ it.sku }}</small></td>
-            <td class="fw-600">{{ it.quantity }}</td>
-            <td>₹{{ it.purchasePrice | number:'1.2-2' }}</td>
-          </tr>
-        </tbody>
-      </table>
+
+    <!-- Panel Body -->
+    <div class="pop-body">
+
+      <!-- Info grid -->
+      <div class="pop-info-grid">
+        <div class="pop-info-row">
+          <span class="pir-label"><i class="bi bi-geo-alt me-1"></i>Warehouse</span>
+          <span class="pir-val">{{ selectedOrder.warehouseName }}</span>
+        </div>
+        <div class="pop-info-row" *ngIf="selectedOrder.createdAt">
+          <span class="pir-label"><i class="bi bi-calendar3 me-1"></i>Created</span>
+          <span class="pir-val">{{ selectedOrder.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+        <div class="pop-info-row" *ngIf="selectedOrder.shippedAt">
+          <span class="pir-label"><i class="bi bi-truck me-1"></i>Shipped</span>
+          <span class="pir-val">{{ selectedOrder.shippedAt | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+        <div class="pop-info-row" *ngIf="selectedOrder.receivedAt">
+          <span class="pir-label"><i class="bi bi-inbox-fill me-1"></i>Received</span>
+          <span class="pir-val" style="color:var(--ims-success); font-weight:600">{{ selectedOrder.receivedAt | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+        <div class="pop-info-row" *ngIf="selectedOrder.note">
+          <span class="pir-label"><i class="bi bi-sticky me-1"></i>Note</span>
+          <span class="pir-val">{{ selectedOrder.note }}</span>
+        </div>
+      </div>
+
+      <!-- Items list -->
+      <div class="pop-items-header">
+        <h6 class="mb-0">
+          <i class="bi bi-box-seam me-1" style="color:var(--ims-primary)"></i>
+          Order Items
+          <span class="badge-ims badge-sent ms-1">{{ selectedOrder.items.length }}</span>
+        </h6>
+        <span class="pop-total">Total: <strong>₹{{ selectedOrder.totalAmount | number:'1.2-2' }}</strong></span>
+      </div>
+
+      <div class="pop-item" *ngFor="let item of selectedOrder.items">
+        <div class="pop-item-icon"><i class="bi bi-box"></i></div>
+        <div class="pop-item-info">
+          <div class="pop-item-name">{{ item.productName }}</div>
+          <div class="pop-item-meta">
+            <code>{{ item.sku }}</code>
+            <span>{{ item.categoryName }}</span>
+          </div>
+        </div>
+        <div class="pop-item-qty">
+          <div class="piq-label">Qty</div>
+          <div class="piq-val">{{ item.quantity }}</div>
+        </div>
+        <div class="pop-item-price">
+          <div class="pip-label">Unit</div>
+          <div class="pip-val">₹{{ item.purchasePrice | number:'1.2-2' }}</div>
+        </div>
+        <div class="pop-item-total">
+          <div class="pit-label">Total</div>
+          <div class="pit-val">₹{{ item.lineTotal | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <!-- Receive action -->
+      <ng-container *ngIf="selectedOrder.status === 'SHIPPED'">
+        <div class="pop-receive-box">
+          <div class="prb-icon"><i class="bi bi-inbox-fill"></i></div>
+          <div class="prb-content">
+            <div class="prb-title">Ready to Receive</div>
+            <div class="prb-sub">Confirming will add all {{ selectedOrder.items.length }} products to your warehouse inventory. This cannot be undone.</div>
+          </div>
+        </div>
+        <button class="pop-receive-btn" (click)="confirmReceive()" [disabled]="receiveLoading">
+          <i class="bi bi-inbox-fill me-2"></i>
+          <span *ngIf="!receiveLoading">Receive into Inventory</span>
+          <span *ngIf="receiveLoading"><span class="spinner-border spinner-border-sm me-1"></span>Processing...</span>
+        </button>
+      </ng-container>
+
+      <!-- Already received state -->
+      <ng-container *ngIf="selectedOrder.status === 'RECEIVED'">
+        <div class="pop-done-box">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <div>
+            <div class="pdb-title">Stock Successfully Received</div>
+            <div class="pdb-sub">All items were added to inventory on {{ selectedOrder.receivedAt | date:'dd MMM yyyy, HH:mm' }}</div>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     RECEIVE CONFIRM DIALOG
+════════════════════════════════════════════════════════ -->
+<div class="confirm-overlay" *ngIf="showReceiveConfirm">
+  <div class="confirm-box">
+    <div class="cb-icon" style="background:rgba(16,185,129,.1);color:var(--ims-success)">
+      <i class="bi bi-inbox-fill"></i>
+    </div>
+    <h5>Confirm Receipt</h5>
+    <p>Mark <strong>{{ selectedOrder?.poNumber }}</strong> as received?<br>
+      <span style="font-size:.8rem;color:var(--ims-text-muted)">{{ selectedOrder?.items?.length }} products · ₹{{ selectedOrder?.totalAmount | number:'1.2-2' }}</span>
+    </p>
+    <p style="font-size:.82rem;color:var(--ims-text-muted)">Stock will be added to <strong>{{ selectedOrder?.warehouseName }}</strong> inventory immediately.</p>
+    <div class="cb-actions">
+      <button class="btn-ims-outline btn" (click)="showReceiveConfirm=false">Cancel</button>
+      <button class="pop-receive-btn cb-confirm" (click)="receive()" [disabled]="receiveLoading">
+        <span *ngIf="!receiveLoading"><i class="bi bi-inbox-fill me-1"></i>Confirm Receipt</span>
+        <span *ngIf="receiveLoading"><span class="spinner-border spinner-border-sm me-1"></span>Receiving...</span>
+      </button>
     </div>
   </div>
 </div>
