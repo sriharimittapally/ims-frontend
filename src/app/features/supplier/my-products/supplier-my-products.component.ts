@@ -24,6 +24,8 @@ export class SupplierMyProductsComponent implements OnInit {
 
   // My linked products
   myLinkedProducts: ProductResponse[] = [];
+  linkedFiltered: ProductResponse[] = [];
+  linkedSearchText = '';
   linkedLoading = true;
 
   // Browse (products in my categories)
@@ -86,12 +88,31 @@ export class SupplierMyProductsComponent implements OnInit {
     this.prodSvc.getMyLinkedProducts().subscribe({
       next: r => {
         this.myLinkedProducts = r.data;
+        this.linkedFiltered = r.data;
         this.linkedProductIds.clear();
         r.data.forEach(p => this.linkedProductIds.add(p.id));
         this.linkedLoading = false;
       },
       error: () => { this.linkedLoading = false; }
     });
+  }
+
+  onLinkedSearch(e: Event): void {
+    this.linkedSearchText = (e.target as HTMLInputElement).value.toLowerCase().trim();
+    this.filterLinked();
+  }
+
+  filterLinked(): void {
+    if (!this.linkedSearchText) {
+      this.linkedFiltered = this.myLinkedProducts;
+      return;
+    }
+
+    this.linkedFiltered = this.myLinkedProducts.filter(p =>
+      p.productName.toLowerCase().includes(this.linkedSearchText) ||
+      p.sku.toLowerCase().includes(this.linkedSearchText) ||
+      p.category.name.toLowerCase().includes(this.linkedSearchText)
+    );
   }
 
   loadBrowse(): void {

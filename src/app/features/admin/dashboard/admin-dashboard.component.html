@@ -69,7 +69,7 @@
     <!-- ── Inventory Value Banner ─────────────────────────────────────── -->
     <div class="inventory-value-banner ims-card mb-4">
       <div class="ivb-label"><i class="bi bi-currency-rupee me-1"></i>Total Inventory Value</div>
-      <div class="ivb-value">₹{{ dashboard.totalInventoryValue | number:'1.2-2' }}</div>
+      <div class="ivb-value">₹{{ formatShortCurrency( dashboard.totalInventoryValue )}}</div>
       <div class="ivb-sub">Across {{ dashboard.totalWarehouses }} warehouses ({{ dashboard.activeWarehouses }} active)</div>
     </div>
 

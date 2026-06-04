@@ -46,25 +46,29 @@
 
   <!-- ── Tabs ────────────────────────────────────────────────────────────── -->
   <div class="ims-card mb-3">
-    <div class="si-tabs">
-      <button class="si-tab all" [class.active]="activeTab==='ALL'" (click)="activeTab='ALL'">
-        All <span class="tc">{{ issues.length }}</span>
-      </button>
-      <button class="si-tab draft" [class.active]="activeTab==='DRAFT'" (click)="activeTab='DRAFT'">
-        Draft <span class="tc">{{ countBy('DRAFT') }}</span>
-      </button>
-      <button class="si-tab pending" [class.active]="activeTab==='PENDING'" (click)="activeTab='PENDING'">
-        Submitted <span class="tc">{{ countBy('PENDING') }}</span>
-      </button>
-      <button class="si-tab approved" [class.active]="activeTab==='APPROVED'" (click)="activeTab='APPROVED'">
-        Approved <span class="tc">{{ countBy('APPROVED') }}</span>
-      </button>
-      <button class="si-tab issued" [class.active]="activeTab==='ISSUED'" (click)="activeTab='ISSUED'">
-        Issued <span class="tc">{{ countBy('ISSUED') }}</span>
-      </button>
-      <button class="si-tab rejected" [class.active]="activeTab==='REJECTED'" (click)="activeTab='REJECTED'">
-        Rejected <span class="tc">{{ countBy('REJECTED') }}</span>
-      </button>
+    <div class="si-toolbar">
+      <div class="si-tabs">
+        <button
+          *ngFor="let tab of statusTabs"
+          class="si-tab {{ tab.tone }}"
+          [class.active]="activeTab===tab.value"
+          (click)="activeTab=tab.value">
+          {{ tab.label }} <span class="tc">{{ countForTab(tab.value) }}</span>
+        </button>
+      </div>
+      <div class="si-search">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search issue, item, status, note...">
+        <button *ngIf="searchQuery" type="button" (click)="searchQuery=''" title="Clear search">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+    <div class="si-result-meta" *ngIf="searchQuery">
+      Showing {{ filtered.length }} of {{ activeTab === 'ALL' ? issues.length : countForTab(activeTab) }} matching issues
     </div>
   </div>
 
@@ -86,8 +90,13 @@
         <div class="smc-bottom">
           <span class="text-muted" style="font-size:.78rem">{{ issue.items.length }} items · {{ issue.createdAt | date:'dd MMM yy' }}</span>
           <div class="smc-actions">
-            <button *ngIf="canExecute(issue)" class="btn btn-sm btn-success rounded-pill" style="font-size:.72rem" (click)="openDetail(issue); $event.stopPropagation()">Execute</button>
-            <button *ngIf="canSubmit(issue)" class="btn btn-sm btn-primary rounded-pill" style="font-size:.72rem" (click)="openDetail(issue); $event.stopPropagation()">Submit</button>
+            <button
+              type="button"
+              class="row-action-btn {{ getStatusClass(issue.status) }}"
+              (click)="handleRowAction(issue, $event)">
+              <i class="bi {{ getRowActionIcon(issue) }}"></i>
+              {{ getRowActionLabel(issue) }}
+            </button>
           </div>
         </div>
       </div>
@@ -113,32 +122,33 @@
         </thead>
         <tbody>
           <tr *ngFor="let issue of filtered" class="si-row" (click)="openDetail(issue)">
-            <td><span class="si-num">{{ issue.issueNumber }}</span></td>
+            <td>
+              <div class="issue-main">
+                <span class="si-num">{{ issue.issueNumber }}</span>
+                <span class="issue-sub">{{ issue.warehouseName }}</span>
+              </div>
+            </td>
             <td>
               <span class="status-pill {{ getStatusClass(issue.status) }}">
                 <i class="bi {{ getStatusIcon(issue.status) }} me-1"></i>{{ issue.status }}
               </span>
             </td>
             <td>
-              <span class="badge-ims badge-sent">{{ issue.items.length }}</span>
+              <span class="items-count">{{ issue.items.length }}</span>
             </td>
-            <td class="text-muted" style="font-size:.82rem; max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
+            <td class="note-cell">
               {{ issue.note || '—' }}
             </td>
             <td class="text-muted" style="font-size:.82rem">{{ issue.createdAt | date:'dd MMM yy, HH:mm' }}</td>
             <td class="text-muted" style="font-size:.82rem">{{ issue.approvedByName || '—' }}</td>
             <td (click)="$event.stopPropagation()">
-              <div class="d-flex gap-1">
-                <button class="action-btn" title="View Details" (click)="openDetail(issue)">
-                  <i class="bi bi-eye" style="color:var(--ims-info)"></i>
-                </button>
-                <button *ngIf="canSubmit(issue)" class="btn btn-xs btn-primary rounded-pill px-2 py-0" style="font-size:.72rem" (click)="openDetail(issue)">
-                  Submit
-                </button>
-                <button *ngIf="canExecute(issue)" class="btn btn-xs btn-success rounded-pill px-2 py-0" style="font-size:.72rem" (click)="openDetail(issue)">
-                  Execute
-                </button>
-              </div>
+              <button
+                type="button"
+                class="row-action-btn {{ getStatusClass(issue.status) }}"
+                (click)="handleRowAction(issue, $event)">
+                <i class="bi {{ getRowActionIcon(issue) }}"></i>
+                {{ getRowActionLabel(issue) }}
+              </button>
             </td>
           </tr>
           <tr *ngIf="filtered.length === 0">
@@ -406,6 +416,17 @@
             <div>
               <div class="sib-title">Rejected by {{ selectedIssue.approvedByName }}</div>
               <div class="sib-sub">{{ selectedIssue.rejectionReason }}</div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- CANCELLED: Closed -->
+        <ng-container *ngIf="selectedIssue.status === 'CANCELLED'">
+          <div class="status-info-box cancelled-box">
+            <i class="bi bi-slash-circle me-2"></i>
+            <div>
+              <div class="sib-title">Issue Cancelled</div>
+              <div class="sib-sub">No inventory was deducted for this issue.</div>
             </div>
           </div>
         </ng-container>

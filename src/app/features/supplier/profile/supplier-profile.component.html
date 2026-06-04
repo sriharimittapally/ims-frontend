@@ -1,265 +1,232 @@
-<div class="animate-fade-in-up">
+<div class="sp-root">
 
-  <!-- PAGE HEADER -->
-  <div class="page-header">
+  <!-- HERO BANNER -->
+  <div class="sp-hero">
+    <div class="sp-hero-grid"></div>
+    <div class="sp-hero-content">
 
-    <h1 class="page-title">
-      My Profile
-    </h1>
+      <div class="sp-avatar-ring">
+        <div class="sp-avatar">
+        {{ profile?.companyName?.charAt(0)?.toUpperCase() }}
+        </div>
+        <div class="sp-status-dot"></div>
+      </div>
 
-    <p class="page-subtitle">
-      Your company information and approved categories
-    </p>
+      <div class="sp-hero-text">
+        <div class="sp-verified-pill">
+          <i class="bi bi-patch-check-fill"></i>
+          Verified Supplier
+        </div>
+        <h1 class="sp-hero-name">{{ profile?.companyName }}</h1>
+        <p class="sp-hero-sub">{{ profile?.email }}</p>
+      </div>
 
+      <div class="sp-hero-meta">
+        <div class="sp-meta-chip">
+          <i class="bi bi-fingerprint"></i>
+          <span>{{ profile?.userCode }}</span>
+        </div>
+        <div class="sp-meta-chip">
+          <i class="bi bi-calendar3"></i>
+          <span>Since {{ profile?.createdAt | date:'MMM yyyy' }}</span>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- LOADER -->
-  <div class="page-loader" *ngIf="loading">
-
-    <div class="spinner-border"></div>
-
+  <div class="sp-loader" *ngIf="loading">
+    <div class="sp-spinner">
+      <div class="sp-spin-ring"></div>
+    </div>
   </div>
 
-  <!-- CONTENT -->
+  <!-- MAIN CONTENT -->
   <ng-container *ngIf="!loading && profile">
 
-    <div class="row g-4">
+    <div class="sp-body">
 
-      <!-- LEFT SIDEBAR -->
-      <div class="col-lg-4">
+      <!-- LEFT COLUMN -->
+      <aside class="sp-aside">
 
-        <!-- PROFILE CARD -->
-        <div class="ims-card text-center profile-sidebar">
-
-          <div class="profile-avatar">
-            {{ profile.companyName[0].toUpperCase() }}
+        <!-- STATS ROW -->
+        <div class="sp-stats-row">
+          <div class="sp-stat">
+            <span class="sp-stat-num">{{ profile.categories.length }}</span>
+            <span class="sp-stat-lbl">Categories</span>
           </div>
-
-          <div class="company-name">
-            {{ profile.companyName }}
+          <div class="sp-stat-div"></div>
+          <div class="sp-stat">
+            <span class="sp-stat-num sp-stat-green">Active</span>
+            <span class="sp-stat-lbl">Status</span>
           </div>
-
-          <div class="company-email">
-            {{ profile.email }}
+          <div class="sp-stat-div"></div>
+          <div class="sp-stat">
+            <span class="sp-stat-num">✓</span>
+            <span class="sp-stat-lbl">Approved</span>
           </div>
-
-          <code class="user-code">
-            {{ profile.userCode }}
-          </code>
-
-          <div class="approved-badge">
-            <i class="bi bi-check-circle-fill"></i>
-            APPROVED
-          </div>
-
-          <div class="member-date">
-            Member since
-            {{ profile.createdAt | date:'dd MMM yyyy' }}
-          </div>
-
         </div>
 
-        <!-- CATEGORY CARD -->
-        <div class="ims-card mt-3">
-
-          <div class="section-heading">
-
-            <i class="bi bi-tags"></i>
-
-            <span>
-              Approved Categories
-            </span>
-
+        <!-- CATEGORIES CARD -->
+        <div class="sp-card sp-cat-card">
+          <div class="sp-card-header">
+            <div class="sp-card-icon sp-icon-teal">
+              <i class="bi bi-grid-3x3-gap-fill"></i>
+            </div>
+            <div>
+              <h3 class="sp-card-title">Approved Categories</h3>
+              <p class="sp-card-desc">Product lines you supply</p>
+            </div>
           </div>
 
-          <div
-            class="category-wrap"
-            *ngIf="profile.categories.length > 0">
-
+          <div class="sp-cat-list" *ngIf="profile.categories.length > 0">
             <div
-              *ngFor="let cat of profile.categories"
-              class="cat-badge">
+              *ngFor="let cat of profile.categories; let i = index"
+              class="sp-cat-item"
+              [style.animation-delay]="(i * 0.06) + 's'">
+              <div class="sp-cat-icon-wrap">
+                <i class="bi bi-tag-fill"></i>
+              </div>
+              <span class="sp-cat-name">{{ cat.name }}</span>
+              <i class="bi bi-chevron-right sp-cat-arrow"></i>
+            </div>
+          </div>
 
-              <i class="bi bi-tag-fill"></i>
+          <div *ngIf="profile.categories.length === 0" class="sp-empty">
+            <i class="bi bi-inbox"></i>
+            <span>No categories assigned yet</span>
+          </div>
 
-              <span>
-                {{ cat.name }}
+        </div>
+
+        <!-- INFO NOTE -->
+        <div class="sp-note-card">
+          <i class="bi bi-shield-lock-fill sp-note-icon"></i>
+          <p class="sp-note-text">
+            Profile updates require admin review and re-verification.
+            Contact your administrator to make changes.
+          </p>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT COLUMN -->
+      <main class="sp-main">
+
+        <!-- SECTION LABEL -->
+        <div class="sp-section-label">
+          <span>Company Information</span>
+          <div class="sp-section-line"></div>
+        </div>
+
+        <!-- DETAILS GRID -->
+        <div class="sp-details-grid">
+
+          <div class="sp-detail-tile sp-tile-accent-blue">
+            <div class="sp-tile-icon">
+              <i class="bi bi-building"></i>
+            </div>
+            <div class="sp-tile-body">
+              <span class="sp-tile-label">Company Name</span>
+              <span class="sp-tile-value">{{ profile.companyName }}</span>
+            </div>
+          </div>
+
+          <div class="sp-detail-tile sp-tile-accent-violet">
+            <div class="sp-tile-icon">
+              <i class="bi bi-person-badge"></i>
+            </div>
+            <div class="sp-tile-body">
+              <span class="sp-tile-label">Account Name</span>
+              <span class="sp-tile-value">{{ profile.name }}</span>
+            </div>
+          </div>
+
+          <div class="sp-detail-tile sp-tile-accent-cyan">
+            <div class="sp-tile-icon">
+              <i class="bi bi-envelope-at-fill"></i>
+            </div>
+            <div class="sp-tile-body">
+              <span class="sp-tile-label">Email Address</span>
+              <span class="sp-tile-value">{{ profile.email }}</span>
+            </div>
+          </div>
+
+          <div class="sp-detail-tile sp-tile-accent-emerald">
+            <div class="sp-tile-icon">
+              <i class="bi bi-telephone-fill"></i>
+            </div>
+            <div class="sp-tile-body">
+              <span class="sp-tile-label">Phone Number</span>
+              <span class="sp-tile-value">{{ profile.phone }}</span>
+            </div>
+          </div>
+
+          <div class="sp-detail-tile sp-detail-tile--wide sp-tile-accent-amber">
+            <div class="sp-tile-icon">
+              <i class="bi bi-geo-alt-fill"></i>
+            </div>
+            <div class="sp-tile-body">
+              <span class="sp-tile-label">Business Address</span>
+              <span class="sp-tile-value">{{ profile.address }}</span>
+            </div>
+          </div>
+
+          <div class="sp-detail-tile sp-tile-accent-rose">
+            <div class="sp-tile-icon">
+              <i class="bi bi-file-earmark-text-fill"></i>
+            </div>
+            <div class="sp-tile-body">
+              <span class="sp-tile-label">GST Number</span>
+              <span class="sp-tile-value">
+                <code class="sp-gst">{{ profile.gstNumber }}</code>
               </span>
-
             </div>
-
           </div>
 
-          <div
-            *ngIf="profile.categories.length === 0"
-            class="empty-text">
-
-            No categories assigned.
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- RIGHT SIDE -->
-      <div class="col-lg-8">
-
-        <div class="ims-card">
-
-          <div class="section-heading">
-
-            <i class="bi bi-building"></i>
-
-            <span>
-              Company Details
-            </span>
-
-          </div>
-
-          <!-- DETAILS GRID -->
-          <div class="detail-grid">
-
-            <!-- COMPANY -->
-            <div class="detail-item">
-
-              <div class="di-label">
-
-                <i class="bi bi-building"></i>
-
-                Company Name
-
-              </div>
-
-              <div class="di-value">
-                {{ profile.companyName }}
-              </div>
-
+          <div class="sp-detail-tile sp-tile-accent-slate">
+            <div class="sp-tile-icon">
+              <i class="bi bi-calendar2-check-fill"></i>
             </div>
-
-            <!-- ACCOUNT NAME -->
-            <div class="detail-item">
-
-              <div class="di-label">
-
-                <i class="bi bi-person"></i>
-
-                Account Name
-
-              </div>
-
-              <div class="di-value">
-                {{ profile.name }}
-              </div>
-
-            </div>
-
-            <!-- EMAIL -->
-            <div class="detail-item">
-
-              <div class="di-label">
-
-                <i class="bi bi-envelope"></i>
-
-                Email
-
-              </div>
-
-              <div class="di-value">
-                {{ profile.email }}
-              </div>
-
-            </div>
-
-            <!-- PHONE -->
-            <div class="detail-item">
-
-              <div class="di-label">
-
-                <i class="bi bi-telephone"></i>
-
-                Phone
-
-              </div>
-
-              <div class="di-value">
-                {{ profile.phone }}
-              </div>
-
-            </div>
-
-            <!-- ADDRESS -->
-            <div class="detail-item full-width">
-
-              <div class="di-label">
-
-                <i class="bi bi-geo-alt"></i>
-
-                Business Address
-
-              </div>
-
-              <div class="di-value">
-                {{ profile.address }}
-              </div>
-
-            </div>
-
-            <!-- GST -->
-            <div class="detail-item">
-
-              <div class="di-label">
-
-                <i class="bi bi-file-text"></i>
-
-                GST Number
-
-              </div>
-
-              <div class="di-value">
-
-                <code class="gst-code">
-                  {{ profile.gstNumber }}
-                </code>
-
-              </div>
-
-            </div>
-
-            <!-- REVIEWED -->
-            <div class="detail-item">
-
-              <div class="di-label">
-
-                <i class="bi bi-calendar-check"></i>
-
-                Reviewed At
-
-              </div>
-
-              <div class="di-value">
+            <div class="sp-tile-body">
+              <span class="sp-tile-label">Reviewed At</span>
+              <span class="sp-tile-value">
                 {{ profile.reviewedAt | date:'dd MMM yyyy, HH:mm' }}
-              </div>
-
+              </span>
             </div>
-
-          </div>
-
-          <!-- NOTE -->
-          <div class="profile-note">
-
-            <i class="bi bi-info-circle"></i>
-
-            <span>
-              To update your supplier profile details, please contact the administrator.
-              Profile updates may require re-verification and approval.
-            </span>
-
           </div>
 
         </div>
 
-      </div>
+        <!-- TIMELINE FOOTER -->
+        <div class="sp-timeline">
+          <div class="sp-tl-item sp-tl-done">
+            <div class="sp-tl-dot"></div>
+            <div class="sp-tl-info">
+              <span class="sp-tl-title">Registration Submitted</span>
+              <span class="sp-tl-date">{{ profile.createdAt | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+          <div class="sp-tl-line"></div>
+          <div class="sp-tl-item sp-tl-done">
+            <div class="sp-tl-dot"></div>
+            <div class="sp-tl-info">
+              <span class="sp-tl-title">Admin Review Completed</span>
+              <span class="sp-tl-date">{{ profile.reviewedAt | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+          <div class="sp-tl-line"></div>
+          <div class="sp-tl-item sp-tl-active">
+            <div class="sp-tl-dot sp-tl-pulse"></div>
+            <div class="sp-tl-info">
+              <span class="sp-tl-title">Supplier Active</span>
+              <span class="sp-tl-date">Current Status</span>
+            </div>
+          </div>
+        </div>
+
+      </main>
 
     </div>
 

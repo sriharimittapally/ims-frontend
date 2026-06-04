@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -7,6 +7,8 @@ import { InventoryService } from '../../../core/services/inventory.service';
 import { StockIssueResponse } from '../../../core/models/stock-issue.model';
 import { InventoryResponse } from '../../../core/models/inventory.model';
 import { NotificationService } from '../../../core/services/notification.service';
+
+type IssueStatusFilter = 'ALL' | 'DRAFT' | 'PENDING' | 'APPROVED' | 'ISSUED' | 'REJECTED' | 'CANCELLED';
 
 @Component({
   selector: 'app-staff-stock-issues',
@@ -19,6 +21,7 @@ export class StaffStockIssuesComponent implements OnInit {
   issues: StockIssueResponse[] = [];
   inventory: InventoryResponse[] = [];
   loading = true;
+  searchQuery = '';
 
   selectedIssue: StockIssueResponse | null = null;
   showDetail = false;
@@ -46,7 +49,16 @@ export class StaffStockIssuesComponent implements OnInit {
   showRejectDetails = false;
 
   // Filter
-  activeTab: 'ALL' | 'DRAFT' | 'PENDING' | 'APPROVED' | 'ISSUED' | 'REJECTED' | 'CANCELLED' = 'ALL';
+  activeTab: IssueStatusFilter = 'ALL';
+  statusTabs: { value: IssueStatusFilter; label: string; tone: string }[] = [
+    { value: 'ALL', label: 'All', tone: 'all' },
+    { value: 'DRAFT', label: 'Draft', tone: 'draft' },
+    { value: 'PENDING', label: 'Submitted', tone: 'pending' },
+    { value: 'APPROVED', label: 'Approved', tone: 'approved' },
+    { value: 'ISSUED', label: 'Issued', tone: 'issued' },
+    { value: 'REJECTED', label: 'Rejected', tone: 'rejected' },
+    { value: 'CANCELLED', label: 'Cancelled', tone: 'cancelled' }
+  ];
 
   constructor(
     private svc: StockIssueService,
@@ -57,9 +69,7 @@ export class StaffStockIssuesComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
-    this.invSvc.getMyWarehouse().subscribe({
-      next: r => this.inventory = r.data.filter(i => i.availableQuantity > 0)
-    });
+    this.loadInventory();
   }
 
   load(): void {
@@ -75,12 +85,40 @@ export class StaffStockIssuesComponent implements OnInit {
   }
 
   get filtered(): StockIssueResponse[] {
-    if (this.activeTab === 'ALL') return this.issues;
-    return this.issues.filter(i => i.status === this.activeTab);
+    const byStatus = this.activeTab === 'ALL'
+      ? this.issues
+      : this.issues.filter(i => i.status === this.activeTab);
+    const term = this.searchQuery.trim().toLowerCase();
+    if (!term) return byStatus;
+
+    return byStatus.filter(issue => {
+      const itemText = issue.items
+        .flatMap(item => [item.productName, item.sku, item.categoryName])
+        .filter(Boolean)
+        .join(' ');
+      return [
+        issue.issueNumber,
+        issue.status,
+        issue.note,
+        issue.warehouseName,
+        issue.approvedByName,
+        itemText
+      ].filter(Boolean).join(' ').toLowerCase().includes(term);
+    });
   }
 
   countBy(status: string): number {
     return this.issues.filter(i => i.status === status).length;
+  }
+
+  countForTab(status: IssueStatusFilter): number {
+    return status === 'ALL' ? this.issues.length : this.countBy(status);
+  }
+
+  loadInventory(): void {
+    this.invSvc.getMyWarehouse().subscribe({
+      next: r => this.inventory = r.data.filter(i => i.availableQuantity > 0)
+    });
   }
 
   // ── CREATE ────────────────────────────────────────────────────────────────
@@ -122,6 +160,7 @@ export class StaffStockIssuesComponent implements OnInit {
         this.productPickerOpen = false;
         this.itemQty = 1;
         this.addItemLoading = false;
+        this.loadInventory();
         this.load();
         this.toastr.success('Product added to issue.');
       },
@@ -134,6 +173,7 @@ export class StaffStockIssuesComponent implements OnInit {
     this.svc.removeItem(this.selectedIssue.id, itemId).subscribe({
       next: r => {
         this.applyIssueUpdate(r.data);
+        this.loadInventory();
         this.load();
         this.toastr.info('Product removed from issue.');
       }
@@ -153,6 +193,7 @@ export class StaffStockIssuesComponent implements OnInit {
       next: r => {
         this.applyIssueUpdate(r.data);
         this.submitLoading = false;
+        this.loadInventory();
         this.load();
         this.toastr.success('Stock issue submitted to manager for approval!', 'Submitted');
         this.notifSvc.add({
@@ -176,6 +217,7 @@ export class StaffStockIssuesComponent implements OnInit {
       next: r => {
         this.applyIssueUpdate(r.data);
         this.executeLoading = false;
+        this.loadInventory();
         this.load();
         this.toastr.success('Stock issued successfully! Inventory has been updated.', 'Stock Issued');
         this.notifSvc.add({
@@ -199,6 +241,7 @@ export class StaffStockIssuesComponent implements OnInit {
       next: () => {
         this.cancelLoading = false;
         this.showDetail = false;
+        this.loadInventory();
         this.load();
         this.toastr.info('Stock issue cancelled.');
       },
@@ -305,6 +348,47 @@ export class StaffStockIssuesComponent implements OnInit {
       REJECTED: 'bi-x-circle', CANCELLED: 'bi-slash-circle'
     };
     return m[s] ?? 'bi-circle';
+  }
+
+  getRowActionLabel(issue: StockIssueResponse): string {
+    const m: Record<string, string> = {
+      DRAFT: issue.items.length > 0 ? 'Submit' : 'Add items',
+      PENDING: 'Awaiting approval',
+      APPROVED: 'Execute',
+      ISSUED: 'Executed',
+      REJECTED: 'Rejected',
+      CANCELLED: 'Cancelled'
+    };
+    return m[issue.status] ?? 'Open';
+  }
+
+  getRowActionIcon(issue: StockIssueResponse): string {
+    const m: Record<string, string> = {
+      DRAFT: issue.items.length > 0 ? 'bi-send' : 'bi-plus-circle',
+      PENDING: 'bi-hourglass-split',
+      APPROVED: 'bi-check2-all',
+      ISSUED: 'bi-check2-circle',
+      REJECTED: 'bi-x-circle',
+      CANCELLED: 'bi-slash-circle'
+    };
+    return m[issue.status] ?? 'bi-box-arrow-up-right';
+  }
+
+  handleRowAction(issue: StockIssueResponse, event?: Event): void {
+    event?.stopPropagation();
+    this.selectedIssue = issue;
+
+    if (this.canSubmit(issue)) {
+      this.showSubmitConfirm = true;
+      return;
+    }
+
+    if (this.canExecute(issue)) {
+      this.showExecuteConfirm = true;
+      return;
+    }
+
+    this.openDetail(issue);
   }
 
   canEdit(issue: StockIssueResponse): boolean { return issue.status === 'DRAFT'; }

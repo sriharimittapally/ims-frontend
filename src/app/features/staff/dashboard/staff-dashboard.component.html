@@ -32,8 +32,19 @@
       <div class="col-lg-5">
         <div class="ims-card h-100">
           <h6 class="fw-700 mb-3">My Issue Breakdown</h6>
-          <div class="chart-container" style="height: 220px;">
-            <canvas baseChart [data]="issueDonutData" [options]="donutOpts" type="doughnut"></canvas>
+          <div class="issue-breakdown">
+            <div class="chart-container issue-chart">
+              <canvas baseChart [data]="issueDonutData" [options]="donutOpts" type="doughnut"></canvas>
+            </div>
+            <div class="issue-breakdown-list">
+              <div class="issue-breakdown-row" *ngFor="let item of issueBreakdown">
+                <span class="breakdown-dot" [style.background]="item.color"></span>
+                <span class="breakdown-label">{{ item.label }}</span>
+                <span class="breakdown-count">{{ item.count }}</span>
+                <span class="breakdown-percent">{{ issuePercent(item.count) }}%</span>
+              </div>
+              <div class="issue-empty" *ngIf="issueBreakdown.length === 0">No issues yet</div>
+            </div>
           </div>
         </div>
       </div>

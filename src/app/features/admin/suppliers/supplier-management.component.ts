@@ -40,18 +40,34 @@ export class SupplierManagementComponent implements OnInit {
   }
 
   applyFilter(): void {
-    let list = this.activeTab === 'ALL' ? this.suppliers : this.suppliers.filter(s => s.approvalStatus === this.activeTab);
-    if (this.searchText) {
-      const q = this.searchText.toLowerCase();
-      list = list.filter(s =>
+  let list =
+    this.activeTab === 'ALL'
+      ? this.suppliers
+      : this.suppliers.filter(
+          s => s.approvalStatus === this.activeTab
+        );
+
+  if (this.searchText) {
+    const q = this.searchText.toLowerCase();
+
+    list = list.filter(
+      s =>
         s.companyName.toLowerCase().includes(q) ||
         s.name.toLowerCase().includes(q) ||
         s.email.toLowerCase().includes(q) ||
         s.gstNumber?.toLowerCase().includes(q)
-      );
-    }
-    this.filtered = list;
+    );
   }
+
+  // Latest to oldest
+  list.sort(
+    (a, b) =>
+      new Date(b.createdAt || '1970-01-01').getTime() -
+      new Date(a.createdAt || '1970-01-01').getTime()
+  );
+
+  this.filtered = list;
+}
 
   setTab(tab: typeof this.activeTab): void { this.activeTab = tab; this.applyFilter(); }
   onSearch(e: Event): void { this.searchText = (e.target as HTMLInputElement).value; this.applyFilter(); }

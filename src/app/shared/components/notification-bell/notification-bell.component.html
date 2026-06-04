@@ -1,17 +1,25 @@
 <div class="notif-wrap">
-  <!-- Bell Button -->
-  <button class="notif-btn" (click)="toggle()" [class.has-unread]="svc.unreadCount() > 0">
-    <i class="bi bi-bell"></i>
-    <span class="badge-dot" *ngIf="svc.unreadCount() > 0">{{ svc.unreadCount() > 9 ? '9+' : svc.unreadCount() }}</span>
+  <!-- Bell Button with count badge -->
+  <button class="notif-btn" (click)="toggle()" [class.has-unread]="svc.unreadCount() > 0" title="Notifications">
+    <i class="bi bi-bell{{ svc.unreadCount() > 0 ? '-fill' : '' }}"></i>
+    <span class="notif-count" *ngIf="svc.unreadCount() > 0">
+      {{ svc.unreadCount() > 9 ? '9+' : svc.unreadCount() }}
+    </span>
   </button>
 
   <!-- Dropdown Panel -->
   <div class="notif-panel" *ngIf="isOpen">
+
     <div class="np-header">
-      <span class="np-title">Notifications</span>
+      <span class="np-title">
+        Notifications
+        <span class="np-unread-chip" *ngIf="svc.unreadCount() > 0">
+          {{ svc.unreadCount() }} new
+        </span>
+      </span>
       <div class="np-actions">
         <button class="np-action-btn" (click)="markAllRead()" *ngIf="svc.unreadCount() > 0" title="Mark all read">
-          <i class="bi bi-check2-all"></i>
+          <i class="bi bi-check2-all"></i>All read
         </button>
         <button class="np-action-btn danger" (click)="clearAll()" *ngIf="svc.notifications().length > 0" title="Clear all">
           <i class="bi bi-trash3"></i>
@@ -19,16 +27,20 @@
       </div>
     </div>
 
-    <!-- Empty State -->
+    <!-- Empty -->
     <div class="np-empty" *ngIf="svc.notifications().length === 0">
       <i class="bi bi-bell-slash"></i>
-      <p>No notifications yet</p>
+      <p>You're all caught up!</p>
     </div>
 
-    <!-- Notification List -->
+    <!-- List -->
     <div class="np-list" *ngIf="svc.notifications().length > 0">
-      <div *ngFor="let n of svc.notifications()" class="np-item" [class.unread]="!n.read" (click)="onNotifClick(n)">
-        <div class="np-icon" [style.color]="svc.getTypeColor(n.type)" [style.background]="svc.getTypeColor(n.type) + '18'">
+      <div *ngFor="let n of svc.notifications()"
+           class="np-item" [class.unread]="!n.read"
+           (click)="onNotifClick(n)">
+        <div class="np-icon"
+             [style.color]="svc.getTypeColor(n.type)"
+             [style.background]="svc.getTypeColor(n.type) + '18'">
           <i class="bi {{ svc.getTypeIcon(n.type) }}"></i>
         </div>
         <div class="np-content">
@@ -44,5 +56,10 @@
         </div>
       </div>
     </div>
+
+    <div class="np-footer" *ngIf="svc.notifications().length > 0">
+      <button (click)="markAllRead()">Mark all as read</button>
+    </div>
+
   </div>
 </div>

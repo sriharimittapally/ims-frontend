@@ -1,67 +1,225 @@
 <div class="animate-fade-in-up">
+
   <div class="page-header">
-    <h1 class="page-title">My PO Reports</h1>
-    <p class="page-subtitle">Purchase order history and performance overview</p>
+    <h1 class="page-title">Reports & Analytics</h1>
+    <p class="page-subtitle" *ngIf="report">{{ report.companyName }} — Order performance overview</p>
   </div>
 
-  <div class="page-loader" *ngIf="loading">
-    <div class="spinner-border"></div>
-  </div>
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
   <ng-container *ngIf="!loading && report">
-    <!-- KPI Row -->
+
+    <!-- ── KPI Grid ─────────────────────────────────────────────────────── -->
+    <div class="rpt-kpi-grid mb-4">
+
+      <div class="rpt-kpi rpt-kpi-total">
+        <div class="rpt-kpi-icon"><i class="bi bi-cart-check-fill"></i></div>
+        <div class="rpt-kpi-body">
+          <div class="rpt-kpi-val">{{ report.totalPOs }}</div>
+          <div class="rpt-kpi-lbl">Total Orders</div>
+        </div>
+        <i class="bi bi-cart-check-fill rpt-kpi-bg"></i>
+      </div>
+
+      <div class="rpt-kpi rpt-kpi-revenue">
+        <div class="rpt-kpi-icon"><i class="bi bi-currency-rupee"></i></div>
+        <div class="rpt-kpi-body">
+          <div class="rpt-kpi-val">{{ formatShortCurrency(report.totalRevenue) }}</div>
+          <div class="rpt-kpi-lbl">Total Revenue</div>
+        </div>
+        <i class="bi bi-currency-rupee rpt-kpi-bg"></i>
+      </div>
+
+      <div class="rpt-kpi rpt-kpi-accepted">
+        <div class="rpt-kpi-icon"><i class="bi bi-check-circle"></i></div>
+        <div class="rpt-kpi-body">
+          <div class="rpt-kpi-val">{{ report.acceptedPOs }}</div>
+          <div class="rpt-kpi-lbl">Accepted</div>
+        </div>
+        <i class="bi bi-check-circle rpt-kpi-bg"></i>
+      </div>
+
+      <div class="rpt-kpi rpt-kpi-shipped">
+        <div class="rpt-kpi-icon"><i class="bi bi-truck"></i></div>
+        <div class="rpt-kpi-body">
+          <div class="rpt-kpi-val">{{ report.shippedPOs }}</div>
+          <div class="rpt-kpi-lbl">Shipped</div>
+        </div>
+        <i class="bi bi-truck rpt-kpi-bg"></i>
+      </div>
+
+      <div class="rpt-kpi rpt-kpi-delivered">
+        <div class="rpt-kpi-icon"><i class="bi bi-inbox-fill"></i></div>
+        <div class="rpt-kpi-body">
+          <div class="rpt-kpi-val">{{ report.receivedPOs }}</div>
+          <div class="rpt-kpi-lbl">Delivered</div>
+        </div>
+        <i class="bi bi-inbox-fill rpt-kpi-bg"></i>
+      </div>
+
+      <div class="rpt-kpi rpt-kpi-rate">
+        <div class="rpt-kpi-icon"><i class="bi bi-graph-up"></i></div>
+        <div class="rpt-kpi-body">
+          <div class="rpt-kpi-val">{{ fulfillmentRate }}<span class="rpt-kpi-pct">%</span></div>
+          <div class="rpt-kpi-lbl">Fulfillment Rate</div>
+        </div>
+        <i class="bi bi-graph-up rpt-kpi-bg"></i>
+      </div>
+
+    </div>
+
+    <!-- ── Charts Row ────────────────────────────────────────────────────── -->
     <div class="row g-3 mb-4">
-      <div class="col-md-4 col-6">
-        <div class="stat-card stat-primary">
-          <div class="stat-icon"><i class="bi bi-cart-check-fill"></i></div>
-          <div class="stat-value mt-2">{{ report.totalPOs }}</div>
-          <div class="stat-label">Total POs</div>
-        </div>
-      </div>
-      <div class="col-md-4 col-6">
-        <div class="stat-card stat-success">
-          <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
-          <div class="stat-value mt-2">₹{{ report.totalRevenue | number:'1.0-0' }}</div>
-          <div class="stat-label">Total Revenue</div>
-        </div>
-      </div>
-      <div class="col-md-4 col-12">
+
+      <!-- Warehouse mix -->
+      <div class="col-lg-5">
         <div class="ims-card h-100">
-          <h6 class="mb-2 fw-700">Status Breakdown</h6>
-          <div class="chart-container" style="height:160px"><canvas baseChart [data]="donutData"
-              [options]="donutOptions" type="doughnut"></canvas></div>
+          <div class="rpt-sec-header mb-3">
+            <h6 class="rpt-sec-title"><i class="bi bi-building-check me-2"></i>Warehouse Value Mix</h6>
+            <small class="text-muted">Top {{ warehouseInsights.length }} warehouses</small>
+          </div>
+          <div *ngIf="warehouseInsights.length > 0; else noWarehouseMix" style="height:220px">
+            <canvas baseChart [data]="warehouseRevenueData" [options]="warehouseRevenueOptions" type="bar"></canvas>
+          </div>
+          <ng-template #noWarehouseMix>
+            <div class="empty-state py-3" style="min-height:220px">
+              <div class="empty-icon"><i class="bi bi-building"></i></div>
+              <h6>No warehouse order value yet</h6>
+            </div>
+          </ng-template>
+          <div class="rpt-legend mt-3" *ngIf="warehouseInsights.length > 0">
+            <div class="rpt-legend-item" *ngFor="let w of warehouseInsights">
+              <span class="rpt-legend-label">
+                {{ w.warehouseName }}
+                <small class="text-muted">({{ w.orders }} orders, {{ w.delivered }} delivered)</small>
+              </span>
+              <span class="rpt-legend-val">
+                {{ formatShortCurrency(w.amount) }}
+                <small class="text-muted">({{ w.contribution }}%)</small>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order aging chart -->
+      <div class="col-lg-7">
+        <div class="ims-card h-100">
+          <div class="rpt-sec-header mb-3">
+            <h6 class="rpt-sec-title"><i class="bi bi-hourglass-split me-2"></i>Order Aging by Stage</h6>
+            <small class="text-muted">Latest {{ orderAgingPoints.length }} purchase orders</small>
+          </div>
+          <div *ngIf="orderAgingPoints.length > 0; else noOrderAging" style="height:260px">
+            <canvas baseChart [data]="orderAgingData" [options]="orderAgingOptions" type="bar"></canvas>
+          </div>
+          <ng-template #noOrderAging>
+            <div class="empty-state py-3" style="min-height:220px">
+              <div class="empty-icon"><i class="bi bi-hourglass"></i></div>
+              <h6>No order aging data yet</h6>
+            </div>
+          </ng-template>
+          <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top small fw-semibold text-muted" *ngIf="orderAgingPoints.length > 0">
+            <span><i class="bi bi-circle-fill" style="color:#2563eb"></i> Sent</span>
+            <span><i class="bi bi-circle-fill" style="color:#059669"></i> Accepted</span>
+            <span><i class="bi bi-circle-fill" style="color:#7c3aed"></i> Shipped</span>
+            <span><i class="bi bi-circle-fill" style="color:#0891b2"></i> Delivered</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Performance Summary Cards ─────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="ims-card rpt-perf-card rpt-perf-accept">
+          <div class="rpt-perf-icon"><i class="bi bi-check-circle-fill"></i></div>
+          <div>
+            <div class="rpt-perf-val">{{ acceptRate }}%</div>
+            <div class="rpt-perf-lbl">Acceptance Rate</div>
+            <div class="rpt-perf-sub">{{ report.acceptedPOs }} of {{ report.sentPOs }} orders accepted</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="ims-card rpt-perf-card rpt-perf-fulfill">
+          <div class="rpt-perf-icon"><i class="bi bi-award-fill"></i></div>
+          <div>
+            <div class="rpt-perf-val">{{ fulfillmentRate }}%</div>
+            <div class="rpt-perf-lbl">Fulfillment Rate</div>
+            <div class="rpt-perf-sub">{{ report.receivedPOs }} orders delivered</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="ims-card rpt-perf-card rpt-perf-avg">
+          <div class="rpt-perf-icon"><i class="bi bi-calculator-fill"></i></div>
+          <div>
+            <div class="rpt-perf-val">{{ formatShortCurrency(avgOrderValue) }}</div>
+            <div class="rpt-perf-lbl">Avg. Order Value</div>
+            <div class="rpt-perf-sub">Across all received POs</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- PO History Table -->
+    <!-- ── Order History Table ────────────────────────────────────────────── -->
     <div class="ims-card p-0 overflow-hidden">
-      <div class="p-3 border-bottom" style="border-color:var(--ims-border)!important">
-        <h6 class="mb-0 fw-700">Order History</h6>
+      <div class="supp-card-header">
+        <span class="sch-title">
+          <i class="bi bi-clock-history"></i>Order History
+          <span class="badge-ims badge-sent" style="font-size:.68rem;margin-left:.35rem">{{ report.orders.length }}</span>
+        </span>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <div class="search-input-wrap" style="width:220px">
+            <i class="bi bi-search search-icon"></i>
+            <input class="ims-form-control" [(ngModel)]="historySearch"
+              placeholder="Search orders..." style="padding-left:2.25rem">
+          </div>
+          <select class="ims-form-control rpt-sort" [(ngModel)]="sortKey">
+            <option value="date_desc">Newest first</option>
+            <option value="date_asc">Oldest first</option>
+            <option value="amount_desc">Amount ↓</option>
+            <option value="amount_asc">Amount ↑</option>
+          </select>
+        </div>
       </div>
       <div class="table-responsive">
-        <table class="ims-table w-100">
+        <table class="ims-table supp-table w-100">
           <thead>
             <tr>
+              <th>#</th>
               <th>PO Number</th>
-              <th>Status</th>
+              <th>Warehouse</th>
+              <th>Items</th>
               <th>Amount</th>
-              <th>Date</th>
+              <th>Status</th>
+              <th>Order Date</th>
+              <th>Delivered</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let o of report.orders">
-              <td><span style="font-family:monospace;color:var(--ims-warning);font-weight:700">{{ o.poNumber }}</span>
+            <tr *ngFor="let o of filteredHistory; let i = index" [class.tr-odd]="i % 2 !== 0">
+              <td class="text-muted" style="font-size:.75rem">{{ i + 1 }}</td>
+              <td><span class="po-mono">{{ o.poNumber }}</span></td>
+              <td class="text-muted td-sm">{{ o.warehouseName }}</td>
+              <td><span class="badge-ims badge-sent" style="font-size:.7rem">{{ o.itemCount }}</span></td>
+              <td class="amt">₹{{ o.amount | number:'1.2-2' }}</td>
+              <td>
+                <span class="supp-badge" [ngClass]="getStatusClass(o.status)">
+                  <i class="bi {{ getStatusIcon(o.status) }} me-1"></i>{{ getDisplayStatus(o.status) }}
+                </span>
               </td>
-              <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
-              <td class="fw-600">₹{{ o.amount | number:'1.2-2' }}</td>
-              <td class="text-muted">{{ o.createdAt | date:'dd MMM yy' }}</td>
+              <td class="text-muted td-sm">{{ o.createdAt | date:'dd MMM yyyy' }}</td>
+              <td class="td-sm" [style.color]="o.receivedAt ? 'var(--ims-success)' : 'var(--ims-text-muted)'">
+                {{ o.receivedAt ? (o.receivedAt | date:'dd MMM yyyy') : '—' }}
+              </td>
             </tr>
-            <tr *ngIf="report.orders?.length === 0">
-              <td colspan="4">
-                <div class="empty-state">
+            <tr *ngIf="filteredHistory.length === 0">
+              <td colspan="8">
+                <div class="empty-state py-4">
                   <div class="empty-icon"><i class="bi bi-bar-chart-line"></i></div>
-                  <h5>No PO history yet</h5>
+                  <h5>{{ historySearch ? 'No matching orders' : 'No order history yet' }}</h5>
                 </div>
               </td>
             </tr>
@@ -69,5 +227,6 @@
         </table>
       </div>
     </div>
+
   </ng-container>
 </div>

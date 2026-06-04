@@ -298,11 +298,13 @@ export class ManagerPoComponent implements OnInit {
         this.submitLoading = false;
         this.showWizard = false;
         this.load();
+        // Notify the supplier that a new PO has been created for them
         this.notifSvc.add({
           type: 'PO_UPDATE',
-          title: 'Purchase Order Created',
-          message: `${r.data.poNumber} for ${r.data.companyName || r.data.supplierName} is ready to send.`,
-          route: '/manager/purchase-orders'
+          title: 'New Purchase Order',
+          message: `${r.data.poNumber} has been sent to you for acceptance.`,
+          route: '/supplier/purchase-orders',
+          targetRoles: ['SUPPLIER']
         });
       },
       error: () => { this.submitLoading = false; }
@@ -334,11 +336,13 @@ export class ManagerPoComponent implements OnInit {
         this.actionLoading = false;
         this.load();
         this.toastr.success(`${r.data.poNumber} sent to ${r.data.companyName || r.data.supplierName}!`);
+        // Notify supplier that PO has been sent and needs their action
         this.notifSvc.add({
           type: 'PO_UPDATE',
-          title: 'PO Sent to Supplier',
-          message: `${r.data.poNumber} sent to ${r.data.companyName}.`,
-          route: '/manager/purchase-orders'
+          title: 'New Purchase Order Received',
+          message: `${r.data.poNumber} from ${r.data.warehouseName} is awaiting your acceptance.`,
+          route: '/supplier/purchase-orders',
+          targetRoles: ['SUPPLIER']
         });
       },
       error: () => { this.actionLoading = false; }

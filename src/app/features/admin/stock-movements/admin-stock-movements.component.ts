@@ -60,17 +60,40 @@ export class AdminStockMovementsComponent implements OnInit {
     });
   }
 
-  applyFilter(): void {
-    let list = this.movements;
-    if (this.filterType)      list = list.filter(m => m.type === this.filterType);
-    if (this.filterWarehouse)  list = list.filter(m => m.warehouseId === +this.filterWarehouse);
-    if (this.filterRef)        list = list.filter(m => m.referenceType === this.filterRef);
-    if (this.searchText) {
-      const q = this.searchText.toLowerCase();
-      list = list.filter(m => m.productName.toLowerCase().includes(q) || m.sku.toLowerCase().includes(q));
-    }
-    this.filtered = list;
+ applyFilter(): void {
+  let list = this.movements;
+
+  if (this.filterType) {
+    list = list.filter(m => m.type === this.filterType);
   }
+
+  if (this.filterWarehouse) {
+    list = list.filter(m => m.warehouseId === +this.filterWarehouse);
+  }
+
+  if (this.filterRef) {
+    list = list.filter(m => m.referenceType === this.filterRef);
+  }
+
+  if (this.searchText) {
+    const q = this.searchText.toLowerCase();
+
+    list = list.filter(
+      m =>
+        m.productName.toLowerCase().includes(q) ||
+        m.sku.toLowerCase().includes(q)
+    );
+  }
+
+  // Latest to oldest
+  list.sort(
+    (a, b) =>
+      new Date(b.createdAt || '1970-01-01').getTime() -
+      new Date(a.createdAt || '1970-01-01').getTime()
+  );
+
+  this.filtered = list;
+}
 
   onSearch(e: Event): void { this.searchText = (e.target as HTMLInputElement).value; this.applyFilter(); }
 

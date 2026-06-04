@@ -56,12 +56,21 @@ export class AdminPoComponent implements OnInit {
     });
   }
 
-  applyFilter(): void {
-    this.filtered =
-      this.activeTab === 'ALL'
-        ? this.orders
-        : this.orders.filter((o) => o.status === this.activeTab);
-  }
+applyFilter(): void {
+  let list =
+    this.activeTab === 'ALL'
+      ? this.orders
+      : this.orders.filter(o => o.status === this.activeTab);
+
+  // Latest to oldest
+  list.sort(
+    (a, b) =>
+      new Date(b.createdAt || '').getTime() -
+      new Date(a.createdAt || '').getTime()
+  );
+
+  this.filtered = list;
+}
 
   setTab(tab: string): void {
     this.activeTab = tab;

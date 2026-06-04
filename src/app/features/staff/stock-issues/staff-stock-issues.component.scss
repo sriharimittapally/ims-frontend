@@ -81,6 +81,14 @@
 }
 
 // ── Tabs ────────────────────────────────────────────────────────────────────
+.si-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .si-tabs {
   display: flex;
   gap: 0.375rem;
@@ -135,6 +143,49 @@
   &.rejected.active {
     background: var(--ims-danger);
   }
+  &.cancelled.active {
+    background: #475569;
+  }
+}
+
+.si-search {
+  width: min(100%, 320px);
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.65rem;
+  border: 1.5px solid var(--ims-border);
+  border-radius: 8px;
+  background: var(--ims-bg-secondary);
+  color: var(--ims-text-muted);
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ims-text-primary);
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  button {
+    border: 0;
+    background: transparent;
+    color: var(--ims-text-muted);
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+  }
+}
+
+.si-result-meta {
+  margin-top: 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ims-text-muted);
 }
 
 // ── Status Pills ────────────────────────────────────────────────────────────
@@ -145,7 +196,7 @@
   border-radius: 100px;
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.2px;
+  letter-spacing: 0;
 
   &.badge-draft {
     background: rgba(100, 116, 139, 0.12);
@@ -180,22 +231,105 @@
     background: var(--ims-surface-hover);
   }
 }
+
+.issue-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.issue-sub {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ims-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 .si-num {
   font-family: monospace;
   font-weight: 700;
   color: var(--ims-secondary);
   font-size: 0.85rem;
 }
-.action-btn {
-  background: none;
-  border: none;
+
+.items-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 26px;
+  padding: 0 0.55rem;
+  border-radius: 8px;
+  background: var(--ims-bg-secondary);
+  border: 1px solid var(--ims-border);
+  color: var(--ims-text-secondary);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.note-cell {
+  max-width: 190px;
+  color: var(--ims-text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 124px;
+  min-height: 30px;
+  padding: 0.28rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1;
   cursor: pointer;
-  font-size: 1rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
   transition: all 0.2s;
+
+  &.badge-draft {
+    background: rgba(100, 116, 139, 0.12);
+    color: #475569;
+    border-color: rgba(100, 116, 139, 0.2);
+  }
+  &.badge-pending {
+    background: rgba(245, 158, 11, 0.13);
+    color: #b45309;
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+  &.badge-approved {
+    background: rgba(59, 130, 246, 0.13);
+    color: #1d4ed8;
+    border-color: rgba(59, 130, 246, 0.25);
+  }
+  &.badge-issued {
+    background: rgba(16, 185, 129, 0.13);
+    color: #047857;
+    border-color: rgba(16, 185, 129, 0.25);
+  }
+  &.badge-rejected {
+    background: rgba(239, 68, 68, 0.13);
+    color: #b91c1c;
+    border-color: rgba(239, 68, 68, 0.25);
+  }
+  &.badge-cancelled {
+    background: rgba(71, 85, 105, 0.12);
+    color: #475569;
+    border-color: rgba(71, 85, 105, 0.2);
+  }
+
   &:hover {
-    background: var(--ims-bg-secondary);
+    filter: brightness(0.97);
+    transform: translateY(-1px);
   }
 }
 .btn-xs {
@@ -362,7 +496,7 @@
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0;
     color: var(--ims-danger);
     margin-bottom: 0.25rem;
   }
@@ -436,7 +570,7 @@
     color: var(--ims-text-secondary);
     font-size: 0.68rem;
     font-weight: 800;
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
     text-transform: uppercase;
     margin: 0 0 0.1rem;
   }
@@ -923,7 +1057,7 @@
     .iq-label {
       font-size: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0;
       color: var(--ims-text-muted);
     }
     .iq-value {
@@ -1000,6 +1134,11 @@
     background: rgba(239, 68, 68, 0.08);
     border: 1px solid rgba(239, 68, 68, 0.2);
     color: var(--ims-danger);
+  }
+  &.cancelled-box {
+    background: rgba(71, 85, 105, 0.08);
+    border: 1px solid rgba(71, 85, 105, 0.2);
+    color: #475569;
   }
 }
 

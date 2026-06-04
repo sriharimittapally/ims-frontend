@@ -11,12 +11,10 @@
       <div class="po-chip chip-pending">
         <i class="bi bi-truck me-1"></i>
         <strong>{{ pendingOrders.length }}</strong> to receive
-        <span class="chip-amt">₹{{ totalPendingValue | number:'1.0-0' }}</span>
       </div>
       <div class="po-chip chip-received">
         <i class="bi bi-inbox-fill me-1"></i>
         <strong>{{ receivedOrders.length }}</strong> received
-        <span class="chip-amt">₹{{ totalReceivedValue | number:'1.0-0' }}</span>
       </div>
     </div>
   </div>
@@ -26,12 +24,12 @@
     <div class="po-toolbar">
       <!-- Tab pills -->
       <div class="po-tabs">
-        <button class="po-tab" [class.active]="activeTab==='pending'" (click)="activeTab='pending'">
+        <button class="po-tab tab-pending" [class.active]="activeTab==='pending'" (click)="activeTab='pending'">
           <i class="bi bi-truck me-1"></i>
           Awaiting Receipt
           <span class="po-tab-count">{{ pendingOrders.length }}</span>
         </button>
-        <button class="po-tab" [class.active]="activeTab==='history'" (click)="activeTab='history'">
+        <button class="po-tab tab-history" [class.active]="activeTab==='history'" (click)="activeTab='history'">
           <i class="bi bi-clock-history me-1"></i>
           Received History
           <span class="po-tab-count">{{ receivedOrders.length }}</span>
@@ -51,10 +49,7 @@
         <select class="ims-form-control po-sort" [(ngModel)]="sortKey">
           <option value="date_desc">Newest first</option>
           <option value="date_asc">Oldest first</option>
-          <option value="amount_desc">Amount ↓ High→Low</option>
-          <option value="amount_asc">Amount ↑ Low→High</option>
-          <option value="supplier_az">Supplier A → Z</option>
-          <option value="supplier_za">Supplier Z → A</option>
+          <option value="supplier_az">Supplier A-Z</option>
         </select>
       </div>
     </div>
@@ -68,58 +63,55 @@
   <!-- ── Loading ──────────────────────────────────────────────────────────── -->
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <!-- ── PO Cards Grid ────────────────────────────────────────────────────── -->
-  <div class="po-grid" *ngIf="!loading">
-
-    <div class="po-card" *ngFor="let o of activeOrders" (click)="openDetail(o)"
-         [class.po-card--receive]="o.status === 'SHIPPED'"
-         [class.po-card--received]="o.status === 'RECEIVED'">
-
-      <!-- Card top stripe -->
-      <div class="po-card-stripe" [ngClass]="o.status === 'SHIPPED' ? 'stripe-pending' : 'stripe-received'"></div>
-
-      <div class="po-card-body">
-        <div class="po-card-head">
-          <span class="po-num">{{ o.poNumber }}</span>
-          <span class="po-status-pill" [ngClass]="getStatusClass(o.status)">
-            <i class="bi {{ getStatusIcon(o.status) }} me-1"></i>{{ o.status }}
-          </span>
-        </div>
-
-        <div class="po-supplier">
-          <i class="bi bi-building me-1"></i>
-          {{ o.companyName || o.supplierName }}
-        </div>
-
-        <div class="po-card-meta">
-          <div class="po-meta-item">
-            <span class="pmi-label">Items</span>
-            <span class="pmi-val">{{ o.items.length }}</span>
-          </div>
-          <div class="po-meta-item">
-            <span class="pmi-label">Value</span>
-            <span class="pmi-val pmi-amount">₹{{ o.totalAmount | number:'1.0-0' }}</span>
-          </div>
-          <div class="po-meta-item">
-            <span class="pmi-label">{{ o.status === 'RECEIVED' ? 'Received' : 'Shipped' }}</span>
-            <span class="pmi-val pmi-date">{{ (o.status === 'RECEIVED' ? o.receivedAt : o.shippedAt) || o.createdAt | date:'dd MMM yy' }}</span>
-          </div>
-        </div>
-
-        <!-- Receive CTA on pending cards -->
-        <button *ngIf="o.status === 'SHIPPED'"
-          class="po-receive-btn"
-          (click)="openDetail(o); $event.stopPropagation()">
-          <i class="bi bi-inbox-fill me-1"></i> Receive Stock
-        </button>
-
-        <div *ngIf="o.status === 'RECEIVED'" class="po-received-tag">
-          <i class="bi bi-check-circle-fill me-1"></i> Received {{ o.receivedAt | date:'dd MMM yy, HH:mm' }}
-        </div>
-      </div>
+  <!-- ── PO Table ─────────────────────────────────────────────────────────── -->
+  <div class="po-table-card" *ngIf="!loading">
+    <div class="table-responsive" *ngIf="activeOrders.length > 0">
+      <table class="po-table w-100">
+        <thead>
+          <tr>
+            <th>PO #</th>
+            <th>Supplier</th>
+            <th>Items</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>{{ activeTab === 'pending' ? 'Shipped' : 'Received' }}</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of activeOrders" class="po-row" (click)="openDetail(o)">
+            <td><span class="po-num">{{ o.poNumber }}</span></td>
+            <td>
+              <div class="po-supplier-cell">
+                <span class="supplier-name">{{ o.companyName || o.supplierName }}</span>
+                <span class="supplier-sub">{{ o.warehouseName }}</span>
+              </div>
+            </td>
+            <td><span class="po-items-count">{{ o.items.length }}</span></td>
+            <td class="po-amount">INR {{ o.totalAmount | number:'1.0-0' }}</td>
+            <td>
+              <span class="po-status-pill" [ngClass]="getStatusClass(o.status)">
+                <i class="bi {{ getStatusIcon(o.status) }} me-1"></i>{{ o.status }}
+              </span>
+            </td>
+            <td class="po-date">{{ getOrderDisplayDate(o) | date:'dd MMM yy, HH:mm' }}</td>
+            <td (click)="$event.stopPropagation()">
+              <button
+                *ngIf="o.status === 'SHIPPED'"
+                type="button"
+                class="po-row-action receive"
+                (click)="confirmReceiveFromRow(o, $event)">
+                <i class="bi bi-inbox-fill"></i> Receive
+              </button>
+              <span *ngIf="o.status === 'RECEIVED'" class="po-row-state received">
+                <i class="bi bi-check-circle-fill"></i> Received
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Empty state -->
     <div class="po-empty" *ngIf="activeOrders.length === 0">
       <div class="empty-icon">
         <i class="bi {{ activeTab === 'pending' ? 'bi-truck' : 'bi-clock-history' }}"></i>

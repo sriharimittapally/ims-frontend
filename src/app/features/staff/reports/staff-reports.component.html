@@ -50,7 +50,7 @@
         <div class="kpi-content">
           <div class="kpi-value">{{ issueHistory.issuedIssues }}</div>
           <div class="kpi-label">Issued</div>
-          <div class="kpi-sub">{{ issueHistory.totalUnitsIssued | number }} units</div>
+          <div class="kpi-sub">{{ issueHistory.totalUnitsIssued | number }} units, avg {{ avgUnitsIssued }}</div>
         </div>
         <div class="kpi-bg-icon"><i class="bi bi-check2-all"></i></div>
       </div>
@@ -58,8 +58,9 @@
       <div class="kpi-card kpi-pending">
         <div class="kpi-icon-wrap"><i class="bi bi-hourglass-split"></i></div>
         <div class="kpi-content">
-          <div class="kpi-value">{{ issueHistory.pendingIssues }}</div>
-          <div class="kpi-label">Pending</div>
+          <div class="kpi-value">{{ openIssueCount }}</div>
+          <div class="kpi-label">Open Issues</div>
+          <div class="kpi-sub">{{ issueHistory.pendingIssues }} pending, {{ issueHistory.approvedIssues }} approved</div>
         </div>
         <div class="kpi-bg-icon"><i class="bi bi-hourglass-split"></i></div>
       </div>
@@ -77,8 +78,9 @@
       <div class="kpi-card kpi-rejected">
         <div class="kpi-icon-wrap"><i class="bi bi-x-circle"></i></div>
         <div class="kpi-content">
-          <div class="kpi-value">{{ issueHistory.rejectedIssues }}</div>
-          <div class="kpi-label">Rejected</div>
+          <div class="kpi-value">{{ closedIssueCount }}</div>
+          <div class="kpi-label">Closed</div>
+          <div class="kpi-sub">{{ issueHistory.rejectedIssues }} rejected</div>
         </div>
         <div class="kpi-bg-icon"><i class="bi bi-x-circle"></i></div>
       </div>
@@ -95,29 +97,28 @@
     </div>
 
     <!-- ── Chart + Table Row ──────────────────────────────────────────────── -->
-    <div class="row g-3">
+    <div class="row g-3 align-items-start">
 
-      <!-- Donut -->
+      <!-- Status volume -->
       <div class="col-xl-4 col-lg-5">
-        <div class="ims-card h-100">
+        <div class="ims-card">
           <div class="rpt-card-header">
-            <h6 class="rpt-section-title"><i class="bi bi-pie-chart me-2"></i>Status Distribution</h6>
+            <h6 class="rpt-section-title"><i class="bi bi-bar-chart-steps me-2"></i>Status Volume</h6>
           </div>
           <div class="chart-wrap" style="height:220px">
-            <canvas baseChart [data]="issueDonutData" [options]="donutOpts" type="doughnut"></canvas>
+            <canvas baseChart [data]="statusBarData" [options]="statusBarOpts" type="bar"></canvas>
           </div>
-          <!-- Summary legend pills -->
-          <div class="donut-legend">
-            <div class="dl-item dl-pending"><span class="dl-dot"></span>Pending: {{ issueHistory.pendingIssues }}</div>
-            <div class="dl-item dl-issued"><span class="dl-dot"></span>Issued: {{ issueHistory.issuedIssues }}</div>
-            <div class="dl-item dl-rejected"><span class="dl-dot"></span>Rejected: {{ issueHistory.rejectedIssues }}</div>
+          <div class="donut-legend status-legend">
+            <div class="dl-item" *ngFor="let item of statusBreakdown">
+              <span class="dl-dot" [style.background]="item.color"></span>{{ item.label }}: {{ item.count }}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Issue Table -->
       <div class="col-xl-8 col-lg-7">
-        <div class="ims-card p-0 overflow-hidden h-100">
+        <div class="ims-card p-0 overflow-hidden">
           <div class="rpt-table-toolbar">
             <h6 class="rpt-section-title mb-0">
               <i class="bi bi-list-check me-2"></i>
@@ -139,7 +140,7 @@
             </div>
           </div>
 
-          <div class="table-responsive">
+          <div class="table-responsive history-table-wrap">
             <table class="ims-table w-100">
               <thead>
                 <tr>
@@ -191,7 +192,12 @@
   <ng-container *ngIf="activeTab==='trend' && !loading">
 
     <div class="ims-card mb-3">
-      <div class="d-flex gap-3 flex-wrap align-items-end">
+      <div class="trend-toolbar">
+        <div class="range-pills">
+          <button type="button" [class.active]="activeRangeDays===7" (click)="setRange(7)">7D</button>
+          <button type="button" [class.active]="activeRangeDays===14" (click)="setRange(14)">14D</button>
+          <button type="button" [class.active]="activeRangeDays===30" (click)="setRange(30)">30D</button>
+        </div>
         <div>
           <label class="ims-form-label">From</label>
           <input type="date" class="ims-form-control" [(ngModel)]="fromDate" style="width:160px">
@@ -209,10 +215,15 @@
     <div class="ims-card">
       <div class="rpt-card-header mb-3">
         <h6 class="rpt-section-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Warehouse Stock Movement</h6>
-        <span class="rpt-date-range">{{ fromDate | date:'dd MMM yy' }} — {{ toDate | date:'dd MMM yy' }}</span>
+        <span class="rpt-date-range">{{ fromDate | date:'dd MMM yy' }} - {{ toDate | date:'dd MMM yy' }}</span>
+      </div>
+      <div class="trend-summary">
+        <span class="trend-chip in"><strong>{{ trendTotalIn | number }}</strong> units in</span>
+        <span class="trend-chip out"><strong>{{ trendTotalOut | number }}</strong> units out</span>
+        <span class="trend-chip net" [class.negative]="trendNet < 0"><strong>{{ trendNet | number }}</strong> net</span>
       </div>
       <div style="height:320px">
-        <canvas baseChart [data]="trendData" [options]="barOpts" type="bar"></canvas>
+        <canvas baseChart [data]="trendData" [options]="lineOpts" type="line"></canvas>
       </div>
     </div>
 

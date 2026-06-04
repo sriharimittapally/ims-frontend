@@ -78,12 +78,20 @@
   }
 
   &.active {
-    background: var(--ims-primary);
-    border-color: var(--ims-primary);
     color: #fff;
     .po-tab-count {
       background: rgba(255, 255, 255, 0.25);
     }
+  }
+
+  &.tab-pending.active {
+    background: #f59e0b;
+    border-color: #f59e0b;
+  }
+
+  &.tab-history.active {
+    background: #10b981;
+    border-color: #10b981;
   }
 }
 
@@ -120,7 +128,7 @@
 }
 
 .po-sort {
-  width: 180px;
+  width: 145px;
   font-size: 0.78rem !important;
   padding: 0.375rem 0.625rem !important;
   height: auto !important;
@@ -130,6 +138,131 @@
   margin-top: 0.5rem;
   font-size: 0.78rem;
   color: var(--ims-text-muted);
+}
+
+.po-table-card {
+  background: var(--ims-surface);
+  border: 1px solid var(--ims-border);
+  border-radius: var(--ims-radius);
+  overflow: hidden;
+}
+
+.po-table {
+  border-collapse: separate;
+  border-spacing: 0;
+
+  thead th {
+    background: var(--ims-bg-secondary);
+    color: var(--ims-text-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--ims-border);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--ims-border);
+    vertical-align: middle;
+    font-size: 0.84rem;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.po-row {
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover td {
+    background: var(--ims-surface-hover);
+  }
+}
+
+.po-supplier-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.supplier-name {
+  color: var(--ims-text-primary);
+  font-weight: 800;
+}
+
+.supplier-sub {
+  color: var(--ims-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.po-items-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 26px;
+  padding: 0 0.55rem;
+  border-radius: 8px;
+  background: var(--ims-bg-secondary);
+  border: 1px solid var(--ims-border);
+  color: var(--ims-text-secondary);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.po-amount {
+  color: var(--ims-text-primary);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.po-date {
+  color: var(--ims-text-muted);
+  font-size: 0.8rem !important;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.po-row-action,
+.po-row-state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 104px;
+  min-height: 30px;
+  padding: 0.28rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.po-row-action {
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.13);
+  color: #b45309;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f59e0b;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+}
+
+.po-row-state.received {
+  background: rgba(16, 185, 129, 0.13);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #047857;
 }
 
 // ── Cards Grid ─────────────────────────────────────────────────────────────
@@ -201,7 +334,7 @@
   border-radius: 100px;
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0;
 
   &.badge-shipped {
     background: rgba(245, 158, 11, 0.12);
@@ -260,7 +393,7 @@
     display: block;
     font-size: 0.6rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0;
     color: var(--ims-text-muted);
     font-weight: 600;
     margin-bottom: 0.1rem;
@@ -564,7 +697,7 @@
     .pit-label {
       font-size: 0.6rem;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0;
       color: var(--ims-text-muted);
     }
     .piq-val {

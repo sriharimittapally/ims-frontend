@@ -148,4 +148,19 @@ get issueTotal(): number {
   }
 
  
+    formatShortCurrency(value: number | null | undefined): string {
+    return `Rs.${this.formatCompactNumber(Number(value || 0))}`;
+  }
+
+  private formatCompactNumber(value: number): string {
+    const abs = Math.abs(value);
+    if (abs >= 10000000) return `${this.trimNumber(value / 10000000)}Cr`;
+    if (abs >= 100000) return `${this.trimNumber(value / 100000)}L`;
+    if (abs >= 1000) return `${this.trimNumber(value / 1000)}k`;
+    return this.trimNumber(value);
+  }
+
+  private trimNumber(value: number): string {
+    return Number.isInteger(value) ? value.toString() : value.toFixed(1).replace(/\.0$/, '');
+  }
 }

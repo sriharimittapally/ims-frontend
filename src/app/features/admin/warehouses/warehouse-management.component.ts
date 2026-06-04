@@ -61,14 +61,30 @@ export class WarehouseManagementComponent implements OnInit {
   }
 
   applyFilter(): void {
-    let list = this.warehouses;
-    if (this.filterStatus) list = list.filter(w => w.status === this.filterStatus);
-    if (this.searchText) {
-      const q = this.searchText.toLowerCase();
-      list = list.filter(w => w.name.toLowerCase().includes(q) || w.city?.toLowerCase().includes(q));
-    }
-    this.filtered = list;
+  let list = this.warehouses;
+
+  if (this.filterStatus) {
+    list = list.filter(w => w.status === this.filterStatus);
   }
+
+  if (this.searchText) {
+    const q = this.searchText.toLowerCase();
+    list = list.filter(
+      w =>
+        w.name.toLowerCase().includes(q) ||
+        w.city?.toLowerCase().includes(q)
+    );
+  }
+
+  // Latest to oldest
+  list.sort(
+    (a, b) =>
+      new Date(b.createdAt || '1970-01-01').getTime() -
+      new Date(a.createdAt || '1970-01-01').getTime()
+  );
+
+  this.filtered = list;
+}
 
   onSearch(e: Event): void { this.searchText = (e.target as HTMLInputElement).value; this.applyFilter(); }
 

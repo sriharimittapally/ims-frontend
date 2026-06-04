@@ -20,34 +20,41 @@ export class StaffReportsComponent implements OnInit {
   activeTab = 'history';
   loading = false;
   issueHistory: MyIssueHistoryReport | null = null;
-  fromDate = this.daysAgo(30);
+  fromDate = this.daysAgo(14);
   toDate = this.today();
+  activeRangeDays = 14;
+  trendTotalIn = 0;
+  trendTotalOut = 0;
+  trendNet = 0;
 
   // Table search
   historySearch = '';
   historySortKey: 'date_desc' | 'date_asc' | 'units_desc' | 'status' = 'date_desc';
 
-  // Issue status donut
-  issueDonutData: ChartData<'doughnut'> = { labels: [], datasets: [] };
-  donutOpts: ChartConfiguration<'doughnut'>['options'] = {
+  statusBreakdown: { label: string; count: number; color: string }[] = [];
+  statusBarData: ChartData<'bar'> = { labels: [], datasets: [] };
+  statusBarOpts: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '68%',
     plugins: {
-      legend: { position: 'right', labels: { usePointStyle: true, font: { size: 11 }, padding: 14 } },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.x}` } }
     },
+    scales: {
+      x: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.12)' }, ticks: { precision: 0 } },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
   };
 
-  // Trend bar
-  trendData: ChartData<'bar'> = { labels: [], datasets: [] };
-  barOpts: ChartConfiguration<'bar'>['options'] = {
+  trendData: ChartData<'line'> = { labels: [], datasets: [] };
+  lineOpts: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } },
     scales: {
-      x: { grid: { display: false } },
-      y: { grid: { color: 'rgba(148,163,184,0.1)' }, beginAtZero: true },
+      x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 7 } },
+      y: { grid: { color: 'rgba(148,163,184,0.1)' }, beginAtZero: true, ticks: { precision: 0 } },
     },
   };
 
@@ -66,13 +73,21 @@ export class StaffReportsComponent implements OnInit {
     this.svc.staffIssueHistory().subscribe({
       next: (r) => {
         this.issueHistory = r.data;
-        this.issueDonutData = {
-          labels: ['Pending', 'Approved', 'Issued', 'Rejected', 'Cancelled'],
+        this.statusBreakdown = [
+          { label: 'Pending', count: r.data.pendingIssues, color: '#f59e0b' },
+          { label: 'Approved', count: r.data.approvedIssues, color: '#3b82f6' },
+          { label: 'Issued', count: r.data.issuedIssues, color: '#10b981' },
+          { label: 'Rejected', count: r.data.rejectedIssues, color: '#ef4444' },
+          { label: 'Cancelled', count: r.data.cancelledIssues, color: '#64748b' },
+        ];
+        this.statusBarData = {
+          labels: this.statusBreakdown.map(item => item.label),
           datasets: [{
-            data: [r.data.pendingIssues, r.data.approvedIssues, r.data.issuedIssues, r.data.rejectedIssues, r.data.cancelledIssues],
-            backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#94a3b8'],
+            data: this.statusBreakdown.map(item => item.count),
+            backgroundColor: this.statusBreakdown.map(item => item.color),
             borderWidth: 0,
-            hoverOffset: 6,
+            borderRadius: 6,
+            barThickness: 18,
           }],
         };
         this.loading = false;
@@ -85,17 +100,27 @@ export class StaffReportsComponent implements OnInit {
     this.loading = true;
     this.svc.staffWarehouseTrend(this.fromDate, this.toDate).subscribe({
       next: (r) => {
+        this.trendTotalIn = r.data.totalIn;
+        this.trendTotalOut = r.data.totalOut;
+        this.trendNet = r.data.totalIn - r.data.totalOut;
         this.trendData = {
-          labels: r.data.dailyTrends.map((d) => d.date),
+          labels: r.data.dailyTrends.map((d) => this.formatShortDate(d.date)),
           datasets: [
-            { label: 'Units In',  data: r.data.dailyTrends.map((d) => d.stockIn),  backgroundColor: 'rgba(16,185,129,0.75)', borderRadius: 5 },
-            { label: 'Units Out', data: r.data.dailyTrends.map((d) => d.stockOut), backgroundColor: 'rgba(239,68,68,0.65)',   borderRadius: 5 },
+            { label: 'Units In', data: r.data.dailyTrends.map((d) => d.stockIn), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.12)', pointBackgroundColor: '#10b981', tension: 0.35, fill: true },
+            { label: 'Units Out', data: r.data.dailyTrends.map((d) => d.stockOut), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.10)', pointBackgroundColor: '#ef4444', tension: 0.35, fill: true },
           ],
         };
         this.loading = false;
       },
       error: () => { this.loading = false; },
     });
+  }
+
+  setRange(days: number): void {
+    this.activeRangeDays = days;
+    this.fromDate = this.daysAgo(days);
+    this.toDate = this.today();
+    this.loadTrend();
   }
 
   get filteredIssues(): IssueRow[] {
@@ -115,6 +140,21 @@ export class StaffReportsComponent implements OnInit {
     if (!this.issueHistory || this.issueHistory.totalIssues === 0) return '0';
     const approved = this.issueHistory.issuedIssues + this.issueHistory.approvedIssues;
     return Math.round((approved / this.issueHistory.totalIssues) * 100).toString();
+  }
+
+  get openIssueCount(): number {
+    if (!this.issueHistory) return 0;
+    return this.issueHistory.pendingIssues + this.issueHistory.approvedIssues;
+  }
+
+  get closedIssueCount(): number {
+    if (!this.issueHistory) return 0;
+    return this.issueHistory.issuedIssues + this.issueHistory.rejectedIssues + this.issueHistory.cancelledIssues;
+  }
+
+  get avgUnitsIssued(): string {
+    if (!this.issueHistory || this.issueHistory.issuedIssues === 0) return '0';
+    return (this.issueHistory.totalUnitsIssued / this.issueHistory.issuedIssues).toFixed(1);
   }
 
   getStatusClass(s: string): string {
@@ -140,5 +180,9 @@ export class StaffReportsComponent implements OnInit {
   private daysAgo(n: number): string {
     const d = new Date(); d.setDate(d.getDate() - n);
     return d.toISOString().split('T')[0];
+  }
+
+  private formatShortDate(value: string): string {
+    return new Date(`${value}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
   }
 }

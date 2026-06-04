@@ -44,10 +44,10 @@
       <div class="col-md-8">
         <div class="revenue-banner ims-card">
           <div class="rb-left">
-            <div class="rb-icon"><i class="bi bi-currency-rupee"></i></div>
+            <div class="rb-icon"><i class="bi bi-wallet2"></i></div>
             <div>
               <div class="rb-label">Total Revenue (Received POs)</div>
-              <div class="rb-value">₹{{ dashboard.totalRevenue | number:'1.2-2' }}</div>
+              <div class="rb-value">{{ formatShortCurrency(dashboard.totalRevenue) }}</div>
             </div>
           </div>
           <div class="rb-right">
@@ -94,10 +94,10 @@
       </div>
       <div class="col-md-7">
         <div class="ims-card h-100">
-          <h6 class="fw-700 mb-1">PO Breakdown by Stage</h6>
-          <small class="text-muted d-block mb-3">Orders count at each fulfilment stage</small>
+          <h6 class="fw-700 mb-1">Purchase Order Amount Trend</h6>
+          <small class="text-muted d-block mb-3">Recent order value movement</small>
           <div class="chart-container" style="height: 230px;">
-            <canvas baseChart [data]="revenueBarData" [options]="barOpts" type="bar"></canvas>
+            <canvas baseChart [data]="revenueLineData" [options]="lineOpts" type="line"></canvas>
           </div>
         </div>
       </div>
@@ -132,7 +132,9 @@
               <td><span class="badge-ims badge-sent">{{ po.items.length }}</span></td>
               <td class="fw-600">₹{{ po.totalAmount | number:'1.2-2' }}</td>
               <td>
-                <span class="badge-ims {{ getStatusClass(po.status) }}">{{ po.status }}</span>
+                <span class="supp-badge" [ngClass]="getStatusClass(po.status)">
+                  <i class="bi {{ getStatusIcon(po.status) }} me-1"></i>{{ getDisplayStatus(po.status) }}
+                </span>
               </td>
               <td class="text-muted" style="font-size:.82rem">{{ po.createdAt | date:'dd MMM yy' }}</td>
             </tr>

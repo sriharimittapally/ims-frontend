@@ -140,7 +140,7 @@
   width: 36px;
   height: 36px;
   background: rgba(255, 255, 255, 0.07);
-  border: 1px solid var(--lp-border);
+  border: 1.5px solid var(--lp-border);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -156,14 +156,16 @@
 }
 
 .btn-ghost {
+
+  border: 1.5px solid #6366f1;
   color: var(--lp-muted);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   background: none;
-  border: none;
+  border-radius: 8px;
   transition: color 0.2s;
-  padding: 0.375rem 0;
+  padding: 0.375rem 1rem;
   &:hover {
     color: var(--lp-text);
   }

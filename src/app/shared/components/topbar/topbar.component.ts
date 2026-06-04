@@ -19,16 +19,21 @@ export class TopbarComponent {
   constructor(public theme: ThemeService, public auth: AuthService) {}
 
   getPortalName(): string {
-    const m: Record<string,string> = {
-      ADMIN:'Admin Portal', MANAGER:'Manager Portal',
-      STAFF:'Staff Portal', SUPPLIER:'Supplier Portal'
+    const m: Record<string, string> = {
+      ADMIN: 'Admin Portal',
+      MANAGER: 'Manager Portal',
+      STAFF: 'Staff Portal',
+      SUPPLIER: 'Supplier Portal'
     };
     return m[this.auth.getRole() ?? ''] ?? 'IMS Portal';
   }
 
   getRoleColor(): string {
-    const m: Record<string,string> = {
-      ADMIN:'#ef4444', MANAGER:'#6366f1', STAFF:'#10b981', SUPPLIER:'#f59e0b'
+    const m: Record<string, string> = {
+      ADMIN: '#ef4444',
+      MANAGER: '#6366f1',
+      STAFF: '#10b981',
+      SUPPLIER: '#f59e0b'
     };
     return m[this.auth.getRole() ?? ''] ?? '#6366f1';
   }

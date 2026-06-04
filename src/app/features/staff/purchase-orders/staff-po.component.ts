@@ -24,7 +24,7 @@ export class StaffPoComponent implements OnInit {
 
   // search + sort
   searchQuery = '';
-  sortKey: 'date_desc' | 'date_asc' | 'amount_desc' | 'amount_asc' | 'supplier_az' | 'supplier_za' = 'date_desc';
+  sortKey: 'date_desc' | 'date_asc' | 'supplier_az' = 'date_desc';
 
   receiveLoading = false;
   showReceiveConfirm = false;
@@ -64,16 +64,17 @@ export class StaffPoComponent implements OnInit {
       result = result.filter(o =>
         o.poNumber.toLowerCase().includes(q) ||
         o.supplierName.toLowerCase().includes(q) ||
-        (o.companyName && o.companyName.toLowerCase().includes(q))
+        (o.companyName && o.companyName.toLowerCase().includes(q)) ||
+        o.items.some(item =>
+          item.productName.toLowerCase().includes(q) ||
+          item.sku.toLowerCase().includes(q)
+        )
       );
     }
     switch (this.sortKey) {
       case 'date_desc': return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       case 'date_asc':  return result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-      case 'amount_desc': return result.sort((a, b) => b.totalAmount - a.totalAmount);
-      case 'amount_asc':  return result.sort((a, b) => a.totalAmount - b.totalAmount);
       case 'supplier_az': return result.sort((a, b) => a.supplierName.localeCompare(b.supplierName));
-      case 'supplier_za': return result.sort((a, b) => b.supplierName.localeCompare(a.supplierName));
     }
   }
 
@@ -89,6 +90,16 @@ export class StaffPoComponent implements OnInit {
   }
 
   confirmReceive(): void { this.showReceiveConfirm = true; }
+
+  confirmReceiveFromRow(o: PurchaseOrderResponse, event: Event): void {
+    event.stopPropagation();
+    this.selectedOrder = o;
+    this.showReceiveConfirm = true;
+  }
+
+  getOrderDisplayDate(o: PurchaseOrderResponse): string | undefined {
+    return (o.status === 'RECEIVED' ? o.receivedAt : o.shippedAt) || o.createdAt;
+  }
 
   receive(): void {
     if (!this.selectedOrder) return;

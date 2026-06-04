@@ -35,14 +35,28 @@ export class SupplierDashboardComponent implements OnInit {
   };
 
   // ── Revenue bar chart (per status) ────────────────────────────────────
-  revenueBarData: ChartData<'bar'> = { labels: [], datasets: [] };
-  barOpts: ChartConfiguration<'bar'>['options'] = {
-    responsive: true, maintainAspectRatio: false, indexAxis: 'y' as const,
-    plugins: { legend: { display: false } },
+  revenueLineData: ChartData<'line'> = { labels: [], datasets: [] };
+  lineOpts: ChartConfiguration<'line'>['options'] = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` Rs.${this.formatCompactNumber(Number(ctx.parsed.y || 0))}`
+        }
+      }
+    },
     scales: {
-      x: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { font: { size: 11 } } },
-      y: { grid: { display: false }, ticks: { font: { size: 12 } } }
-    }
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: {
+        grid: { color: 'rgba(148,163,184,0.12)' },
+        ticks: {
+          font: { size: 11 },
+          callback: value => this.formatCompactNumber(Number(value))
+        }
+      }
+    },
+    elements: { line: { tension: 0.38 }, point: { radius: 4, hoverRadius: 6 } }
   };
 
   // ── PO Report doughnut (detailed) ──────────────────────────────────────
@@ -85,6 +99,7 @@ export class SupplierDashboardComponent implements OnInit {
             borderWidth: 0, hoverOffset: 8
           }]
         };
+        this.buildRevenueLine(d.orders ?? []);
       }
     });
   }
@@ -100,15 +115,53 @@ export class SupplierDashboardComponent implements OnInit {
       }]
     };
 
-    // Revenue horizontal bar
-    this.revenueBarData = {
-      labels: ['Received', 'Shipped', 'Accepted', 'Pending', 'Rejected'],
+    this.revenueLineData = {
+      labels: ['Sent', 'Accepted', 'Shipped', 'Received'],
       datasets: [{
-        data: [d.receivedPOs * 100, d.shippedPOs * 80, d.acceptedPOs * 60, d.pendingPOs * 30, d.rejectedPOs * 0],
-        backgroundColor: ['rgba(6,182,212,0.75)','rgba(139,92,246,0.75)','rgba(16,185,129,0.75)','rgba(245,158,11,0.75)','rgba(239,68,68,0.65)'],
-        borderRadius: 6
+        data: [d.pendingPOs, d.acceptedPOs, d.shippedPOs, d.receivedPOs],
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.12)',
+        pointBackgroundColor: '#6366f1',
+        fill: true
       }]
     };
+  }
+
+  private buildRevenueLine(orders: any[]): void {
+    const recentOrders = [...orders]
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .slice(-8);
+
+    if (!recentOrders.length) return;
+
+    this.revenueLineData = {
+      labels: recentOrders.map(o => new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })),
+      datasets: [{
+        data: recentOrders.map(o => Number(o.amount || 0)),
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.14)',
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        fill: true
+      }]
+    };
+  }
+
+  formatShortCurrency(value: number | null | undefined): string {
+    return `Rs.${this.formatCompactNumber(Number(value || 0))}`;
+  }
+
+  private formatCompactNumber(value: number): string {
+    const abs = Math.abs(value);
+    if (abs >= 10000000) return `${this.trimNumber(value / 10000000)}Cr`;
+    if (abs >= 100000) return `${this.trimNumber(value / 100000)}L`;
+    if (abs >= 1000) return `${this.trimNumber(value / 1000)}k`;
+    return this.trimNumber(value);
+  }
+
+  private trimNumber(value: number): string {
+    return Number.isInteger(value) ? value.toString() : value.toFixed(1).replace(/\.0$/, '');
   }
 
   getFulfillmentRate(): number {
@@ -116,11 +169,23 @@ export class SupplierDashboardComponent implements OnInit {
     return Math.round((this.dashboard.receivedPOs / this.dashboard.totalPOs) * 100);
   }
 
+  getDisplayStatus(status: string): string {
+    return status === 'RECEIVED' ? 'Delivered' : status.charAt(0) + status.slice(1).toLowerCase();
+  }
+
   getStatusClass(s: string): string {
     const m: Record<string,string> = {
-      SENT:'badge-sent', ACCEPTED:'badge-active', SHIPPED:'badge-secondary',
-      RECEIVED:'badge-active', REJECTED:'badge-inactive', CANCELLED:'badge-inactive'
+      SENT:'supp-badge-sent', ACCEPTED:'supp-badge-accepted', SHIPPED:'supp-badge-shipped',
+      RECEIVED:'supp-badge-delivered', REJECTED:'supp-badge-rejected', CANCELLED:'supp-badge-cancelled'
     };
-    return m[s] ?? 'badge-pending';
+    return m[s] ?? 'supp-badge-cancelled';
+  }
+
+  getStatusIcon(s: string): string {
+    const m: Record<string, string> = {
+      SENT: 'bi-inbox', ACCEPTED: 'bi-check-circle', SHIPPED: 'bi-truck',
+      RECEIVED: 'bi-inbox-fill', REJECTED: 'bi-x-circle', CANCELLED: 'bi-slash-circle',
+    };
+    return m[s] ?? 'bi-circle';
   }
 }

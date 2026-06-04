@@ -41,13 +41,27 @@ export class CategoryManagementComponent implements OnInit {
     });
   }
 
-  applyFilter(): void {
-    if (!this.searchText) { this.filtered = this.categories; return; }
+applyFilter(): void {
+  let list = this.categories;
+
+  if (this.searchText) {
     const q = this.searchText.toLowerCase();
-    this.filtered = this.categories.filter(c =>
-      c.name.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q)
+    list = list.filter(
+      c =>
+        c.name.toLowerCase().includes(q) ||
+        c.description?.toLowerCase().includes(q)
     );
   }
+
+  // Latest to oldest
+  list.sort(
+    (a, b) =>
+      new Date(b.createdAt || '1970-01-01').getTime() -
+      new Date(a.createdAt || '1970-01-01').getTime()
+  );
+
+  this.filtered = list;
+}
 
   onSearch(e: Event): void { this.searchText = (e.target as HTMLInputElement).value; this.applyFilter(); }
 

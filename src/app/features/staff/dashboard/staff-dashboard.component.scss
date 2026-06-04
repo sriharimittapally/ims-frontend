@@ -1,6 +1,73 @@
 .fw-700 {
   font-weight: 700;
 }
+
+.issue-breakdown {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 0.9fr);
+  align-items: center;
+  gap: 1rem;
+}
+
+.issue-chart {
+  height: 220px;
+}
+
+.issue-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.issue-breakdown-row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto auto;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 28px;
+  padding: 0.25rem 0;
+  font-size: 0.78rem;
+}
+
+.breakdown-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.breakdown-label {
+  color: var(--ims-text-secondary);
+  font-weight: 700;
+}
+
+.breakdown-count {
+  color: var(--ims-text-primary);
+  font-weight: 800;
+}
+
+.breakdown-percent {
+  min-width: 36px;
+  color: var(--ims-text-muted);
+  font-weight: 700;
+  text-align: right;
+}
+
+.issue-empty {
+  color: var(--ims-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 575.98px) {
+  .issue-breakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .issue-chart {
+    height: 190px;
+  }
+}
+
 .qa-btn {
   display: inline-flex;
   align-items: center;
