@@ -21,16 +21,7 @@ export class AdminPoComponent implements OnInit {
   selectedOrder: PurchaseOrderResponse | null = null;
   showDetail = false;
 
-  statuses = [
-    'ALL',
-    'DRAFT',
-    'SENT',
-    'ACCEPTED',
-    'SHIPPED',
-    'RECEIVED',
-    'CANCELLED',
-    'REJECTED',
-  ];
+  statuses = ['ALL','DRAFT','SENT','ACCEPTED','SHIPPED','RECEIVED','CANCELLED','REJECTED'];
 
   constructor(
     private svc: PurchaseOrderService,
@@ -38,53 +29,29 @@ export class AdminPoComponent implements OnInit {
     private toastr: ToastrService,
   ) {}
 
-  ngOnInit(): void {
-    this.load();
-  }
+  ngOnInit(): void { this.load(); }
 
   load(): void {
     this.loading = true;
     this.svc.getAll().subscribe({
-      next: (r) => {
-        this.orders = r.data;
-        this.applyFilter();
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
+      next: r => { this.orders = r.data; this.applyFilter(); this.loading = false; },
+      error: () => { this.loading = false; },
     });
   }
 
-applyFilter(): void {
-  let list =
-    this.activeTab === 'ALL'
+  applyFilter(): void {
+    let list = this.activeTab === 'ALL'
       ? this.orders
       : this.orders.filter(o => o.status === this.activeTab);
-
-  // Latest to oldest
-  list.sort(
-    (a, b) =>
-      new Date(b.createdAt || '').getTime() -
-      new Date(a.createdAt || '').getTime()
-  );
-
-  this.filtered = list;
-}
-
-  setTab(tab: string): void {
-    this.activeTab = tab;
-    this.applyFilter();
+    list.sort((a, b) =>
+      new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+    );
+    this.filtered = list;
   }
 
-  countBy(status: string): number {
-    return this.orders.filter((o) => o.status === status).length;
-  }
-
-  viewDetail(o: PurchaseOrderResponse): void {
-    this.selectedOrder = o;
-    this.showDetail = true;
-  }
+  setTab(tab: string): void { this.activeTab = tab; this.applyFilter(); }
+  countBy(status: string): number { return this.orders.filter(o => o.status === status).length; }
+  viewDetail(o: PurchaseOrderResponse): void { this.selectedOrder = o; this.showDetail = true; }
 
   cancel(o: PurchaseOrderResponse): void {
     const ref = this.modal.open(ConfirmModalComponent);
@@ -92,39 +59,32 @@ applyFilter(): void {
     ref.componentInstance.message = `Cancel PO <strong>${o.poNumber}</strong>?`;
     ref.componentInstance.confirmLabel = 'Cancel PO';
     ref.componentInstance.confirmClass = 'danger';
-    ref.result
-      .then(() => {
-        this.svc.cancel(o.id).subscribe({
-          next: () => {
-            this.toastr.success('PO cancelled');
-            this.load();
-          },
-        });
-      })
-      .catch(() => {});
-  }
-
-  getStatusClass(s: string): string {
-    const m: Record<string, string> = {
-      DRAFT: 'badge-draft',
-
-      SENT: 'badge-sent',
-
-      ACCEPTED: 'badge-accepted',
-
-      SHIPPED: 'badge-shipped',
-
-      RECEIVED: 'badge-received',
-
-      REJECTED: 'badge-rejected',
-
-      CANCELLED: 'badge-cancelled',
-    };
-
-    return m[s] ?? 'badge-draft';
+    ref.result.then(() => {
+      this.svc.cancel(o.id).subscribe({
+        next: () => { this.toastr.success('PO cancelled'); this.showDetail = false; this.load(); },
+      });
+    }).catch(() => {});
   }
 
   isAutoDraft = (o: PurchaseOrderResponse): boolean => {
-  return !o.createdByName || (o.note?.includes('AUTO-DRAFT') ?? false);
-};
+    return !o.createdByName || (o.note?.includes('AUTO-DRAFT') ?? false);
+  };
+
+  getStatusClass(s: string): string {
+    const m: Record<string, string> = {
+      DRAFT: 'badge-draft', SENT: 'badge-sent', ACCEPTED: 'badge-accepted',
+      SHIPPED: 'badge-shipped', RECEIVED: 'badge-received',
+      REJECTED: 'badge-rejected', CANCELLED: 'badge-cancelled',
+    };
+    return m[s] ?? 'badge-draft';
+  }
+
+  getStatusIcon(s: string): string {
+    const m: Record<string, string> = {
+      DRAFT: 'bi-pencil-square', SENT: 'bi-send', ACCEPTED: 'bi-check-circle',
+      SHIPPED: 'bi-truck', RECEIVED: 'bi-box-seam',
+      REJECTED: 'bi-x-circle', CANCELLED: 'bi-slash-circle',
+    };
+    return m[s] ?? 'bi-circle';
+  }
 }

@@ -2,6 +2,13 @@
   font-weight: 600;
 }
 
+
+.ims-table-striped tbody tr:nth-child(even) td { background: var(--ims-bg-secondary); }
+.cat-row {
+  cursor: pointer; transition: background 0.15s;
+  &:hover td { background: var(--ims-surface-hover) !important; }
+}
+
 .cat-icon {
   width: 30px;
   height: 30px;

@@ -36,6 +36,13 @@
 .fw-600 {
   font-weight: 600;
 }
+
+.ims-table-striped tbody tr:nth-child(even) td { background: var(--ims-bg-secondary); }
+.mgr-row {
+  cursor: pointer; transition: background 0.15s;
+  &:hover td { background: var(--ims-surface-hover) !important; }
+}
+
 .mgr-row {
   cursor: pointer;
   transition: background 0.15s;

@@ -31,7 +31,14 @@ export class SupplierService {
     return this.http.put<ApiResponse<string>>(`${this.base}/${id}/reject`, request);
   }
 
-  // Supplier self
+  revokeApproval(id: number): Observable<ApiResponse<string>> {
+    return this.http.put<ApiResponse<string>>(`${this.base}/${id}/revoke-approval`, {});
+  }
+
+  revokeRejection(id: number): Observable<ApiResponse<string>> {
+    return this.http.put<ApiResponse<string>>(`${this.base}/${id}/revoke-rejection`, {});
+  }
+
   getMyProfile(): Observable<ApiResponse<SupplierProfileResponse>> {
     return this.http.get<ApiResponse<SupplierProfileResponse>>(`${this.base}/profile`);
   }

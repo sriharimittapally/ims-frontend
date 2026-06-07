@@ -5,6 +5,12 @@
   font-weight: 700;
 }
 
+
+.ims-table-striped tbody tr:nth-child(even) td { background: var(--ims-bg-secondary); }
+.wh-row {
+  cursor: pointer; transition: background 0.15s;
+  &:hover td { background: var(--ims-surface-hover) !important; }
+}
 .wh-row {
   transition: background 0.15s;
   &:hover td {

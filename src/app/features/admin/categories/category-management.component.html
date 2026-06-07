@@ -24,7 +24,7 @@
 
   <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
     <div class="table-responsive">
-      <table class="ims-table w-100">
+      <table class="ims-table ims-table-striped w-100">
         <thead>
           <tr>
             <th style="width:50px">#</th>
@@ -36,7 +36,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of filtered; let i = index">
+          <tr *ngFor="let c of filtered; let i = index" class="cat-row">
             <td class="text-muted" style="font-size:.8rem">{{ i + 1 }}</td>
             <td>
               <div class="d-flex align-items-center gap-2">

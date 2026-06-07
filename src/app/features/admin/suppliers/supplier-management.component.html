@@ -16,10 +16,18 @@
   <div class="ims-card mb-3">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
       <div class="sup-tabs">
-        <button class="sup-tab" [class.active]="activeTab==='ALL'"      (click)="setTab('ALL')">All ({{ suppliers.length }})</button>
-        <button class="sup-tab pending"  [class.active]="activeTab==='PENDING'"  (click)="setTab('PENDING')">Pending ({{ countBy('PENDING') }})</button>
-        <button class="sup-tab approved" [class.active]="activeTab==='APPROVED'" (click)="setTab('APPROVED')">Approved ({{ countBy('APPROVED') }})</button>
-        <button class="sup-tab rejected" [class.active]="activeTab==='REJECTED'" (click)="setTab('REJECTED')">Rejected ({{ countBy('REJECTED') }})</button>
+        <button class="sup-tab" [class.active]="activeTab==='ALL'" (click)="setTab('ALL')">
+          <i class="bi bi-grid-3x3-gap me-1"></i>All <span class="tab-count">{{ suppliers.length }}</span>
+        </button>
+        <button class="sup-tab pending" [class.active]="activeTab==='PENDING'" (click)="setTab('PENDING')">
+          <i class="bi bi-hourglass-split me-1"></i>Pending <span class="tab-count pending-c">{{ countBy('PENDING') }}</span>
+        </button>
+        <button class="sup-tab approved" [class.active]="activeTab==='APPROVED'" (click)="setTab('APPROVED')">
+          <i class="bi bi-check-circle me-1"></i>Approved <span class="tab-count approved-c">{{ countBy('APPROVED') }}</span>
+        </button>
+        <button class="sup-tab rejected" [class.active]="activeTab==='REJECTED'" (click)="setTab('REJECTED')">
+          <i class="bi bi-x-circle me-1"></i>Rejected <span class="tab-count rejected-c">{{ countBy('REJECTED') }}</span>
+        </button>
       </div>
       <div class="search-input-wrap" style="width:240px">
         <i class="bi bi-search search-icon"></i>
@@ -30,113 +38,197 @@
 
   <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
-  <!-- ── Supplier Table ──────────────────────────────────────────────────── -->
+  <!-- Supplier Table -->
   <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
     <div class="table-responsive">
-      <table class="ims-table w-100">
+      <table class="ims-table ims-table-striped w-100">
         <thead>
           <tr>
             <th>Company</th>
-            <th>Contact Person</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>GST Number</th>
-            <th>Categories</th>
+            <th class="d-none d-md-table-cell">Contact Person</th>
+            <th class="d-none d-lg-table-cell">Email</th>
+            <th class="d-none d-lg-table-cell">Phone</th>
+            <th class="d-none d-xl-table-cell">Categories</th>
             <th style="text-align:center">Status</th>
-            <th style="width:180px; text-align:center">Actions</th>
+            <th style="text-align:center; width:80px">Details</th>
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let s of filtered">
-            <!-- Supplier Row -->
-            <tr class="sup-row">
-              <td>
-                <div class="sup-company-cell">
-                  <div class="sup-avatar">{{ s.companyName[0].toUpperCase() }}</div>
-                  <div>
-                    <div class="fw-600">{{ s.companyName }}</div>
-                    <div class="text-muted" style="font-size:.75rem">{{ s.address | slice:0:30 }}...</div>
-                  </div>
+          <tr *ngFor="let s of filtered" class="sup-row" (click)="openModal(s)">
+            <td>
+              <div class="sup-company-cell">
+                <div class="sup-avatar" [style.background]="getAvatarColor(s.companyName)">{{ s.companyName[0].toUpperCase() }}</div>
+                <div>
+                  <div class="fw-600">{{ s.companyName }}</div>
+                  <div class="text-muted d-md-none" style="font-size:.75rem">{{ s.name }}</div>
+                  <code class="gst-code">{{ s.gstNumber }}</code>
                 </div>
-              </td>
-              <td class="fw-500" style="font-size:.875rem">{{ s.name }}</td>
-              <td class="text-muted" style="font-size:.82rem">{{ s.email }}</td>
-              <td class="text-muted" style="font-size:.82rem">{{ s.phone }}</td>
-              <td>
-                <code class="gst-code">{{ s.gstNumber }}</code>
-              </td>
-              <td>
-                <div class="cat-chips">
-                  <span *ngFor="let c of (s.categories || []) | slice:0:2" class="cat-chip">{{ c.name }}</span>
-                  <span *ngIf="(s.categories?.length ?? 0) > 2" class="cat-chip-more">+{{ (s.categories?.length ?? 0) - 2 }}</span>
-                </div>
-              </td>
-              <td style="text-align:center">
-                <span class="sup-status-badge"
-                  [class.approved]="s.approvalStatus==='APPROVED'"
-                  [class.pending]="s.approvalStatus==='PENDING'"
-                  [class.rejected]="s.approvalStatus==='REJECTED'">
-                  <i class="bi me-1"
-                    [class.bi-check-circle-fill]="s.approvalStatus==='APPROVED'"
-                    [class.bi-hourglass-split]="s.approvalStatus==='PENDING'"
-                    [class.bi-x-circle-fill]="s.approvalStatus==='REJECTED'"></i>
-                  {{ s.approvalStatus }}
-                </span>
-              </td>
-              <td style="text-align:center" (click)="$event.stopPropagation()">
-                <ng-container *ngIf="s.approvalStatus === 'PENDING'">
-                  <button class="sup-approve-btn" (click)="approve(s)" [disabled]="approveLoading === s.id">
-                    <span *ngIf="approveLoading !== s.id"><i class="bi bi-check-circle me-1"></i>Approve</span>
-                    <span *ngIf="approveLoading === s.id"><span class="spinner-border spinner-border-sm me-1"></span></span>
-                  </button>
-                  <button class="sup-reject-btn" (click)="openReject(s); rejectingId = s.id">
-                    <i class="bi bi-x-circle me-1"></i>Reject
-                  </button>
-                </ng-container>
-                <span *ngIf="s.approvalStatus !== 'PENDING'" class="text-muted" style="font-size:.78rem">—</span>
-              </td>
-            </tr>
-
-            <!-- Rejection Form Row -->
-            <tr *ngIf="rejectingId === s.id" class="reject-form-row">
-              <td colspan="8">
-                <div class="reject-inline-form">
-                  <label class="ims-form-label"><i class="bi bi-chat-left-text me-1"></i>Rejection Reason *</label>
-                  <div class="d-flex gap-2 align-items-start">
-                    <textarea class="ims-form-control flex-1" rows="2" [(ngModel)]="rejectReason"
-                      placeholder="Explain why you are rejecting this supplier..."></textarea>
-                    <div class="d-flex flex-column gap-1">
-                      <button class="btn btn-danger btn-sm" style="border-radius:8px; white-space:nowrap" (click)="submitReject(s)" [disabled]="rejectLoading">
-                        <span *ngIf="!rejectLoading">Confirm Reject</span>
-                        <span *ngIf="rejectLoading"><span class="spinner-border spinner-border-sm"></span></span>
-                      </button>
-                      <button class="btn-ims-outline btn btn-sm" (click)="rejectingId=null">Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-
-            <!-- Rejection reason display -->
-            <tr *ngIf="s.approvalStatus === 'REJECTED' && s.rejectionReason" class="rejection-reason-row">
-              <td colspan="8">
-                <div class="rejection-display">
-                  <i class="bi bi-info-circle me-1"></i>
-                  <strong>Rejection reason:</strong> {{ s.rejectionReason }}
-                </div>
-              </td>
-            </tr>
-          </ng-container>
+              </div>
+            </td>
+            <td class="d-none d-md-table-cell fw-500" style="font-size:.875rem">{{ s.name }}</td>
+            <td class="d-none d-lg-table-cell text-muted" style="font-size:.82rem">{{ s.email }}</td>
+            <td class="d-none d-lg-table-cell text-muted" style="font-size:.82rem">{{ s.phone }}</td>
+            <td class="d-none d-xl-table-cell">
+              <div class="cat-chips">
+                <span *ngFor="let c of (s.categories || []) | slice:0:2" class="cat-chip">{{ c.name }}</span>
+                <span *ngIf="(s.categories?.length ?? 0) > 2" class="cat-chip-more">+{{ (s.categories?.length ?? 0) - 2 }}</span>
+              </div>
+            </td>
+            <td style="text-align:center">
+              <span class="sup-status-badge"
+                [class.approved]="s.approvalStatus==='APPROVED'"
+                [class.pending]="s.approvalStatus==='PENDING'"
+                [class.rejected]="s.approvalStatus==='REJECTED'">
+                <i class="bi me-1"
+                  [class.bi-check-circle-fill]="s.approvalStatus==='APPROVED'"
+                  [class.bi-hourglass-split]="s.approvalStatus==='PENDING'"
+                  [class.bi-x-circle-fill]="s.approvalStatus==='REJECTED'"></i>
+                <span class="d-none d-sm-inline">{{ s.approvalStatus }}</span>
+              </span>
+            </td>
+            <td style="text-align:center" (click)="$event.stopPropagation()">
+              <button class="sup-view-btn" (click)="openModal(s)" title="View Details">
+                <i class="bi bi-eye"></i>
+              </button>
+            </td>
+          </tr>
 
           <tr *ngIf="filtered.length === 0">
-            <td colspan="8">
-              <div class="empty-state"><div class="empty-icon"><i class="bi bi-truck"></i></div>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="bi bi-truck"></i></div>
                 <h5>No suppliers in this view</h5>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Detail Modal -->
+<div class="sup-modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="sup-modal" (click)="$event.stopPropagation()" *ngIf="selectedSupplier">
+
+    <div class="sup-modal-header">
+      <div class="d-flex align-items-center gap-3">
+        <div class="sup-modal-avatar" [style.background]="getAvatarColor(selectedSupplier.companyName)">
+          {{ selectedSupplier.companyName[0].toUpperCase() }}
+        </div>
+        <div>
+          <h5 class="mb-0 fw-700">{{ selectedSupplier.companyName }}</h5>
+          <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+            <span class="sup-status-badge"
+              [class.approved]="selectedSupplier.approvalStatus==='APPROVED'"
+              [class.pending]="selectedSupplier.approvalStatus==='PENDING'"
+              [class.rejected]="selectedSupplier.approvalStatus==='REJECTED'">
+              <i class="bi me-1"
+                [class.bi-check-circle-fill]="selectedSupplier.approvalStatus==='APPROVED'"
+                [class.bi-hourglass-split]="selectedSupplier.approvalStatus==='PENDING'"
+                [class.bi-x-circle-fill]="selectedSupplier.approvalStatus==='REJECTED'"></i>
+              {{ selectedSupplier.approvalStatus }}
+            </span>
+            <code class="gst-code">{{ selectedSupplier.gstNumber }}</code>
+          </div>
+        </div>
+      </div>
+      <button class="sup-modal-close" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="sup-modal-body">
+      <div class="sup-info-grid">
+        <div class="sup-info-item">
+          <div class="sup-info-label"><i class="bi bi-person me-1"></i>Contact Person</div>
+          <div class="sup-info-value">{{ selectedSupplier.name }}</div>
+        </div>
+        <div class="sup-info-item">
+          <div class="sup-info-label"><i class="bi bi-envelope me-1"></i>Email</div>
+          <div class="sup-info-value">{{ selectedSupplier.email }}</div>
+        </div>
+        <div class="sup-info-item">
+          <div class="sup-info-label"><i class="bi bi-telephone me-1"></i>Phone</div>
+          <div class="sup-info-value">{{ selectedSupplier.phone }}</div>
+        </div>
+        <div class="sup-info-item">
+          <div class="sup-info-label"><i class="bi bi-hash me-1"></i>Supplier Code</div>
+          <div class="sup-info-value"><code class="gst-code">{{ selectedSupplier.userCode }}</code></div>
+        </div>
+        <div class="sup-info-item sup-info-full">
+          <div class="sup-info-label"><i class="bi bi-geo-alt me-1"></i>Address</div>
+          <div class="sup-info-value">{{ selectedSupplier.address }}</div>
+        </div>
+        <div class="sup-info-item" *ngIf="selectedSupplier.createdAt">
+          <div class="sup-info-label"><i class="bi bi-calendar3 me-1"></i>Registered</div>
+          <div class="sup-info-value">{{ selectedSupplier.createdAt | date:'dd MMM yyyy, HH:mm' }}</div>
+        </div>
+        <div class="sup-info-item" *ngIf="selectedSupplier.reviewedAt">
+          <div class="sup-info-label"><i class="bi bi-clock-history me-1"></i>Reviewed At</div>
+          <div class="sup-info-value">{{ selectedSupplier.reviewedAt | date:'dd MMM yyyy, HH:mm' }}</div>
+        </div>
+      </div>
+
+      <div class="sup-section" *ngIf="(selectedSupplier.categories?.length ?? 0) > 0">
+        <div class="sup-section-title"><i class="bi bi-tags me-1"></i>Supply Categories</div>
+        <div class="cat-chips">
+          <span *ngFor="let c of selectedSupplier.categories" class="cat-chip cat-chip-lg">{{ c.name }}</span>
+        </div>
+      </div>
+
+      <div class="sup-rejection-box" *ngIf="selectedSupplier.approvalStatus === 'REJECTED' && selectedSupplier.rejectionReason">
+        <div class="sup-rejection-title"><i class="bi bi-x-circle-fill me-2"></i>Rejection Reason</div>
+        <div class="sup-rejection-text">{{ selectedSupplier.rejectionReason }}</div>
+      </div>
+
+      <div class="sup-reject-form" *ngIf="showRejectForm">
+        <label class="ims-form-label"><i class="bi bi-chat-left-text me-1"></i>Rejection Reason <span style="color:var(--ims-danger)">*</span></label>
+        <textarea class="ims-form-control" rows="3" [(ngModel)]="rejectReason"
+          placeholder="Explain why you are rejecting this supplier..."></textarea>
+        <div class="d-flex gap-2 mt-2">
+          <button class="btn btn-danger btn-sm" style="border-radius:8px" (click)="submitReject()" [disabled]="rejectLoading">
+            <span *ngIf="!rejectLoading"><i class="bi bi-x-circle me-1"></i>Confirm Reject</span>
+            <span *ngIf="rejectLoading"><span class="spinner-border spinner-border-sm me-1"></span>Rejecting...</span>
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" style="border-radius:8px" (click)="showRejectForm=false">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sup-modal-footer">
+      <ng-container *ngIf="selectedSupplier.approvalStatus === 'PENDING' && !showRejectForm">
+        <div class="sup-action-hint"><i class="bi bi-info-circle me-1"></i>Review this supplier's application and take action</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="sup-approve-btn-lg" (click)="approve()" [disabled]="approveLoading">
+            <span *ngIf="!approveLoading"><i class="bi bi-check-circle-fill me-1"></i>Approve Supplier</span>
+            <span *ngIf="approveLoading"><span class="spinner-border spinner-border-sm me-1"></span>Approving...</span>
+          </button>
+          <button class="sup-reject-btn-lg" (click)="showRejectForm=true">
+            <i class="bi bi-x-circle me-1"></i>Reject
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedSupplier.approvalStatus === 'APPROVED' && !showRejectForm">
+        <div class="sup-approved-note"><i class="bi bi-check-circle-fill me-1"></i>This supplier is currently approved and active</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="sup-revoke-btn" (click)="revokeApproval()" [disabled]="revokeLoading">
+            <span *ngIf="!revokeLoading"><i class="bi bi-arrow-counterclockwise me-1"></i>Revoke Approval</span>
+            <span *ngIf="revokeLoading"><span class="spinner-border spinner-border-sm me-1"></span>Revoking...</span>
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedSupplier.approvalStatus === 'REJECTED' && !showRejectForm">
+        <div class="sup-rejected-note"><i class="bi bi-x-circle-fill me-1"></i>This supplier's application was rejected</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="sup-revoke-rejection-btn" (click)="revokeRejection()" [disabled]="revokeLoading">
+            <span *ngIf="!revokeLoading"><i class="bi bi-arrow-counterclockwise me-1"></i>Revoke Rejection</span>
+            <span *ngIf="revokeLoading"><span class="spinner-border spinner-border-sm me-1"></span>Revoking...</span>
+          </button>
+        </div>
+      </ng-container>
+
+      <button class="sup-close-btn" (click)="closeModal()">Close</button>
     </div>
   </div>
 </div>

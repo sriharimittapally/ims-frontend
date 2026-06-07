@@ -4,67 +4,92 @@
     <p class="page-subtitle">System-wide purchase order management</p>
   </div>
 
-  <!-- Auto-Draft POs from system -->
-<div class="auto-draft-alert ims-card mb-3"
-  *ngIf="orders.filter(isAutoDraft).length > 0">
-  <div class="ada-left">
-    <div class="ada-icon"><i class="bi bi-robot"></i></div>
-    <div>
-      <div class="ada-title">
-        <span class="auto-draft-badge"><i class="bi bi-magic me-1"></i>System Auto-Generated</span>
-        {{ orders.filter(isAutoDraft).length }} PO(s) auto-drafted due to low stock
+  <!-- Auto-Draft Alert -->
+  <div class="auto-draft-alert ims-card mb-3" *ngIf="orders.filter(isAutoDraft).length > 0">
+    <div class="ada-left">
+      <div class="ada-icon"><i class="bi bi-robot"></i></div>
+      <div>
+        <div class="ada-title">
+          <span class="auto-draft-badge"><i class="bi bi-magic me-1"></i>Auto-Generated</span>
+          {{ orders.filter(isAutoDraft).length }} PO(s) drafted from low stock triggers
+        </div>
+        <div class="ada-sub">Created automatically when warehouse stock fell below reorder level. Review and send to suppliers.</div>
       </div>
-      <div class="ada-sub">These were created automatically when warehouse stock fell below reorder level.</div>
     </div>
+    <div class="ada-count">{{ orders.filter(isAutoDraft).length }}</div>
   </div>
-</div>
 
+  <!-- Status Filter Tabs -->
   <div class="ims-card mb-3">
-    <div class="tab-scroll">
-      <button class="tab-btn" *ngFor="let s of statuses" [class.active]="activeTab===s" (click)="setTab(s)">
-        {{ s === 'ALL' ? 'All (' + orders.length + ')' : s + ' (' + countBy(s) + ')' }}
+    <div class="po-tab-scroll">
+      <button class="po-tab-btn po-tab-all"       [class.active]="activeTab==='ALL'"       (click)="setTab('ALL')">
+        <i class="bi bi-grid-3x3-gap me-1"></i>All <span class="po-tab-count">{{ orders.length }}</span>
+      </button>
+      <button class="po-tab-btn po-tab-draft"      [class.active]="activeTab==='DRAFT'"     (click)="setTab('DRAFT')">
+        <i class="bi bi-pencil-square me-1"></i>Draft <span class="po-tab-count">{{ countBy('DRAFT') }}</span>
+      </button>
+      <button class="po-tab-btn po-tab-sent"       [class.active]="activeTab==='SENT'"      (click)="setTab('SENT')">
+        <i class="bi bi-send me-1"></i>Sent <span class="po-tab-count">{{ countBy('SENT') }}</span>
+      </button>
+      <button class="po-tab-btn po-tab-accepted"   [class.active]="activeTab==='ACCEPTED'"  (click)="setTab('ACCEPTED')">
+        <i class="bi bi-check-circle me-1"></i>Accepted <span class="po-tab-count">{{ countBy('ACCEPTED') }}</span>
+      </button>
+      <button class="po-tab-btn po-tab-shipped"    [class.active]="activeTab==='SHIPPED'"   (click)="setTab('SHIPPED')">
+        <i class="bi bi-truck me-1"></i>Shipped <span class="po-tab-count">{{ countBy('SHIPPED') }}</span>
+      </button>
+      <button class="po-tab-btn po-tab-received"   [class.active]="activeTab==='RECEIVED'"  (click)="setTab('RECEIVED')">
+        <i class="bi bi-box-seam me-1"></i>Received <span class="po-tab-count">{{ countBy('RECEIVED') }}</span>
+      </button>
+      <button class="po-tab-btn po-tab-cancelled"  [class.active]="activeTab==='CANCELLED'" (click)="setTab('CANCELLED')">
+        <i class="bi bi-slash-circle me-1"></i>Cancelled <span class="po-tab-count">{{ countBy('CANCELLED') }}</span>
+      </button>
+      <button class="po-tab-btn po-tab-rejected"   [class.active]="activeTab==='REJECTED'"  (click)="setTab('REJECTED')">
+        <i class="bi bi-x-circle me-1"></i>Rejected <span class="po-tab-count">{{ countBy('REJECTED') }}</span>
       </button>
     </div>
   </div>
 
-  <div class="page-loader" *ngIf="loading">
-    <div class="spinner-border"></div>
-  </div>
+  <div class="page-loader" *ngIf="loading"><div class="spinner-border"></div></div>
 
   <div class="ims-card p-0 overflow-hidden" *ngIf="!loading">
     <div class="table-responsive">
-      <table class="ims-table w-100">
+      <table class="ims-table ims-table-striped w-100">
         <thead>
           <tr>
             <th>PO Number</th>
-            <th>Warehouse</th>
-            <th>Supplier</th>
+            <th class="d-none d-md-table-cell">Warehouse</th>
+            <th class="d-none d-sm-table-cell">Supplier</th>
             <th>Amount</th>
             <th>Status</th>
-            <th>Created</th>
-            <th>Actions</th>
+            <th class="d-none d-lg-table-cell">Created</th>
+            <th style="text-align:center; width:80px">View</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let o of filtered" class="po-clickable-row" (click)="viewDetail(o)">
-            <td><span class="po-number">{{ o.poNumber }}</span></td>
-            <td class="text-muted">{{ o.warehouseName }}</td>
-            <td class="text-muted">{{ o.supplierName }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-1">
+                <span class="po-number">{{ o.poNumber }}</span>
+                <span class="auto-draft-dot" *ngIf="isAutoDraft(o)" title="Auto-drafted by system">
+                  <i class="bi bi-robot"></i>
+                </span>
+              </div>
+              <div class="text-muted d-sm-none" style="font-size:.75rem">{{ o.supplierName || o.companyName }}</div>
+            </td>
+            <td class="d-none d-md-table-cell text-muted" style="font-size:.875rem">{{ o.warehouseName }}</td>
+            <td class="d-none d-sm-table-cell text-muted" style="font-size:.875rem">{{ o.companyName || o.supplierName }}</td>
             <td class="fw-600">₹{{ o.totalAmount | number:'1.2-2' }}</td>
-            <td><span class="badge-ims" [ngClass]="getStatusClass(o.status)">{{ o.status }}</span></td>
-            <td class="text-muted">{{ o.createdAt | date:'dd MMM, yy' }}</td>
-           <!-- Replace the eye + cancel button td with: -->
-<td>
-  <div class="d-flex gap-1 align-items-center">
-    <button class="po-view-btn" (click)="viewDetail(o); $event.stopPropagation()">
-      <i class="bi bi-folder2-open me-1"></i>Open
-    </button>
-    <button class="po-cancel-btn" *ngIf="o.status === 'SENT' || o.status === 'ACCEPTED'"
-      (click)="cancel(o); $event.stopPropagation()" title="Cancel PO">
-      <i class="bi bi-x-circle"></i>
-    </button>
-  </div>
-</td>
+            <td>
+              <span class="badge-ims" [ngClass]="getStatusClass(o.status)">
+                <i class="bi me-1" [ngClass]="getStatusIcon(o.status)"></i>{{ o.status }}
+              </span>
+            </td>
+            <td class="d-none d-lg-table-cell text-muted" style="font-size:.82rem">{{ o.createdAt | date:'dd MMM, yy' }}</td>
+            <td style="text-align:center" (click)="$event.stopPropagation()">
+              <button class="po-view-btn" (click)="viewDetail(o); $event.stopPropagation()">
+                <i class="bi bi-folder2-open"></i>
+              </button>
+            </td>
           </tr>
           <tr *ngIf="filtered.length === 0">
             <td colspan="7">
@@ -80,50 +105,113 @@
   </div>
 </div>
 
-<!-- Detail Side Panel -->
+<!-- PO Detail Side Panel -->
 <div class="detail-overlay" *ngIf="showDetail" (click)="showDetail=false">
   <div class="detail-panel" (click)="$event.stopPropagation()" *ngIf="selectedOrder">
+
     <div class="detail-header">
       <div>
-        <h5 class="mb-0">{{ selectedOrder.poNumber }}</h5>
-        <span class="badge-ims" [ngClass]="getStatusClass(selectedOrder.status)">{{ selectedOrder.status }}</span>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="po-number" style="font-size:1rem">{{ selectedOrder.poNumber }}</span>
+          <span class="auto-draft-dot" *ngIf="isAutoDraft(selectedOrder)"><i class="bi bi-robot"></i></span>
+        </div>
+        <span class="badge-ims" [ngClass]="getStatusClass(selectedOrder.status)">
+          <i class="bi me-1" [ngClass]="getStatusIcon(selectedOrder.status)"></i>{{ selectedOrder.status }}
+        </span>
       </div>
-      <button class="btn-close" (click)="showDetail=false"></button>
+      <div class="d-flex gap-2 align-items-center">
+        <button class="po-cancel-btn-panel"
+          *ngIf="selectedOrder.status === 'SENT' || selectedOrder.status === 'ACCEPTED'"
+          (click)="cancel(selectedOrder)">
+          <i class="bi bi-x-circle me-1"></i>Cancel PO
+        </button>
+        <button class="detail-close-btn" (click)="showDetail=false"><i class="bi bi-x-lg"></i></button>
+      </div>
     </div>
 
     <div class="detail-body">
-      <div class="detail-row"><span class="detail-label">Warehouse</span><span>{{ selectedOrder.warehouseName }}</span>
+      <div class="detail-info-grid">
+        <div class="detail-info-card">
+          <div class="detail-info-label"><i class="bi bi-building me-1"></i>Warehouse</div>
+          <div class="detail-info-val">{{ selectedOrder.warehouseName }}</div>
+          <div class="detail-info-sub" *ngIf="selectedOrder.warehouseCity">{{ selectedOrder.warehouseCity }}</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label"><i class="bi bi-truck me-1"></i>Supplier</div>
+          <div class="detail-info-val">{{ selectedOrder.companyName || selectedOrder.supplierName }}</div>
+          <div class="detail-info-sub" *ngIf="selectedOrder.supplierUserCode">{{ selectedOrder.supplierUserCode }}</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label"><i class="bi bi-person me-1"></i>Created By</div>
+          <div class="detail-info-val">{{ selectedOrder.createdByName || 'System (Auto-Draft)' }}</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label"><i class="bi bi-calendar3 me-1"></i>Created At</div>
+          <div class="detail-info-val">{{ selectedOrder.createdAt | date:'dd MMM yyyy, HH:mm' }}</div>
+        </div>
       </div>
-      <div class="detail-row"><span class="detail-label">Supplier</span><span>{{ selectedOrder.supplierName }}</span>
-      </div>
-      <div class="detail-row"><span class="detail-label">Created By</span><span>{{ selectedOrder.createdByName }}</span>
-      </div>
-      <div class="detail-row"><span class="detail-label">Created At</span><span>{{ selectedOrder.createdAt | date:'dd
-          MMM yyyy, HH:mm' }}</span></div>
-      <div class="detail-row" *ngIf="selectedOrder.note"><span class="detail-label">Note</span><span>{{
-          selectedOrder.note }}</span></div>
 
-      <h6 class="mt-3 mb-2">Items</h6>
-      <table class="ims-table w-100">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Qty</th>
-            <th>Unit Cost</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of selectedOrder.items">
-            <td>{{ item.productName }}<br><small class="text-muted">{{ item.sku }}</small></td>
-            <td>{{ item.quantity }}</td>
-            <td>₹{{ item.purchasePrice | number:'1.2-2' }}</td>
-            <td class="fw-600">₹{{ item.lineTotal | number:'1.2-2' }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="detail-total">
-        <span>Total Amount</span><span class="fw-700">₹{{ selectedOrder.totalAmount | number:'1.2-2' }}</span>
+      <div class="detail-timeline"
+        *ngIf="selectedOrder.sentAt || selectedOrder.acceptedAt || selectedOrder.shippedAt || selectedOrder.receivedAt">
+        <div class="detail-section-title"><i class="bi bi-clock-history me-1"></i>Timeline</div>
+        <div class="timeline-list">
+          <div class="tl-item" *ngIf="selectedOrder.sentAt">
+            <div class="tl-dot sent"></div>
+            <div><div class="tl-label">Sent</div><div class="tl-time">{{ selectedOrder.sentAt | date:'dd MMM yyyy, HH:mm' }}</div></div>
+          </div>
+          <div class="tl-item" *ngIf="selectedOrder.acceptedAt">
+            <div class="tl-dot accepted"></div>
+            <div><div class="tl-label">Accepted</div><div class="tl-time">{{ selectedOrder.acceptedAt | date:'dd MMM yyyy, HH:mm' }}</div></div>
+          </div>
+          <div class="tl-item" *ngIf="selectedOrder.shippedAt">
+            <div class="tl-dot shipped"></div>
+            <div><div class="tl-label">Shipped</div><div class="tl-time">{{ selectedOrder.shippedAt | date:'dd MMM yyyy, HH:mm' }}</div></div>
+          </div>
+          <div class="tl-item" *ngIf="selectedOrder.receivedAt">
+            <div class="tl-dot received"></div>
+            <div><div class="tl-label">Received</div><div class="tl-time">{{ selectedOrder.receivedAt | date:'dd MMM yyyy, HH:mm' }}</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-rejection-box" *ngIf="selectedOrder.rejectionReason">
+        <i class="bi bi-x-circle-fill me-2"></i><strong>Rejected:</strong> {{ selectedOrder.rejectionReason }}
+      </div>
+
+      <div class="detail-note-box" *ngIf="selectedOrder.note">
+        <div class="detail-section-title"><i class="bi bi-sticky me-1"></i>Note</div>
+        <div style="font-size:.875rem">{{ selectedOrder.note }}</div>
+      </div>
+
+      <div>
+        <div class="detail-section-title mb-2"><i class="bi bi-list-check me-1"></i>Order Items ({{ selectedOrder.items.length }})</div>
+        <div class="detail-items-table">
+          <table class="ims-table ims-table-striped w-100">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th style="text-align:right">Qty</th>
+                <th style="text-align:right">Unit Cost</th>
+                <th style="text-align:right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of selectedOrder.items">
+                <td>
+                  <div class="fw-600" style="font-size:.875rem">{{ item.productName }}</div>
+                  <div style="font-size:.72rem;color:var(--ims-text-muted)"><code>{{ item.sku }}</code> · {{ item.categoryName }}</div>
+                </td>
+                <td style="text-align:right">{{ item.quantity }}</td>
+                <td style="text-align:right">₹{{ item.purchasePrice | number:'1.2-2' }}</td>
+                <td style="text-align:right" class="fw-600">₹{{ item.lineTotal | number:'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="detail-total">
+          <span class="fw-600">Total Amount</span>
+          <span class="detail-total-val">₹{{ selectedOrder.totalAmount | number:'1.2-2' }}</span>
+        </div>
       </div>
     </div>
   </div>

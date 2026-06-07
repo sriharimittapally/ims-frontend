@@ -1,3 +1,9 @@
+.ims-table-striped tbody tr:nth-child(even) td { background: var(--ims-bg-secondary); }
+.stock-row {
+  cursor: pointer; transition: background 0.15s;
+  &:hover td { background: var(--ims-surface-hover) !important; }
+}
+
 .fw-700 {
   font-weight: 700;
 }

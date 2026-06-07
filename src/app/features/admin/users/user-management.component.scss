@@ -27,7 +27,15 @@
   }
 }
 
+
 // ── User Table ────────────────────────────────────────────────────────────────
+
+.ims-table-striped tbody tr:nth-child(even) td { background: var(--ims-bg-secondary); }
+.user-cell {
+  cursor: pointer; transition: background 0.15s;
+  &:hover td { background: var(--ims-surface-hover) !important; }
+}
+
 .user-cell {
   display: flex;
   align-items: center;
